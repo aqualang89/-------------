@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Студия аквариумного дизайна</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ЗАСТАВКА-ИНТРО -->
+  <div id="intro-overlay">
+    <div class="intro-center">
+      <img src="img/logo-shrimp.png" alt="Студия аквариумного дизайна" class="intro-logo">
+      <div class="bubbles">
+        <span class="bubble b1"></span>
+        <span class="bubble b2"></span>
+        <span class="bubble b3"></span>
+        <span class="bubble b4"></span>
+        <span class="bubble b5"></span>
+      </div>
+      <button class="intro-text" type="button">ВОЙТИ НА САЙТ</button>
+    </div>
+  </div> <!-- ВАЖНО: здесь закрываем интро -->
+
+  <!-- Верхнее меню -->
+  <nav class="top-nav">
+    <div class="nav-inner">
+      <span class="nav-logo-text">Студия аквариумного дизайна</span>
+      <div class="nav-links">
+        <a href="#услуги" class="nav-link">Услуги</a>
+        <a href="#каталог" class="nav-link">Каталог</a>
+        <a href="#контакты" class="nav-link">Контакты</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Основной контент -->
+  <div class="page-wrap">
+    <header class="hero">
+      <div class="hero-inner">
+        <img src="img/logo-shrimp.png" alt="Студия аквариумного дизайна" class="hero-logo">
+        <h1 class="hero-title">СТУДИЯ АКВАРИУМНОГО ДИЗАЙНА</h1>
+        <p class="hero-subtitle">Дизайн • Монтаж • Обслуживание аквариумов</p>
+        <button onclick="document.getElementById('контакты').scrollIntoView()" class="hero-button">
+          Заказать консультацию
+        </button>
+      </div>
+    </header>
+
+    <section id="услуги" class="block section-animate">
+      <h2>Наши услуги</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Дизайн‑проект</h3>
+          <p>Индивидуальный проект под ваше пространство.</p>
+          <span>от 5 000 ₽</span>
+        </div>
+        <div class="card">
+          <h3>Монтаж и запуск</h3>
+          <p>Полный монтаж «под ключ» с оборудованием.</p>
+          <span>от 30 000 ₽</span>
+        </div>
+        <div class="card">
+          <h3>Обслуживание</h3>
+          <p>Чистка, подмена воды, контроль параметров.</p>
+          <span>от 3 000 ₽ в месяц</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="каталог" class="block section-animate">
+      <h2>Каталог</h2>
+      <label>Максимальная цена:
+        <input type="range" id="фильтр-цена" min="0" max="100000" value="100000">
+        <span id="цена-значение">до 100 000 ₽</span>
+      </label>
+      <div id="товары" class="cards"></div>
+    </section>
+
+    <section id="контакты" class="block section-animate">
+      <h2>Контакты</h2>
+      <p>Калининград, студия аквариумного дизайна.</p>
+      <p>Телефон / Telegram: +7 (XXX) XXX‑XX‑XX</p>
+    </section>
+  </div>
+
+  <!-- Скрипт каталога -->
+  <script>
+    // Загрузка товаров из JSON
+    async function загрузитьТовары() {
+      const resp = await fetch('товары.json');
+      const data = await resp.json();
+      отрисоватьТовары(data);
+    }
+
+    function отрисоватьТовары(список) {
+      const контейнер = document.getElementById('товары');
+      контейнер.innerHTML = '';
+      список.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <h3>${t.название}</h3>
+          <p>${t.описание}</p>
+          <span>${t.цена.toLocaleString()} ₽</span>
+        `;
+        контейнер.appendChild(div);
+      });
+    }
+
+    async function применитьФильтр() {
+      const max = parseInt(document.getElementById('фильтр-цена').value);
+      document.getElementById('цена-значение').textContent = `до ${max.toLocaleString()} ₽`;
+      const resp = await fetch('товары.json');
+      const data = await resp.json();
+      отрисоватьТовары(data.filter(t => t.цена <= max));
+    }
+
+    document.getElementById('фильтр-цена').addEventListener('input', применитьФильтр);
+    загрузитьТовары();
+  </script>
+
+  <!-- Параллакс и плавный скролл + заставка -->
+  <script>
+    // Параллакс заголовка
+    const title = document.querySelector('.hero-title');
+    window.addEventListener('scroll', () => {
+      if (!title) return;
+      const y = window.scrollY;
+      title.style.transform = `translateY(${y * 0.15}px)`;
+    });
+
+    // Плавный скролл по клику на пункты меню
+    document.querySelectorAll('a.nav-link[href^="#"]').forEach((link) => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const id = this.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (!target) return;
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    // Логика заставки-интро + "водяной" фон
+    document.addEventListener('DOMContentLoaded', () => {
+      const overlay = document.getElementById('intro-overlay');
+      const logo = document.querySelector('.intro-logo');
+      const introBtn = document.querySelector('.intro-text');
+
+      function closeIntro() {
+        overlay.classList.add('hidden');
+        setTimeout(() => overlay.remove(), 700);
+      }
+
+      logo.addEventListener('click', closeIntro);
+      introBtn.addEventListener('click', closeIntro);
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeIntro();
+      });
+
+      // движение "воды" от мыши
+      let lastX = 50;
+      let lastY = 30;
+
+      overlay.addEventListener('pointermove', (e) => {
+        const rect = overlay.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+        lastX = lastX + (x - lastX) * 0.15;  // было 0.08
+        lastY = lastY + (y - lastY) * 0.15;
+
+        overlay.style.setProperty('--mx', `${lastX}%`);
+        overlay.style.setProperty('--my', `${lastY}%`);
+      });
+    });
+  </script>
+
+  <script src="chat.js"></script>
+</body>
+</html>
