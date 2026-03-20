@@ -88,7 +88,7 @@ export default async function handler(req, res) {
     // 3. Ответ клиенту
     res.status(200).json({ 
       reply: answer,
-      chatId: chatId || '919466417'  // fallback
+      clientChatId: '919466417',
     });
 
   } catch (error) {
