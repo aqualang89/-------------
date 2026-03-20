@@ -63,36 +63,29 @@ export default async function handler(req, res) {
     const answer = data.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
     const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
 
-    // 2. TELEGRAM УВЕДОМЛЕНИЕ 🚀
-    console.log('🚀 ИДЁМ В TELEGRAM:', { chatId, lastMessage: lastMessage.slice(0,30) });
-    
-    try {
-      const telegramRes = await fetch('https://aquariumpage.vercel.app/api/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: lastMessage,
-          aiAnswer: answer,
-          clientChatId: chatId || 'no-chat-id',
-          clientId: Date.now()
-        })
-      });
-      
-      const tgResult = await telegramRes.json();
-      console.log('📤 TELEGRAM ОТВЕТ:', tgResult.ok ? '✅' : '❌', tgResult);
-      
-    } catch (telegramError) {
-      console.log('❌ TELEGRAM ОШИБКА:', telegramError.message);
-    }
+// 2. TELEGRAM УВЕДОМЛЕНИЕ 🚀
+console.log('🚀 ИДЁМ В TELEGRAM:', { chatId, lastMessage: lastMessage.slice(0,30) });
 
-    // 3. Ответ клиенту
-    res.status(200).json({ 
-      reply: answer,
-      clientChatId: '919466417',
-    });
+try {
+  const telegramRes = await fetch('https://aquariumpage.vercel.app/api/telegram', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      question: lastMessage,
+      aiAnswer: answer,
+      clientChatId: '919466417',  // ← вот здесь жёстко твой ID
+      clientId: Date.now()
+    })
+  });
 
-  } catch (error) {
-    console.error('Chat error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
+  const tgResult = await telegramRes.json();
+  console.log('📤 TELEGRAM ОТВЕТ:', tgResult.ok ? '✅' : '❌', tgResult);
+
+} catch (telegramError) {
+  console.log('❌ TELEGRAM ОШИБКА:', telegramError.message);
 }
+
+// 3. Ответ клиенту
+res.status(200).json({ 
+  reply: answer
+});
