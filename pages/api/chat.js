@@ -63,29 +63,26 @@ export default async function handler(req, res) {
     const answer = data.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
     const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
 
-// 2. TELEGRAM УВЕДОМЛЕНИЕ 🚀
-console.log('🚀 ИДЁМ В TELEGRAM:', { chatId, lastMessage: lastMessage.slice(0,30) });
+// 2. TELEGRAM НАПРЯМУЮ (без /api/telegram)
+console.log('🚀 ОТПРАВЛЯЕМ В TELEGRAM НАПРЯМУЮ');
 
 try {
-  const telegramRes = await fetch('https://aquariumpage.vercel.app/api/telegram', {
+  const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
+  
+  const telegramRes = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      question: lastMessage,
-      aiAnswer: answer,
-      clientChatId: '919466417',  // ← вот здесь жёстко твой ID
-      clientId: Date.now()
+      chat_id: process.env.TELEGRAM_ADMIN_CHAT_ID,
+      text: `🐟 *Новый клиент*\n\n❓ *Вопрос*:\n${lastMessage}\n\n🤖 *ИИ ответил*:\n${answer.slice(0,200)}\n\n💬 Ваш ответ:`,
+      parse_mode: 'Markdown'
     })
   });
-
-  const tgResult = await telegramRes.json();
-  console.log('📤 TELEGRAM ОТВЕТ:', tgResult.ok ? '✅' : '❌', tgResult);
-
-} catch (telegramError) {
-  console.log('❌ TELEGRAM ОШИБКА:', telegramError.message);
+  
+  const result = await telegramRes.json();
+  console.log('📱 TELEGRAM API:', result.ok ? '✅' : result);
+  
+} catch (error) {
+  console.log('❌ TELEGRAM:', error.message);
 }
 
-// 3. Ответ клиенту
-res.status(200).json({ 
-  reply: answer
-});
