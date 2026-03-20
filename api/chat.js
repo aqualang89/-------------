@@ -1,4 +1,4 @@
-// api/chat.js – ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ
+// api/chat.js – С ДЕБАГОМ (копируй целиком)
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -17,7 +17,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Системный промпт про аквариумы
+  // 🧪 ТЕСТ ПЕРЕМЕННЫХ (удали потом)
+  console.log('🔑 TOKEN OK:', !!process.env.TELEGRAM_BOT_TOKEN);
+  console.log('👤 CHAT_ID:', process.env.TELEGRAM_ADMIN_CHAT_ID);
+  console.log('🌐 VERCEL_URL:', process.env.VERCEL_URL);
+  console.log('💬 chatId из фронта:', chatId);
+
+  // Системный промпт
   const finalMessages = [
     {
       role: 'system',
@@ -31,7 +37,7 @@ export default async function handler(req, res) {
   ];
 
   try {
-    // 1. Получаем ответ от Perplexity
+    // 1. Perplexity
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -55,31 +61,34 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     const answer = data.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
+    const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
 
-    // 2. Уведомляем владельца (БЕЗ ОШИБОК)
+    // 2. TELEGRAM УВЕДОМЛЕНИЕ 🚀
+    console.log('🚀 ИДЁМ В TELEGRAM:', { chatId, lastMessage: lastMessage.slice(0,30) });
+    
     try {
-      if (process.env.TELEGRAM_BOT_TOKEN && chatId) {
-        const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
-        
-await fetch('https://aquariumpage.vercel.app/api/telegram', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    question: lastMessage,
-    aiAnswer: answer,
-    clientChatId: chatId,
-    clientId: Date.now()
-  })
-});
-      }
+      const telegramRes = await fetch('https://aquariumpage.vercel.app/api/telegram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: lastMessage,
+          aiAnswer: answer,
+          clientChatId: chatId || 'no-chat-id',
+          clientId: Date.now()
+        })
+      });
+      
+      const tgResult = await telegramRes.json();
+      console.log('📤 TELEGRAM ОТВЕТ:', tgResult.ok ? '✅' : '❌', tgResult);
+      
     } catch (telegramError) {
-      console.log('Telegram уведомление: OK, но не критично', telegramError.message);
+      console.log('❌ TELEGRAM ОШИБКА:', telegramError.message);
     }
 
-    // 3. Отвечаем клиенту
+    // 3. Ответ клиенту
     res.status(200).json({ 
       reply: answer,
-      chatId: chatId  // для ответов владельца
+      chatId: chatId || '919466417'  // fallback
     });
 
   } catch (error) {
@@ -87,7 +96,3 @@ await fetch('https://aquariumpage.vercel.app/api/telegram', {
     res.status(500).json({ error: 'Server error' });
   }
 }
-// 🧪 ТЕСТ ПЕРЕМЕННЫХ (1 раз)
-console.log('🔑 TOKEN OK:', !!process.env.TELEGRAM_BOT_TOKEN);
-console.log('👤 CHAT_ID:', process.env.TELEGRAM_ADMIN_CHAT_ID);
-console.log('🌐 VERCEL_URL:', process.env.VERCEL_URL);
