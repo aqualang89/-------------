@@ -87,3 +87,7 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Server error' });
   }
 }
+// 🧪 ТЕСТ ПЕРЕМЕННЫХ (1 раз)
+console.log('🔑 TOKEN OK:', !!process.env.TELEGRAM_BOT_TOKEN);
+console.log('👤 CHAT_ID:', process.env.TELEGRAM_ADMIN_CHAT_ID);
+console.log('🌐 VERCEL_URL:', process.env.VERCEL_URL);
