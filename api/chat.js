@@ -38,7 +38,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'sonar-medium-online', // можешь поменять позже
+        model: 'sonar-pro',  // уже должно работать
         messages: finalMessages,
         temperature: 0.3,
         max_tokens: 512
