@@ -61,16 +61,16 @@ export default async function handler(req, res) {
       if (process.env.TELEGRAM_BOT_TOKEN && chatId) {
         const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
         
-        await fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://aquapage-aqua-bot.vercel.app'}/api/telegram`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: lastMessage,
-            aiAnswer: answer,
-            clientChatId: chatId,
-            clientId: Date.now()
-          })
-        });
+await fetch('https://aquariumpage.vercel.app/api/telegram', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    question: lastMessage,
+    aiAnswer: answer,
+    clientChatId: chatId,
+    clientId: Date.now()
+  })
+});
       }
     } catch (telegramError) {
       console.log('Telegram уведомление: OK, но не критично', telegramError.message);
