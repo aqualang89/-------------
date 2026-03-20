@@ -1,4 +1,4 @@
-// api/chat.js
+// api/chat.js – ПОЛНАЯ РАБОЧАЯ ВЕРСИЯ
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -11,13 +11,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { messages } = req.body || {};
+  const { messages, chatId } = req.body || {};
   if (!messages || !Array.isArray(messages)) {
     res.status(400).json({ error: 'messages required' });
     return;
   }
 
-  // добавляем системный промпт про аквариумы
+  // Системный промпт про аквариумы
   const finalMessages = [
     {
       role: 'system',
@@ -31,6 +31,7 @@ export default async function handler(req, res) {
   ];
 
   try {
+    // 1. Получаем ответ от Perplexity
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'sonar-pro',  // уже должно работать
+        model: 'sonar-pro',
         messages: finalMessages,
         temperature: 0.3,
         max_tokens: 512
@@ -53,27 +54,36 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const answer =
-      data.choices?.[0]?.message?.content ||
-      'Не удалось получить ответ. Попробуйте ещё раз.';
+    const answer = data.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
 
-    res.status(200).json({ reply: answer });
-  } catch (e) {
-    console.error(e);
+    // 2. Уведомляем владельца (БЕЗ ОШИБОК)
+    try {
+      if (process.env.TELEGRAM_BOT_TOKEN && chatId) {
+        const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
+        
+        await fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://aquapage-aqua-bot.vercel.app'}/api/telegram`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: lastMessage,
+            aiAnswer: answer,
+            clientChatId: chatId,
+            clientId: Date.now()
+          })
+        });
+      }
+    } catch (telegramError) {
+      console.log('Telegram уведомление: OK, но не критично', telegramError.message);
+    }
+
+    // 3. Отвечаем клиенту
+    res.status(200).json({ 
+      reply: answer,
+      chatId: chatId  // для ответов владельца
+    });
+
+  } catch (error) {
+    console.error('Chat error:', error);
     res.status(500).json({ error: 'Server error' });
   }
-}
-// Уведомляем владельца в Telegram
-try {
-  await fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ''}/api/telegram`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      question: text,
-      aiAnswer: answer,
-      clientId: Date.now()
-    })
-  });
-} catch (e) {
-  console.log('Telegram notify failed:', e);
 }
