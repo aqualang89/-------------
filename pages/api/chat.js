@@ -1,43 +1,25 @@
-// api/chat.js – С ДЕБАГОМ (копируй целиком)
 export default async function handler(req, res) {
+  console.log('API START');
+  
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
+    console.log('NOT POST');
+    return res.status(405).json({ error: 'POST only' });
+  }
+
+  const { messages } = req.body;
+  console.log('MESSAGES:', messages?.length);
+
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'messages required' });
   }
 
   const apiKey = process.env.PERPLEXITY_API_KEY;
-  if (!apiKey) {
-    res.status(500).json({ error: 'Missing PERPLEXITY_API_KEY' });
-    return;
-  }
-
-  const { messages, chatId } = req.body || {};
-  if (!messages || !Array.isArray(messages)) {
-    res.status(400).json({ error: 'messages required' });
-    return;
-  }
-
-  // 🧪 ТЕСТ ПЕРЕМЕННЫХ (удали потом)
-  console.log('🔑 TOKEN OK:', !!process.env.TELEGRAM_BOT_TOKEN);
-  console.log('👤 CHAT_ID:', process.env.TELEGRAM_ADMIN_CHAT_ID);
-  console.log('🌐 VERCEL_URL:', process.env.VERCEL_URL);
-  console.log('💬 chatId из фронта:', chatId);
-
-  // Системный промпт
-  const finalMessages = [
-    {
-      role: 'system',
-      content:
-        'Ты консультант студии аквариумного дизайна. ' +
-        'Отвечаешь коротко и по делу, помогаешь подобрать ' +
-        'объем, оборудование и обслуживание аквариума. ' +
-        'Пиши по-русски, дружелюбно, на "вы".'
-    },
-    ...messages
-  ];
+  const finalMessages = [{
+    role: 'system',
+    content: 'Аквариумный консультант. Коротко, по-русски.'
+  }, ...messages];
 
   try {
-    // 1. Perplexity
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -48,51 +30,18 @@ export default async function handler(req, res) {
         model: 'sonar-pro',
         messages: finalMessages,
         temperature: 0.3,
-        max_tokens: 512
+        max_tokens: 300
       })
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('Perplexity error:', text);
-      res.status(500).json({ error: 'LLM error' });
-      return;
-    }
-
     const data = await response.json();
-    const answer = data.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
-    const lastMessage = messages[messages.length - 1]?.content || 'сообщение';
+    const answer = data.choices?.[0]?.message?.content || 'AI error';
 
-    // 2. TELEGRAM УВЕДОМЛЕНИЕ 🚀
-    console.log('🚀 ИДЁМ В TELEGRAM:', { chatId, lastMessage: lastMessage.slice(0,30) });
-    
-    try {
-      const telegramRes = await fetch('https://aquariumpage.vercel.app/api/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: lastMessage,
-          aiAnswer: answer,
-          clientChatId: chatId || 'no-chat-id',
-          clientId: Date.now()
-        })
-      });
-      
-      const tgResult = await telegramRes.json();
-      console.log('📤 TELEGRAM ОТВЕТ:', tgResult.ok ? '✅' : '❌', tgResult);
-      
-    } catch (telegramError) {
-      console.log('❌ TELEGRAM ОШИБКА:', telegramError.message);
-    }
-
-    // 3. Ответ клиенту
-    res.status(200).json({ 
-      reply: answer,
-      chatId: chatId || '919466417'  // fallback
-    });
+    console.log('AI ANSWER OK');
+    res.json({ reply: answer });
 
   } catch (error) {
-    console.error('Chat error:', error);
+    console.error('ERROR:', error);
     res.status(500).json({ error: 'Server error' });
   }
 }
