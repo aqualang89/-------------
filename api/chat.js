@@ -63,3 +63,17 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Server error' });
   }
 }
+// Уведомляем владельца в Telegram
+try {
+  await fetch(`${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ''}/api/telegram`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      question: text,
+      aiAnswer: answer,
+      clientId: Date.now()
+    })
+  });
+} catch (e) {
+  console.log('Telegram notify failed:', e);
+}
