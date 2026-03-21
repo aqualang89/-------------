@@ -1,21 +1,3 @@
-import { setMode, queueManualReplyForSite } from '../lib/store.js';
-import {
-  answerCallbackQuery,
-  removeInlineKeyboard,
-  sendOwnerText
-} from '../lib/telegram.js';
-
-function parseReplyCommand(text = '') {
-  const match = text.match(/^\/reply\s+([^\s]+)\s+([\s\S]+)/);
-  if (!match) return null;
-  return { sessionId: match[1], replyText: match[2].trim() };
-}
-
-function parseModeCommand(text = '', command) {
-  const match = text.match(new RegExp(`^\\/${command}\\s+([^\\s]+)`));
-  return match ? match[1] : null;
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).end('Method Not Allowed');
@@ -30,80 +12,79 @@ export default async function handler(req, res) {
 
   try {
     const update = req.body;
-
-    if (update.callback_query) {
-      const q = update.callback_query;
-      const data = q.data || '';
-      const [action, sessionId] = data.split(':');
-
-      if (action === 'take') {
-        await setMode(sessionId, 'manual');
-        await answerCallbackQuery(q.id, 'Чат переведен в ручной режим');
-        await removeInlineKeyboard(q.message.chat.id, q.message.message_id);
-        await sendOwnerText(
-          `✍️ Ручной режим включен для ${sessionId}\nОтвет: /reply ${sessionId} ваш текст`
-        );
-        return res.status(200).json({ ok: true });
-      }
-
-      if (action === 'ai') {
-        await setMode(sessionId, 'ai');
-        await answerCallbackQuery(q.id, 'ИИ снова отвечает сам');
-        await removeInlineKeyboard(q.message.chat.id, q.message.message_id);
-        await sendOwnerText(`🤖 AI-режим включен для ${sessionId}`);
-        return res.status(200).json({ ok: true });
-      }
-
-      return res.status(200).json({ ok: true });
-    }
-
-    const msg = update.message;
-    const chatId = String(msg?.chat?.id || '');
+    const msg = update?.message;
+    const chatId = msg?.chat?.id;
     const text = (msg?.text || '').trim();
 
-    if (!msg || !text) {
+    if (!chatId || !text) {
       return res.status(200).json({ ok: true });
     }
 
-    if (process.env.OWNER_CHAT_ID && chatId !== String(process.env.OWNER_CHAT_ID)) {
-      return res.status(200).json({ ok: true });
-    }
+    let reply = '';
 
     if (text === '/start') {
-      await sendOwnerText(
-        'Команды:\n' +
-        '/take SESSION_ID — перевести чат в ручной режим\n' +
-        '/ai SESSION_ID — вернуть ИИ\n' +
-        '/reply SESSION_ID текст — отправить ручной ответ клиенту'
-      );
-      return res.status(200).json({ ok: true });
+      reply =
+        'Привет! Я бот Scaper’s House. Напишите вопрос по аквариуму: запуск, фильтр, свет, CO2, грунт, растения или обслуживание.';
+    } else {
+      const aiRes = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'sonar-pro',
+          messages: [
+            {
+              role: 'system',
+              content: `Ты — консультант студии аквариумного дизайна Scaper’s House.
+Отвечай только по-русски.
+Пиши кратко, профессионально и по делу.
+Помогай по темам: запуск аквариума, травники, фильтрация, свет, CO2, грунты, растения, обслуживание.
+Если данных мало, сначала задай 1–3 уточняющих вопроса.
+Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
+Не выдумывай цены и характеристики, если их не дали.`
+            },
+            {
+              role: 'user',
+              content: text
+            }
+          ]
+        })
+      });
+
+      if (!aiRes.ok) {
+        const errText = await aiRes.text();
+        console.error('Perplexity error:', aiRes.status, errText);
+        reply = 'Сейчас не могу ответить. Попробуйте чуть позже.';
+      } else {
+        const data = await aiRes.json();
+        reply =
+          data?.choices?.[0]?.message?.content ||
+          'Не удалось получить ответ.';
+      }
     }
 
-    const takeId = parseModeCommand(text, 'take');
-    if (takeId) {
-      await setMode(takeId, 'manual');
-      await sendOwnerText(`✍️ Ручной режим включен для ${takeId}`);
-      return res.status(200).json({ ok: true });
+    const tgRes = await fetch(
+      `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: reply
+        })
+      }
+    );
+
+    if (!tgRes.ok) {
+      const tgErr = await tgRes.text();
+      console.error('Telegram sendMessage error:', tgRes.status, tgErr);
     }
 
-    const aiId = parseModeCommand(text, 'ai');
-    if (aiId) {
-      await setMode(aiId, 'ai');
-      await sendOwnerText(`🤖 AI-режим включен для ${aiId}`);
-      return res.status(200).json({ ok: true });
-    }
-
-    const replyCmd = parseReplyCommand(text);
-    if (replyCmd) {
-      await queueManualReplyForSite(replyCmd.sessionId, replyCmd.replyText);
-      await sendOwnerText(`✅ Ответ отправлен в чат сайта для ${replyCmd.sessionId}`);
-      return res.status(200).json({ ok: true });
-    }
-
-    await sendOwnerText('Не понял команду. Используйте /reply SESSION_ID текст');
     return res.status(200).json({ ok: true });
   } catch (error) {
-    console.error('TELEGRAM ERROR', error);
+    console.error('TELEGRAM ERROR:', error);
     return res.status(500).json({ ok: false });
   }
 }
