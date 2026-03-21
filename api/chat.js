@@ -1,14 +1,59 @@
+import {
+  addHistory,
+  getHistory,
+  getMode
+} from '../lib/store.js';
+
+async function notifyOwner(sessionId, text) {
+  if (!process.env.OWNER_CHAT_ID || !process.env.TELEGRAM_BOT_TOKEN) return;
+
+  const ownerText =
+    `🌐 Сообщение с сайта\n` +
+    `SESSION_ID: ${sessionId}\n\n` +
+    `Клиент: ${text}\n\n` +
+    `/take ${sessionId}\n` +
+    `/reply ${sessionId} ваш ответ\n` +
+    `/ai ${sessionId}`;
+
+  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: process.env.OWNER_CHAT_ID,
+      text: ownerText
+    })
+  });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const { text } = req.body || {};
+    const { sessionId, text } = req.body || {};
 
-    if (!text || !text.trim()) {
-      return res.status(400).json({ error: 'text is required' });
+    if (!sessionId || !text || !text.trim()) {
+      return res.status(400).json({ error: 'sessionId and text are required' });
     }
+
+    await addHistory(sessionId, 'user', text);
+    await notifyOwner(sessionId, text);
+
+    const mode = await getMode(sessionId);
+
+    if (mode === 'manual') {
+      return res.status(200).json({
+        reply: 'Сообщение передано владельцу. Он ответит здесь.',
+        mode: 'manual'
+      });
+    }
+
+    const history = await getHistory(sessionId);
+    const recent = history.slice(-12).map((m) => ({
+      role: m.role,
+      content: m.content
+    }));
 
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -24,15 +69,12 @@ export default async function handler(req, res) {
             content: `Ты — консультант студии аквариумного дизайна Scaper’s House.
 Отвечай только по-русски.
 Пиши кратко, профессионально и по делу.
-Ты помогаешь с запуском аквариума, подбором фильтра, света, CO2, грунта, растений, оформления и обслуживания.
+Помогай по темам: запуск аквариума, травники, фильтрация, свет, CO2, грунты, растения, обслуживание.
 Если данных мало, сначала задай 1–3 уточняющих вопроса.
 Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
 Не выдумывай цены и характеристики, если их не дали.`
           },
-          {
-            role: 'user',
-            content: text
-          }
+          ...recent
         ]
       })
     });
@@ -45,6 +87,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     const reply = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
+
+    await addHistory(sessionId, 'assistant', reply);
 
     return res.status(200).json({ reply, mode: 'ai' });
   } catch (error) {
