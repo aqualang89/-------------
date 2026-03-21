@@ -1,38 +1,48 @@
-// pages/api/chat.js
-export default async function handler(req, res) {
-  // Разрешаем только POST
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).end('Method Not Allowed');
-  }
+import { askAquariumAI } from '../lib/ai.js';
+import { addUserMessage, addAssistantMessage } from '../lib/store.js';
+import { sendOwnerCard } from '../lib/telegram.js';
 
-  const { messages } = req.body;
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Invalid body' });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   try {
-    const aiResp = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'sonar-pro',
-        messages: [
-          { role: 'system', content: 'Аквариумный консультант. Отвечай коротко, по‑русски.' },
-          ...messages,
-        ],
-      }),
+    const { sessionId, text } = req.body || {};
+
+    if (!sessionId || !text) {
+      return res.status(400).json({ error: 'sessionId and text are required' });
+    }
+
+    let session = await addUserMessage(sessionId, text);
+
+    if (session.mode === 'manual') {
+      await sendOwnerCard({
+        sessionId,
+        userText: text,
+        aiReply: null,
+        mode: session.mode
+      });
+
+      return res.status(200).json({
+        reply: 'Сообщение передано специалисту студии. Он ответит вручную.',
+        mode: 'manual'
+      });
+    }
+
+    const aiReply = await askAquariumAI(session.messages);
+    session = await addAssistantMessage(sessionId, aiReply, { manual: false });
+
+    await sendOwnerCard({
+      sessionId,
+      userText: text,
+      aiReply,
+      mode: session.mode
     });
 
-    const data = await aiResp.json();
-    const answer = data.choices?.[0]?.message?.content ?? 'Не удалось получить ответ';
-
-    res.status(200).json({ reply: answer });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(200).json({ reply: aiReply, mode: session.mode });
+  } catch (error) {
+    console.error('CHAT ERROR', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
