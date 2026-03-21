@@ -1,6 +1,5 @@
 import {
   addHistory,
-  getHistory,
   getMode
 } from '../lib/store.js';
 
@@ -49,12 +48,6 @@ export default async function handler(req, res) {
       });
     }
 
-    const history = await getHistory(sessionId);
-    const recent = history.slice(-12).map((m) => ({
-      role: m.role,
-      content: m.content
-    }));
-
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
       headers: {
@@ -74,7 +67,10 @@ export default async function handler(req, res) {
 Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
 Не выдумывай цены и характеристики, если их не дали.`
           },
-          ...recent
+          {
+            role: 'user',
+            content: text
+          }
         ]
       })
     });
