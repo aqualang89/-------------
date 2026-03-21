@@ -3,9 +3,20 @@ import {
   getMode
 } from '../lib/store.js';
 
-async function notifyOwner(sessionId, text) {
+async function sendTelegram(text) {
   if (!process.env.OWNER_CHAT_ID || !process.env.TELEGRAM_BOT_TOKEN) return;
 
+  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: process.env.OWNER_CHAT_ID,
+      text
+    })
+  });
+}
+
+async function notifyOwnerAboutClient(sessionId, text) {
   const ownerText =
     `🌐 Сообщение с сайта\n` +
     `SESSION_ID: ${sessionId}\n\n` +
@@ -14,14 +25,20 @@ async function notifyOwner(sessionId, text) {
     `/reply ${sessionId} ваш ответ\n` +
     `/ai ${sessionId}`;
 
-  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: process.env.OWNER_CHAT_ID,
-      text: ownerText
-    })
-  });
+  await sendTelegram(ownerText);
+}
+
+async function notifyOwnerAboutAiReply(sessionId, userText, reply) {
+  const ownerText =
+    `🤖 ИИ ответил на сайте\n` +
+    `SESSION_ID: ${sessionId}\n\n` +
+    `Клиент: ${userText}\n\n` +
+    `Ответ ИИ:\n${reply}\n\n` +
+    `/take ${sessionId}\n` +
+    `/reply ${sessionId} ваш ответ\n` +
+    `/ai ${sessionId}`;
+
+  await sendTelegram(ownerText);
 }
 
 export default async function handler(req, res) {
@@ -36,8 +53,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'sessionId and text are required' });
     }
 
-    await addHistory(sessionId, 'user', text);
-    await notifyOwner(sessionId, text);
+    const cleanText = text.trim();
+
+    await addHistory(sessionId, 'user', cleanText);
+    await notifyOwnerAboutClient(sessionId, cleanText);
 
     const mode = await getMode(sessionId);
 
@@ -69,7 +88,7 @@ export default async function handler(req, res) {
           },
           {
             role: 'user',
-            content: text
+            content: cleanText
           }
         ]
       })
@@ -85,6 +104,7 @@ export default async function handler(req, res) {
     const reply = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
 
     await addHistory(sessionId, 'assistant', reply);
+    await notifyOwnerAboutAiReply(sessionId, cleanText, reply);
 
     return res.status(200).json({ reply, mode: 'ai' });
   } catch (error) {
