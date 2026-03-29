@@ -129,13 +129,6 @@
 
   <!-- Параллакс и плавный скролл + заставка -->
   <script>
-    // Параллакс заголовка
-    const title = document.querySelector('.hero-title');
-    window.addEventListener('scroll', () => {
-      if (!title) return;
-      const y = window.scrollY;
-      title.style.transform = `translateY(${y * 0.15}px)`;
-    });
 
     // Плавный скролл по клику на пункты меню
     document.querySelectorAll('a.nav-link[href^="#"]').forEach((link) => {
