@@ -1,5 +1,6 @@
 import {
   addHistory,
+  getHistory,
   getMode
 } from '../lib/store.js';
 
@@ -55,6 +56,7 @@ export default async function handler(req, res) {
 
     const cleanText = text.trim();
 
+    const previousHistory = await getHistory(sessionId);
     await addHistory(sessionId, 'user', cleanText);
     await notifyOwnerAboutClient(sessionId, cleanText);
 
@@ -86,6 +88,7 @@ export default async function handler(req, res) {
 Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
 Не выдумывай цены и характеристики, если их не дали.`
           },
+          ...previousHistory.slice(-10).map(h => ({ role: h.role, content: h.content })),
           {
             role: 'user',
             content: cleanText
