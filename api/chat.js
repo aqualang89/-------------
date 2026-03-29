@@ -1,6 +1,7 @@
 import {
   addHistory,
-  getMode
+  getMode,
+  getHistory
 } from '../lib/store.js';
 
 async function sendTelegram(text) {
@@ -55,29 +56,35 @@ export default async function handler(req, res) {
 
     const cleanText = text.trim();
 
-    await addHistory(sessionId, 'user', cleanText);
+    const previousHistory = await getHistory(sessionId);
+    await addHistory(sessionId, ‘user’, cleanText);
     await notifyOwnerAboutClient(sessionId, cleanText);
 
     const mode = await getMode(sessionId);
 
-    if (mode === 'manual') {
+    if (mode === ‘manual’) {
       return res.status(200).json({
-        reply: 'Сообщение передано владельцу. Он ответит здесь.',
-        mode: 'manual'
+        reply: ‘Сообщение передано владельцу. Он ответит здесь.’,
+        mode: ‘manual’
       });
     }
 
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
+    const historyMessages = previousHistory.slice(-10).map(h => ({
+      role: h.role,
+      content: h.content
+    }));
+
+    const response = await fetch(‘https://api.perplexity.ai/chat/completions’, {
+      method: ‘POST’,
       headers: {
         Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-        'Content-Type': 'application/json'
+        ‘Content-Type’: ‘application/json’
       },
       body: JSON.stringify({
-        model: 'sonar-pro',
+        model: ‘sonar-pro’,
         messages: [
           {
-            role: 'system',
+            role: ‘system’,
             content: `Ты — консультант студии аквариумного дизайна Scaper’s House.
 Отвечай только по-русски.
 Пиши кратко, профессионально и по делу.
@@ -86,8 +93,9 @@ export default async function handler(req, res) {
 Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
 Не выдумывай цены и характеристики, если их не дали.`
           },
+          ...historyMessages,
           {
-            role: 'user',
+            role: ‘user’,
             content: cleanText
           }
         ]

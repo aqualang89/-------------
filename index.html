@@ -88,11 +88,13 @@
 
   <!-- Скрипт каталога -->
   <script>
+    let cachedТовары = null;
+
     // Загрузка товаров из JSON
     async function загрузитьТовары() {
       const resp = await fetch('товары.json');
-      const data = await resp.json();
-      отрисоватьТовары(data);
+      cachedТовары = await resp.json();
+      отрисоватьТовары(cachedТовары);
     }
 
     function отрисоватьТовары(список) {
@@ -101,21 +103,24 @@
       список.forEach(t => {
         const div = document.createElement('div');
         div.className = 'card';
-        div.innerHTML = `
-          <h3>${t.название}</h3>
-          <p>${t.описание}</p>
-          <span>${t.цена.toLocaleString()} ₽</span>
-        `;
+        const название = document.createElement('h3');
+        название.textContent = t.название;
+        const описание = document.createElement('p');
+        описание.textContent = t.описание;
+        const цена = document.createElement('span');
+        цена.textContent = `${t.цена.toLocaleString()} ₽`;
+        div.appendChild(название);
+        div.appendChild(описание);
+        div.appendChild(цена);
         контейнер.appendChild(div);
       });
     }
 
-    async function применитьФильтр() {
+    function применитьФильтр() {
       const max = parseInt(document.getElementById('фильтр-цена').value);
       document.getElementById('цена-значение').textContent = `до ${max.toLocaleString()} ₽`;
-      const resp = await fetch('товары.json');
-      const data = await resp.json();
-      отрисоватьТовары(data.filter(t => t.цена <= max));
+      if (!cachedТовары) return;
+      отрисоватьТовары(cachedТовары.filter(t => t.цена <= max));
     }
 
     document.getElementById('фильтр-цена').addEventListener('input', применитьФильтр);
