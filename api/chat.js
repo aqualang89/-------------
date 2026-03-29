@@ -55,30 +55,30 @@ export default async function handler(req, res) {
 
     const cleanText = text.trim();
 
-    await addHistory(sessionId, ‘user’, cleanText);
+    await addHistory(sessionId, 'user', cleanText);
     await notifyOwnerAboutClient(sessionId, cleanText);
 
     const mode = await getMode(sessionId);
 
-    if (mode === ‘manual’) {
+    if (mode === 'manual') {
       return res.status(200).json({
-        reply: ‘Сообщение передано владельцу. Он ответит здесь.’,
-        mode: ‘manual’
+        reply: 'Сообщение передано владельцу. Он ответит здесь.',
+        mode: 'manual'
       });
     }
 
-    const response = await fetch(‘https://api.perplexity.ai/chat/completions’, {
-      method: ‘POST’,
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-        ‘Content-Type’: ‘application/json’
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: ‘sonar-pro’,
+        model: 'sonar-pro',
         messages: [
           {
-            role: ‘system’,
-            content: `Ты — консультант студии аквариумного дизайна Scaper’s House.
+            role: 'system',
+            content: `Ты — консультант студии аквариумного дизайна Scaper's House.
 Отвечай только по-русски.
 Пиши кратко, профессионально и по делу.
 Помогай по темам: запуск аквариума, травники, фильтрация, свет, CO2, грунты, растения, обслуживание.
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
 Не выдумывай цены и характеристики, если их не дали.`
           },
           {
-            role: ‘user’,
+            role: 'user',
             content: cleanText
           }
         ]
