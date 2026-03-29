@@ -1,7 +1,6 @@
 import {
   addHistory,
-  getMode,
-  getHistory
+  getMode
 } from '../lib/store.js';
 
 async function sendTelegram(text) {
@@ -56,12 +55,6 @@ export default async function handler(req, res) {
 
     const cleanText = text.trim();
 
-    let previousHistory = [];
-    try {
-      previousHistory = await getHistory(sessionId);
-    } catch (err) {
-      console.error(‘Failed to load history:’, err);
-    }
     await addHistory(sessionId, ‘user’, cleanText);
     await notifyOwnerAboutClient(sessionId, cleanText);
 
@@ -73,11 +66,6 @@ export default async function handler(req, res) {
         mode: ‘manual’
       });
     }
-
-    const historyMessages = previousHistory.slice(-10).map(h => ({
-      role: h.role,
-      content: h.content
-    }));
 
     const response = await fetch(‘https://api.perplexity.ai/chat/completions’, {
       method: ‘POST’,
@@ -98,7 +86,6 @@ export default async function handler(req, res) {
 Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
 Не выдумывай цены и характеристики, если их не дали.`
           },
-          ...historyMessages,
           {
             role: ‘user’,
             content: cleanText
