@@ -56,7 +56,12 @@ export default async function handler(req, res) {
 
     const cleanText = text.trim();
 
-    const previousHistory = await getHistory(sessionId);
+    let previousHistory = [];
+    try {
+      previousHistory = await getHistory(sessionId);
+    } catch (err) {
+      console.error(‘Failed to load history:’, err);
+    }
     await addHistory(sessionId, ‘user’, cleanText);
     await notifyOwnerAboutClient(sessionId, cleanText);
 
