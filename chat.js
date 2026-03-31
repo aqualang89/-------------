@@ -1,7 +1,17 @@
 // chat.js
+function getSessionId() {
+  let sid = sessionStorage.getItem('chat_session_id');
+  if (!sid) {
+    sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    sessionStorage.setItem('chat_session_id', sid);
+  }
+  return sid;
+}
+
 const chatState = {
   open: false,
-  history: []
+  history: [],
+  sessionId: getSessionId()
 };
 
 function createChatElements() {
@@ -60,7 +70,7 @@ async function onChatSubmit(e) {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatState.history })
+      body: JSON.stringify({ sessionId: chatState.sessionId, text })
     });
 
     const data = await res.json();
