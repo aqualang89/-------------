@@ -148,13 +148,23 @@
       const logo = document.querySelector('.intro-logo');
       const introBtn = document.querySelector('.intro-text');
 
-      function closeIntro() {
+      function closeIntro(scrollTo) {
         overlay.classList.add('hidden');
-        setTimeout(() => overlay.remove(), 700);
+        setTimeout(() => {
+          overlay.remove();
+          if (scrollTo) {
+            const target = document.getElementById(scrollTo);
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 700);
       }
 
-      logo.addEventListener('click', closeIntro);
-      introBtn.addEventListener('click', closeIntro);
+      // Если пришли с якорем — пропускаем интро автоматически
+      const hash = window.location.hash.slice(1);
+      if (hash) closeIntro(hash);
+
+      logo.addEventListener('click', () => closeIntro());
+      introBtn.addEventListener('click', () => closeIntro());
       overlay.addEventListener('click', (e) => {
         if (e.target === overlay) closeIntro();
       });
