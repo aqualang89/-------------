@@ -67,7 +67,14 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const reply = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
+    const raw = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
+    const reply = raw
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/\[(\d+)\]/g, '')
+      .replace(/^[-•]\s/gm, '— ')
+      .trim();
 
     await addHistory(sessionId, 'assistant', reply);
     await sendOwnerCard({ sessionId, userText: cleanText, aiReply: reply, mode: 'ai' });

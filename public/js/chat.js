@@ -4,10 +4,10 @@ const chatState = {
 };
 
 const sessionId =
-  localStorage.getItem('scapers_chat_session') ||
-  (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()));
+  sessionStorage.getItem('scapers_chat_session') ||
+  (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
 
-localStorage.setItem('scapers_chat_session', sessionId);
+sessionStorage.setItem('scapers_chat_session', sessionId);
 
 function createChatElements() {
   const btn = document.createElement('button');
