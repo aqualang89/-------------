@@ -239,6 +239,9 @@
 
       <div class="calc-tabs">
         <button class="calc-tab active" data-tab="volume">💧 Объём</button>
+        <button class="calc-tab" data-tab="substrate">🪨 Грунт</button>
+        <button class="calc-tab" data-tab="heater">🌡️ Нагреватель</button>
+        <button class="calc-tab" data-tab="glass">🔲 Стёкла</button>
         <button class="calc-tab" data-tab="filter">⚙️ Фильтр</button>
         <button class="calc-tab" data-tab="light">💡 Освещение</button>
         <button class="calc-tab" data-tab="fish">🐟 Рыбки</button>
@@ -280,6 +283,151 @@
             <span class="value" id="rv-area">—</span>
           </div>
           <div class="result-note" id="rv-note"></div>
+        </div>
+      </div>
+
+      <!-- ГРУНТ -->
+      <div class="calc-panel" id="tab-substrate">
+        <h2><span class="icon">🪨</span> Объём и масса грунта</h2>
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label>Длина аквариума (см)</label>
+            <input type="number" id="s-length" placeholder="120" min="1">
+          </div>
+          <div class="field">
+            <label>Ширина аквариума (см)</label>
+            <input type="number" id="s-width" placeholder="40" min="1">
+          </div>
+          <div class="field">
+            <label>Толщина слоя (см)</label>
+            <input type="number" id="s-depth" placeholder="5" min="1" max="30">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Тип грунта</label>
+            <select id="s-type" onchange="substrateTypeChange()">
+              <option value="1.4">Кварцевый песок — 1.4 кг/л</option>
+              <option value="1.5">Гравий мелкий (2–3 мм) — 1.5 кг/л</option>
+              <option value="1.65">Гравий средний (3–5 мм) — 1.65 кг/л</option>
+              <option value="1.7">Галька — 1.7 кг/л</option>
+              <option value="1.66">Арагонит (CaribSea) — 1.66 кг/л</option>
+              <option value="2.7">Мраморная крошка — 2.7 кг/л</option>
+              <option value="0.6">ADA Amazonia (травник) — 0.6 кг/л</option>
+              <option value="0.9">Seachem Flourite — 0.9 кг/л</option>
+              <option value="custom">Свой грунт (указать плотность)</option>
+            </select>
+          </div>
+          <div class="field" id="s-custom-wrap" style="display:none">
+            <label>Плотность грунта (кг/л)</label>
+            <input type="number" id="s-density" placeholder="1.5" min="0.1" max="5" step="0.01">
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calcSubstrate()">Рассчитать</button>
+        <div class="calc-result" id="res-substrate">
+          <div class="result-row">
+            <span class="label">Объём грунта</span>
+            <span class="value highlight" id="rs-vol">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Масса грунта</span>
+            <span class="value" id="rs-mass">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Рекомендуемый слой</span>
+            <span class="value" id="rs-rec">—</span>
+          </div>
+          <div class="result-note" id="rs-note"></div>
+        </div>
+      </div>
+
+      <!-- НАГРЕВАТЕЛЬ -->
+      <div class="calc-panel" id="tab-heater">
+        <h2><span class="icon">🌡️</span> Мощность нагревателя</h2>
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label>Объём аквариума (л)</label>
+            <input type="number" id="h-volume" placeholder="200" min="1">
+          </div>
+          <div class="field">
+            <label>Нужная температура (°C)</label>
+            <input type="number" id="h-target" placeholder="26" min="15" max="35">
+          </div>
+          <div class="field">
+            <label>Температура в комнате (°C)</label>
+            <input type="number" id="h-room" placeholder="20" min="5" max="30">
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calcHeater()">Рассчитать</button>
+        <div class="calc-result" id="res-heater">
+          <div class="result-row">
+            <span class="label">Минимальная мощность</span>
+            <span class="value highlight" id="rh-watts">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Рекомендуемый нагреватель</span>
+            <span class="value" id="rh-model">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Резервный нагреватель</span>
+            <span class="value" id="rh-backup">—</span>
+          </div>
+          <div class="result-note" id="rh-note"></div>
+        </div>
+      </div>
+
+      <!-- СТЁКЛА -->
+      <div class="calc-panel" id="tab-glass">
+        <h2><span class="icon">🔲</span> Размеры стёкол</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>Длина аквариума (мм)</label>
+            <input type="number" id="g-length" placeholder="600" min="1">
+          </div>
+          <div class="field">
+            <label>Ширина аквариума (мм)</label>
+            <input type="number" id="g-width" placeholder="300" min="1">
+          </div>
+          <div class="field">
+            <label>Высота аквариума (мм)</label>
+            <input type="number" id="g-height" placeholder="400" min="1">
+          </div>
+          <div class="field">
+            <label>Толщина стекла (мм)</label>
+            <select id="g-glass">
+              <option value="4">4 мм</option>
+              <option value="5">5 мм</option>
+              <option value="6" selected>6 мм</option>
+              <option value="8">8 мм</option>
+              <option value="10">10 мм</option>
+              <option value="12">12 мм</option>
+              <option value="15">15 мм</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Толщина шва (мм)</label>
+            <input type="number" id="g-seam" placeholder="3" min="1" max="10" value="3">
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calcGlass()">Рассчитать</button>
+        <div class="calc-result" id="res-glass">
+          <div class="result-row">
+            <span class="label">Переднее и заднее стекло (×2)</span>
+            <span class="value highlight" id="rg-front">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Боковые стёкла (×2)</span>
+            <span class="value" id="rg-side">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Дно (×1)</span>
+            <span class="value" id="rg-bottom">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Рекомендуемая толщина стекла</span>
+            <span class="value" id="rg-rec">—</span>
+          </div>
+          <div class="result-note" id="rg-note"></div>
         </div>
       </div>
 
@@ -628,6 +776,127 @@
     }
 
     buildFishList();
+
+    // ===== ГРУНТ =====
+    function substrateTypeChange() {
+      const val = document.getElementById('s-type').value;
+      document.getElementById('s-custom-wrap').style.display = val === 'custom' ? 'block' : 'none';
+    }
+
+    function calcSubstrate() {
+      const l = parseFloat(document.getElementById('s-length').value);
+      const w = parseFloat(document.getElementById('s-width').value);
+      const d = parseFloat(document.getElementById('s-depth').value);
+      if (!l || !w || !d) return alert('Введите длину, ширину и толщину слоя');
+
+      const typeVal = document.getElementById('s-type').value;
+      let density;
+      if (typeVal === 'custom') {
+        density = parseFloat(document.getElementById('s-density').value);
+        if (!density) return alert('Укажите плотность грунта');
+      } else {
+        density = parseFloat(typeVal);
+      }
+
+      const vol = (l * w * d) / 1000;
+      const mass = vol * density;
+
+      document.getElementById('rs-vol').textContent = vol.toFixed(1) + ' л';
+      document.getElementById('rs-mass').textContent = mass.toFixed(1) + ' кг';
+
+      let rec, note;
+      if (d < 3) {
+        rec = 'Слой слишком тонкий';
+        note = '⚠️ Слой менее 3 см не подходит для травника — корни растений не будут держаться. Для рыбного аквариума без растений — допустимо.';
+      } else if (d <= 5) {
+        rec = 'Оптимально для большинства аквариумов';
+        note = 'Слой 3–5 см подходит для большинства растений и рыб.';
+      } else if (d <= 8) {
+        rec = 'Хорошо для травника с корневыми растениями';
+        note = 'Слой 6–8 см идеален для кувшинок, апоногетонов и других растений с мощными корнями.';
+      } else {
+        rec = 'Очень толстый слой';
+        note = '⚠️ Слой более 8 см может вызвать анаэробные зоны и выделение сероводорода. Лучше использовать питательную подложку снизу + 5–6 см грунта сверху.';
+      }
+
+      document.getElementById('rs-rec').textContent = rec;
+      document.getElementById('rs-note').textContent = note;
+      document.getElementById('res-substrate').classList.add('show');
+    }
+
+    // ===== НАГРЕВАТЕЛЬ =====
+    function calcHeater() {
+      const vol = parseFloat(document.getElementById('h-volume').value);
+      const target = parseFloat(document.getElementById('h-target').value);
+      const room = parseFloat(document.getElementById('h-room').value);
+      if (!vol || !target || room === undefined || isNaN(room)) return alert('Введите все три значения');
+
+      const diff = target - room;
+      if (diff <= 0) return alert('Температура воды должна быть выше температуры в комнате');
+
+      // Формула reefcentral: P = 0.45 × ΔT × V^(2/3)
+      const watts = Math.ceil(0.45 * diff * Math.pow(vol, 2/3));
+
+      // Подбор стандартного нагревателя
+      const sizes = [25, 50, 75, 100, 150, 200, 250, 300, 500];
+      const recommended = sizes.find(s => s >= watts) || sizes[sizes.length - 1];
+      const backup = recommended <= 150 ? recommended : Math.ceil(recommended / 2);
+
+      document.getElementById('rh-watts').textContent = watts + ' Вт';
+      document.getElementById('rh-model').textContent = recommended + ' Вт';
+      document.getElementById('rh-backup').textContent = vol > 200 ? '2 × ' + backup + ' Вт (надёжнее)' : 'Необязателен';
+
+      let note = '';
+      if (diff > 10) note = '⚠️ Большая разница температур (более 10°C) — нагреватель будет работать почти постоянно. Подумайте об утеплении тумбы или размещении аквариума в более тёплом месте. ';
+      if (vol > 200) note += 'Для аквариумов от 200 л лучше два нагревателя — если один выйдет из строя, рыбы не замёрзнут.';
+      if (!note) note = 'Выбирайте нагреватель с термостатом и защитой от работы без воды.';
+
+      document.getElementById('rh-note').textContent = note;
+      document.getElementById('res-heater').classList.add('show');
+    }
+
+    // ===== СТЁКЛА =====
+    function calcGlass() {
+      const L = parseFloat(document.getElementById('g-length').value);
+      const W = parseFloat(document.getElementById('g-width').value);
+      const H = parseFloat(document.getElementById('g-height').value);
+      const S = parseFloat(document.getElementById('g-glass').value);
+      const M = parseFloat(document.getElementById('g-seam').value) || 3;
+      if (!L || !W || !H) return alert('Введите длину, ширину и высоту');
+
+      // Передние/задние стёкла: L × H (стекло по полной длине)
+      const frontW = L;
+      const frontH = H;
+
+      // Боковые: вставляются между передним и задним
+      const sideW = W - 2 * M - 2 * S;
+      const sideH = H;
+
+      // Дно
+      const bottomL = L - 2 * M - 2 * S;
+      const bottomW = W - 2 * M - 2 * S;
+
+      document.getElementById('rg-front').textContent = frontW + ' × ' + frontH + ' мм';
+      document.getElementById('rg-side').textContent = sideW + ' × ' + sideH + ' мм';
+      document.getElementById('rg-bottom').textContent = bottomL + ' × ' + bottomW + ' мм';
+
+      // Рекомендуемая толщина по объёму
+      const vol = (L * W * H) / 1e6; // в литрах (мм→л)
+      let recGlass, glassNote;
+      if (vol < 30)       { recGlass = '4 мм'; glassNote = 'Нано-аквариум, достаточно 4 мм.'; }
+      else if (vol < 80)  { recGlass = '5–6 мм'; glassNote = 'Аквариум до 80 л — 5–6 мм.'; }
+      else if (vol < 200) { recGlass = '6–8 мм'; glassNote = 'Аквариум до 200 л — 6–8 мм.'; }
+      else if (vol < 400) { recGlass = '8–10 мм'; glassNote = 'Аквариум до 400 л — 8–10 мм.'; }
+      else                { recGlass = '10–15 мм'; glassNote = 'Большой аквариум — обязательно закалённое стекло от 10 мм.'; }
+
+      if (S < parseFloat(recGlass)) {
+        glassNote = '⚠️ Выбранная толщина ' + S + ' мм может быть недостаточной для этого объёма! ' + glassNote;
+      }
+
+      document.getElementById('rg-rec').textContent = recGlass;
+      document.getElementById('rg-note').textContent = glassNote + ' Итого стёкол: 5 шт (2 передних/задних + 2 боковых + 1 дно).';
+      document.getElementById('res-glass').classList.add('show');
+    }
   </script>
 
 </body>
