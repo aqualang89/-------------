@@ -3,44 +3,7 @@ import {
   getHistory,
   getMode
 } from '../lib/store.js';
-
-async function sendTelegram(text) {
-  if (!process.env.OWNER_CHAT_ID || !process.env.TELEGRAM_BOT_TOKEN) return;
-
-  await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: process.env.OWNER_CHAT_ID,
-      text
-    })
-  });
-}
-
-async function notifyOwnerAboutClient(sessionId, text) {
-  const ownerText =
-    `🌐 Сообщение с сайта\n` +
-    `SESSION_ID: ${sessionId}\n\n` +
-    `Клиент: ${text}\n\n` +
-    `/take ${sessionId}\n` +
-    `/reply ${sessionId} ваш ответ\n` +
-    `/ai ${sessionId}`;
-
-  await sendTelegram(ownerText);
-}
-
-async function notifyOwnerAboutAiReply(sessionId, userText, reply) {
-  const ownerText =
-    `🤖 ИИ ответил на сайте\n` +
-    `SESSION_ID: ${sessionId}\n\n` +
-    `Клиент: ${userText}\n\n` +
-    `Ответ ИИ:\n${reply}\n\n` +
-    `/take ${sessionId}\n` +
-    `/reply ${sessionId} ваш ответ\n` +
-    `/ai ${sessionId}`;
-
-  await sendTelegram(ownerText);
-}
+import { sendOwnerCard } from '../lib/telegram.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -58,11 +21,11 @@ export default async function handler(req, res) {
 
     const previousHistory = await getHistory(sessionId);
     await addHistory(sessionId, 'user', cleanText);
-    await notifyOwnerAboutClient(sessionId, cleanText);
 
     const mode = await getMode(sessionId);
 
     if (mode === 'manual') {
+      await sendOwnerCard({ sessionId, userText: cleanText, aiReply: null, mode: 'manual' });
       return res.status(200).json({
         reply: 'Сообщение передано владельцу. Он ответит здесь.',
         mode: 'manual'
@@ -82,7 +45,7 @@ export default async function handler(req, res) {
             role: 'system',
             content: `Ты — консультант студии аквариумного дизайна Scaper's House.
 Отвечай только по-русски.
-Пиши кратко, профессионально и по делу.
+Пиши кратко, профессионально и по делу. Без Markdown — никаких звёздочек, решёток, тире-списков. Только обычный текст.
 Помогай по темам: запуск аквариума, травники, фильтрация, свет, CO2, грунты, растения, обслуживание.
 Если данных мало, сначала задай 1–3 уточняющих вопроса.
 Если клиент хочет заказать услугу, мягко попроси объем, размеры, фото места установки и бюджет.
@@ -107,7 +70,7 @@ export default async function handler(req, res) {
     const reply = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
 
     await addHistory(sessionId, 'assistant', reply);
-    await notifyOwnerAboutAiReply(sessionId, cleanText, reply);
+    await sendOwnerCard({ sessionId, userText: cleanText, aiReply: reply, mode: 'ai' });
 
     return res.status(200).json({ reply, mode: 'ai' });
   } catch (error) {
