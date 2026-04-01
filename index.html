@@ -33,9 +33,22 @@
         <a href="#каталог" class="nav-link">Каталог</a>
         <a href="calculator.html" class="nav-link">Калькулятор</a>
         <a href="#контакты" class="nav-link">Контакты</a>
+        <a href="#" class="nav-link nav-quiz-link" id="nav-quiz-btn">🐠 Викторина</a>
       </div>
+      <button class="nav-burger" id="nav-burger" aria-label="Меню">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </nav>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#услуги" class="mobile-nav-link">Услуги</a>
+    <a href="#каталог" class="mobile-nav-link">Каталог</a>
+    <a href="calculator.html" class="mobile-nav-link">Калькулятор</a>
+    <a href="#контакты" class="mobile-nav-link">Контакты</a>
+    <a href="#" class="mobile-nav-link mobile-quiz-link" id="mobile-quiz-btn">🐠 Викторина</a>
+  </div>
 
   <!-- Основной контент -->
   <div class="page-wrap">
@@ -189,5 +202,50 @@
 
   <script src="public/js/chat.js"></script>
   <script src="public/js/quiz.js"></script>
+  <script>
+    // Бургер-меню
+    const burger = document.getElementById('nav-burger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    burger.addEventListener('click', () => {
+      const open = mobileMenu.classList.toggle('open');
+      burger.classList.toggle('open', open);
+    });
+
+    // Закрыть меню при клике на пункт
+    mobileMenu.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        burger.classList.remove('open');
+      });
+    });
+
+    // Викторина из навбара (десктоп)
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nav-quiz-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        restartQuiz();
+        toggleQuiz(true);
+      });
+      // Викторина из мобильного меню
+      document.getElementById('mobile-quiz-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        mobileMenu.classList.remove('open');
+        burger.classList.remove('open');
+        restartQuiz();
+        toggleQuiz(true);
+      });
+    });
+
+    // Плавный скролл для мобильного меню
+    mobileMenu.querySelectorAll('.mobile-nav-link[href^="#"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = link.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
 </body>
 </html>
