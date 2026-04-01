@@ -241,10 +241,11 @@
         <button class="calc-tab active" data-tab="volume">💧 Объём</button>
         <button class="calc-tab" data-tab="substrate">🪨 Грунт</button>
         <button class="calc-tab" data-tab="heater">🌡️ Нагреватель</button>
-        <button class="calc-tab" data-tab="glass">🔲 Стёкла</button>
+        <button class="calc-tab" data-tab="glass">🔲 Размеры стёкол</button>
+        <button class="calc-tab" data-tab="glassthick">📐 Толщина стёкол</button>
+        <button class="calc-tab" data-tab="kh">🧪 Повышение KH</button>
         <button class="calc-tab" data-tab="filter">⚙️ Фильтр</button>
         <button class="calc-tab" data-tab="light">💡 Освещение</button>
-        <button class="calc-tab" data-tab="fish">🐟 Рыбки</button>
       </div>
 
       <!-- ОБЪЁМ -->
@@ -264,15 +265,25 @@
             <input type="number" id="v-height" placeholder="50" min="1">
           </div>
         </div>
-        <div class="field" style="margin-bottom:20px">
-          <label>Толщина стекла (мм) — необязательно</label>
-          <input type="number" id="v-glass" placeholder="6" min="0" max="30">
+        <div class="form-grid">
+          <div class="field">
+            <label>Толщина стекла (мм) — необязательно</label>
+            <input type="number" id="v-glass" placeholder="6" min="0" max="30">
+          </div>
+          <div class="field">
+            <label>Недолив воды (см) — необязательно</label>
+            <input type="number" id="v-underfill" placeholder="5" min="0" max="30">
+          </div>
         </div>
         <button class="calc-btn" onclick="calcVolume()">Рассчитать</button>
         <div class="calc-result" id="res-volume">
           <div class="result-row">
-            <span class="label">Полный объём</span>
+            <span class="label">Объём по внешним габаритам</span>
             <span class="value highlight" id="rv-full">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Реальный объём воды</span>
+            <span class="value" id="rv-water">—</span>
           </div>
           <div class="result-row">
             <span class="label">Рабочий объём (−10% на грунт и декор)</span>
@@ -376,7 +387,7 @@
         </div>
       </div>
 
-      <!-- СТЁКЛА -->
+      <!-- РАЗМЕРЫ СТЁКОЛ -->
       <div class="calc-panel" id="tab-glass">
         <h2><span class="icon">🔲</span> Размеры стёкол</h2>
         <div class="form-grid">
@@ -428,6 +439,85 @@
             <span class="value" id="rg-rec">—</span>
           </div>
           <div class="result-note" id="rg-note"></div>
+        </div>
+      </div>
+
+      <!-- ТОЛЩИНА СТЁКОЛ -->
+      <div class="calc-panel" id="tab-glassthick">
+        <h2><span class="icon">📐</span> Толщина стёкол</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label>Длина аквариума (см)</label>
+            <input type="number" id="gt-length" placeholder="120" min="1">
+          </div>
+          <div class="field">
+            <label>Высота аквариума (см)</label>
+            <input type="number" id="gt-height" placeholder="50" min="1">
+          </div>
+          <div class="field">
+            <label>Материал</label>
+            <select id="gt-material">
+              <option value="glass">Силикатное стекло</option>
+              <option value="acrylic">Акрил</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Конструкция</label>
+            <select id="gt-brace">
+              <option value="yes">Со стяжками / отбортовкой</option>
+              <option value="no">Без стяжек (открытый верх)</option>
+            </select>
+          </div>
+        </div>
+        <button class="calc-btn" onclick="calcGlassThick()">Рассчитать</button>
+        <div class="calc-result" id="res-glassthick">
+          <div class="result-row">
+            <span class="label">Рекомендуемая толщина</span>
+            <span class="value highlight" id="rgt-thick">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Минимально допустимая</span>
+            <span class="value" id="rgt-min">—</span>
+          </div>
+          <div class="result-note" id="rgt-note"></div>
+        </div>
+      </div>
+
+      <!-- ПОВЫШЕНИЕ KH -->
+      <div class="calc-panel" id="tab-kh">
+        <h2><span class="icon">🧪</span> Повышение KH</h2>
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label>Текущий KH (°dKH)</label>
+            <input type="number" id="kh-current" placeholder="3" min="0" max="30" step="0.1">
+          </div>
+          <div class="field">
+            <label>Нужный KH (°dKH)</label>
+            <input type="number" id="kh-target" placeholder="6" min="0" max="30" step="0.1">
+          </div>
+          <div class="field">
+            <label>Объём воды (л)</label>
+            <input type="number" id="kh-volume" placeholder="200" min="1">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:20px">
+          <label>Реагент</label>
+          <select id="kh-reagent">
+            <option value="baking">Пищевая сода NaHCO₃</option>
+            <option value="washing">Стиральная сода Na₂CO₃</option>
+          </select>
+        </div>
+        <button class="calc-btn" onclick="calcKH()">Рассчитать</button>
+        <div class="calc-result" id="res-kh">
+          <div class="result-row">
+            <span class="label">Необходимо добавить</span>
+            <span class="value highlight" id="rkh-amount">—</span>
+          </div>
+          <div class="result-row">
+            <span class="label">Разница KH</span>
+            <span class="value" id="rkh-diff">—</span>
+          </div>
+          <div class="result-note" id="rkh-note"></div>
         </div>
       </div>
 
@@ -539,31 +629,6 @@
         </div>
       </div>
 
-      <!-- РЫБКИ -->
-      <div class="calc-panel" id="tab-fish">
-        <h2><span class="icon">🐟</span> Совместимость рыб</h2>
-        <p class="tip">Введите объём аквариума и выберите рыбок которых хотите содержать</p>
-        <div class="form-grid cols-1" style="margin-bottom:16px">
-          <div class="field">
-            <label>Объём аквариума (л)</label>
-            <input type="number" id="fish-volume" placeholder="200" min="1">
-          </div>
-        </div>
-        <p class="tip">Выберите рыбок и укажите количество:</p>
-        <div class="fish-list" id="fishList"></div>
-        <button class="calc-btn" onclick="calcFish()">Проверить совместимость</button>
-        <div class="calc-result" id="res-fish">
-          <div class="result-row">
-            <span class="label">Занято объёма</span>
-            <span class="value highlight" id="rfish-used">—</span>
-          </div>
-          <div class="result-row">
-            <span class="label">Статус заселённости</span>
-            <span class="value" id="rfish-status">—</span>
-          </div>
-          <div class="result-note" id="rfish-notes"></div>
-        </div>
-      </div>
 
     </div>
   </div>
@@ -585,25 +650,30 @@
       const w = parseFloat(document.getElementById('v-width').value);
       const h = parseFloat(document.getElementById('v-height').value);
       const g = parseFloat(document.getElementById('v-glass').value) || 0;
+      const u = parseFloat(document.getElementById('v-underfill').value) || 0;
 
       if (!l || !w || !h) return alert('Введите все три размера');
 
+      // Полный объём по внешним габаритам
+      const full = Math.round((l * w * h) / 1000);
+
+      // Реальный объём воды (с учётом стекла и недолива)
       const innerL = l - g * 2 / 10;
       const innerW = w - g * 2 / 10;
-      const innerH = h - g / 10;
-
-      const full = Math.round((innerL * innerW * innerH) / 1000);
-      const work = Math.round(full * 0.9);
+      const innerH = h - g / 10 - u;
+      const water = Math.round((innerL * innerW * innerH) / 1000);
+      const work = Math.round(water * 0.9);
       const area = Math.round(innerL * innerW);
 
       document.getElementById('rv-full').textContent = full + ' л';
+      document.getElementById('rv-water').textContent = water + ' л';
       document.getElementById('rv-work').textContent = work + ' л';
       document.getElementById('rv-area').textContent = area + ' см²';
 
       let note = '';
-      if (full < 30) note = '⚠️ Очень маленький аквариум — сложно поддерживать стабильные параметры.';
-      else if (full < 100) note = 'Нано-аквариум. Подходит для неприхотливых рыбок, креветок, небольших травников.';
-      else if (full < 300) note = 'Оптимальный размер для большинства видов рыб и травников.';
+      if (water < 30) note = '⚠️ Очень маленький аквариум — сложно поддерживать стабильные параметры.';
+      else if (water < 100) note = 'Нано-аквариум. Подходит для неприхотливых рыбок, креветок, небольших травников.';
+      else if (water < 300) note = 'Оптимальный размер для большинства видов рыб и травников.';
       else note = 'Большой аквариум — отличная стабильность параметров, больше вариантов для дизайна.';
 
       document.getElementById('rv-note').textContent = note;
@@ -684,98 +754,6 @@
       document.getElementById('rl-note').textContent = p.note;
       document.getElementById('res-light').classList.add('show');
     }
-
-    // ===== РЫБКИ =====
-    const fishDB = [
-      { name: 'Гуппи',           size: 4,  minVol: 30,  schooling: true,  minSchool: 6,  aggressive: false, notes: 'Стайные, держать от 6 шт. Самцы и самки 1:2.' },
-      { name: 'Неон',            size: 3,  minVol: 40,  schooling: true,  minSchool: 8,  aggressive: false, notes: 'Стайные, минимум 8 шт. Не переносят нитраты.' },
-      { name: 'Тернеция',        size: 5,  minVol: 60,  schooling: true,  minSchool: 6,  aggressive: false, notes: 'Активные стайные рыбки, могут щипать плавники.' },
-      { name: 'Данио рерио',     size: 5,  minVol: 50,  schooling: true,  minSchool: 6,  aggressive: false, notes: 'Быстрые и неприхотливые. Стая от 6 шт.' },
-      { name: 'Меченосец',       size: 10, minVol: 80,  schooling: false, minSchool: 1,  aggressive: false, notes: 'Самцы дерутся — лучше 1 самец на 2–3 самки.' },
-      { name: 'Скалярия',        size: 15, minVol: 150, schooling: false, minSchool: 2,  aggressive: false, notes: 'Высокое тело — нужна высота аквариума от 45 см.' },
-      { name: 'Золотая рыбка',   size: 20, minVol: 80,  schooling: false, minSchool: 1,  aggressive: false, notes: 'Любит прохладу, сильно загрязняет воду — нужен мощный фильтр.' },
-      { name: 'Сомик коридорас', size: 6,  minVol: 60,  schooling: true,  minSchool: 4,  aggressive: false, notes: 'Донные рыбки, держать стаей от 4 шт. Санитары аквариума.' },
-      { name: 'Анциструс',       size: 15, minVol: 100, schooling: false, minSchool: 1,  aggressive: false, notes: 'Чистит стёкла от водорослей. 1–2 шт на аквариум.' },
-      { name: 'Боция клоун',     size: 12, minVol: 150, schooling: true,  minSchool: 4,  aggressive: false, notes: 'Стайные, активны ночью. Поедают улиток.' },
-      { name: 'Петушок (бетта)', size: 7,  minVol: 30,  schooling: false, minSchool: 1,  aggressive: true,  notes: 'Самцы несовместимы друг с другом! Одиночное содержание.' },
-      { name: 'Цихлида попугай', size: 15, minVol: 200, schooling: false, minSchool: 2,  aggressive: true,  notes: 'Территориальные, перекапывают грунт и вырывают растения.' },
-      { name: 'Дискус',          size: 20, minVol: 250, schooling: true,  minSchool: 4,  aggressive: false, notes: 'Требовательны к температуре (28–30°C) и качеству воды.' },
-      { name: 'Моллинезия',      size: 8,  minVol: 60,  schooling: false, minSchool: 3,  aggressive: false, notes: 'Лучше держать трио (1 самец + 2 самки).' },
-      { name: 'Тетра-фонарик',   size: 4,  minVol: 40,  schooling: true,  minSchool: 6,  aggressive: false, notes: 'Светятся в темноте. Стайные, минимум 6 шт.' },
-    ];
-
-    function buildFishList() {
-      const list = document.getElementById('fishList');
-      fishDB.forEach((fish, i) => {
-        const div = document.createElement('div');
-        div.className = 'fish-item';
-        div.innerHTML =
-          '<span>' + fish.name + '</span>' +
-          '<input class="fish-qty" type="number" min="0" max="99" value="0" data-idx="' + i + '" onclick="event.stopPropagation()">';
-        div.addEventListener('click', function() {
-          this.classList.toggle('selected');
-          const inp = this.querySelector('.fish-qty');
-          if (this.classList.contains('selected') && parseInt(inp.value) === 0) {
-            inp.value = fish.minSchool;
-          }
-        });
-        list.appendChild(div);
-      });
-    }
-
-    function calcFish() {
-      const vol = parseFloat(document.getElementById('fish-volume').value);
-      if (!vol) return alert('Введите объём аквариума');
-
-      let totalVol = 0;
-      const warnings = [];
-      const selected = [];
-
-      document.querySelectorAll('.fish-item.selected').forEach(item => {
-        const inp = item.querySelector('.fish-qty');
-        const qty = parseInt(inp.value) || 0;
-        const idx = parseInt(inp.dataset.idx);
-        const fish = fishDB[idx];
-        if (qty <= 0) return;
-
-        // Правило 1 см рыбы = 1–2 л (используем 1.5)
-        totalVol += fish.size * qty * 1.5;
-        selected.push({ fish, qty });
-
-        if (fish.schooling && qty < fish.minSchool) {
-          warnings.push('⚠️ ' + fish.name + ': стайная рыбка, нужно минимум ' + fish.minSchool + ' шт.');
-        }
-        if (fish.aggressive) {
-          warnings.push('⚠️ ' + fish.name + ': агрессивный вид, проверьте совместимость с остальными.');
-        }
-        if (vol < fish.minVol) {
-          warnings.push('⚠️ ' + fish.name + ': минимальный объём ' + fish.minVol + ' л.');
-        }
-      });
-
-      if (selected.length === 0) return alert('Выберите хотя бы одну рыбку');
-
-      const percent = Math.round((totalVol / vol) * 100);
-      let status, statusColor;
-
-      if (percent <= 60) { status = 'Отлично — аквариум не перегружен'; statusColor = '#00e5ff'; }
-      else if (percent <= 80) { status = 'Норма — можно добавить ещё рыбок'; statusColor = '#69f0ae'; }
-      else if (percent <= 100) { status = 'Плотно — не рекомендуется добавлять'; statusColor = '#ffeb3b'; }
-      else { status = 'Перегружен! Нужен больший аквариум'; statusColor = '#ff5252'; }
-
-      document.getElementById('rfish-used').textContent = Math.round(totalVol) + ' л / ' + vol + ' л (' + percent + '%)';
-      document.getElementById('rfish-used').style.color = statusColor;
-      document.getElementById('rfish-status').textContent = status;
-      document.getElementById('rfish-status').style.color = statusColor;
-
-      let notesHTML = '';
-      if (warnings.length) notesHTML += warnings.join('\n') + '\n\n';
-      selected.forEach(({ fish }) => { notesHTML += '🐟 ' + fish.name + ': ' + fish.notes + '\n'; });
-      document.getElementById('rfish-notes').textContent = notesHTML;
-      document.getElementById('res-fish').classList.add('show');
-    }
-
-    buildFishList();
 
     // ===== ГРУНТ =====
     function substrateTypeChange() {
@@ -896,6 +874,108 @@
       document.getElementById('rg-rec').textContent = recGlass;
       document.getElementById('rg-note').textContent = glassNote + ' Итого стёкол: 5 шт (2 передних/задних + 2 боковых + 1 дно).';
       document.getElementById('res-glass').classList.add('show');
+    }
+
+    // ===== ТОЛЩИНА СТЁКОЛ =====
+    function calcGlassThick() {
+      const l = parseFloat(document.getElementById('gt-length').value);
+      const h = parseFloat(document.getElementById('gt-height').value);
+      const material = document.getElementById('gt-material').value;
+      const brace = document.getElementById('gt-brace').value;
+      if (!l || !h) return alert('Введите длину и высоту');
+
+      // Таблица: [maxH, maxL, толщина со стяжками, толщина без стяжек] (мм)
+      const table = [
+        [25,  50,  4,  4],
+        [25,  80,  4,  5],
+        [25, 120,  5,  6],
+        [30,  50,  4,  5],
+        [30,  80,  5,  6],
+        [30, 120,  5,  6],
+        [30, 160,  6,  8],
+        [40,  50,  5,  6],
+        [40,  80,  5,  6],
+        [40, 120,  6,  8],
+        [40, 160,  8, 10],
+        [50,  60,  5,  6],
+        [50,  90,  6,  8],
+        [50, 120,  6,  8],
+        [50, 150,  8, 10],
+        [50, 200, 10, 12],
+        [60,  60,  6,  8],
+        [60,  90,  8, 10],
+        [60, 120,  8, 10],
+        [60, 150, 10, 12],
+        [60, 200, 10, 12],
+        [70,  80,  8, 10],
+        [70, 120, 10, 12],
+        [70, 160, 12, 15],
+        [80,  80, 10, 12],
+        [80, 120, 12, 15],
+      ];
+
+      let rec = 0, min = 0;
+      for (const row of table) {
+        if (h <= row[0] && l <= row[1]) {
+          rec = brace === 'yes' ? row[2] : row[3];
+          min = brace === 'yes' ? row[2] : row[3];
+          break;
+        }
+      }
+
+      let note = '';
+      if (rec === 0) {
+        document.getElementById('rgt-thick').textContent = 'Нужна консультация';
+        document.getElementById('rgt-min').textContent = '15+ мм';
+        document.getElementById('rgt-note').textContent = '⚠️ Для аквариума таких размеров необходима индивидуальная консультация специалиста. Возможно потребуется закалённое или многослойное стекло.';
+        document.getElementById('res-glassthick').classList.add('show');
+        return;
+      }
+
+      if (material === 'acrylic') {
+        rec = Math.max(3, Math.ceil(rec * 0.6));
+        min = Math.max(3, rec - 1);
+        note = 'Акрил прочнее стекла при изгибе — толщина меньше. Используйте акрил марки XT (литой), не PS. ';
+      } else {
+        min = Math.max(4, rec - 1);
+        note = 'Рекомендуется закалённое стекло для аквариумов от 100 л. ';
+      }
+
+      if (brace === 'no') note += 'Без стяжек требуется большая толщина — стекло испытывает максимальный изгиб. ';
+      note += 'Данные рассчитаны с запасом прочности. Все размеры — в см.';
+
+      document.getElementById('rgt-thick').textContent = rec + ' мм';
+      document.getElementById('rgt-min').textContent = min + ' мм';
+      document.getElementById('rgt-note').textContent = note;
+      document.getElementById('res-glassthick').classList.add('show');
+    }
+
+    // ===== KH =====
+    function calcKH() {
+      const current = parseFloat(document.getElementById('kh-current').value);
+      const target = parseFloat(document.getElementById('kh-target').value);
+      const vol = parseFloat(document.getElementById('kh-volume').value);
+      const reagent = document.getElementById('kh-reagent').value;
+
+      if (isNaN(current) || isNaN(target) || !vol) return alert('Заполните все поля');
+      if (target <= current) return alert('Нужный KH должен быть больше текущего');
+
+      const diff = target - current;
+      // NaHCO3: коэффициент 3, Na2CO3: коэффициент 1.8841
+      const coeff = reagent === 'baking' ? 3 : 1.8841;
+      const amount = (diff * vol * coeff / 100).toFixed(2);
+
+      const reagentName = reagent === 'baking' ? 'Пищевая сода (NaHCO₃)' : 'Стиральная сода (Na₂CO₃)';
+      document.getElementById('rkh-amount').textContent = amount + ' г';
+      document.getElementById('rkh-diff').textContent = '+' + diff.toFixed(1) + ' °dKH → ' + target + ' °dKH';
+
+      let note = 'Добавляйте ' + reagentName + ' постепенно — растворите в небольшом количестве воды из аквариума и медленно вливайте. ';
+      if (diff > 3) note += '⚠️ Большое изменение KH — лучше разбить на 2–3 подмены, чтобы не шокировать рыб. ';
+      if (reagent === 'washing') note += 'Стиральная сода поднимает KH быстрее, но также сильнее повышает pH — будьте осторожны.';
+      else note += 'Пищевая сода — мягкое и предсказуемое средство, хорошо подходит для травников.';
+
+      document.getElementById('rkh-note').textContent = note;
+      document.getElementById('res-kh').classList.add('show');
     }
   </script>
 

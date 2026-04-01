@@ -252,6 +252,16 @@ input[type="range"] {
   .cards {
     flex-direction: column;
   }
+
+  .nav-logo-text {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links {
+    gap: 10px;
+    font-size: 12px;
+  }
 }
 
 /* QUIZ WIDGET */
@@ -429,14 +439,16 @@ input[type="range"] {
 
 @media (max-width: 768px) {
   #quiz-box {
+    left: 8px;
     right: 8px;
-    bottom: 120px;
+    bottom: 70px;
     width: calc(100vw - 16px);
   }
 
   #quiz-toggle {
-    right: 8px;
-    bottom: 72px;
+    left: 16px;
+    right: auto;
+    bottom: 24px;
   }
 }
 
