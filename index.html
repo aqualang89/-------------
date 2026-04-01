@@ -161,8 +161,12 @@
       const logo = document.querySelector('.intro-logo');
       const introBtn = document.querySelector('.intro-text');
 
+      // Блокируем скролл body пока интро активно
+      document.body.style.overflow = 'hidden';
+
       function closeIntro(scrollTo) {
         overlay.classList.add('hidden');
+        document.body.style.overflow = '';
         setTimeout(() => {
           overlay.remove();
           if (scrollTo) {

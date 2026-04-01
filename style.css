@@ -357,6 +357,10 @@ input[type="range"] {
 
 /* QUIZ WIDGET */
 #quiz-toggle {
+  display: none !important;
+}
+
+#quiz-toggle-hidden {
   position: fixed;
   right: 24px;
   bottom: 72px;
@@ -658,6 +662,8 @@ input[type="range"] {
   z-index: 2000;
   transition: opacity 0.6s ease, transform 0.6s ease;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 #intro-overlay::before {
