@@ -216,11 +216,48 @@
       .fish-list { grid-template-columns: 1fr; }
       .calc-panel { padding: 20px 16px; }
     }
+
+    /* Мобильная шапка калькулятора */
+    .calc-nav-home {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .calc-nav .nav-inner {
+        flex-direction: column;
+        justify-content: center;
+        height: auto;
+        padding: 10px 20px;
+        gap: 6px;
+      }
+
+      .calc-nav .nav-logo-text {
+        text-align: center;
+        font-size: 12px;
+      }
+
+      .calc-nav-home {
+        display: block;
+        color: #e0c27a;
+        font-weight: 600;
+        font-size: 13px;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .calc-nav .nav-links {
+        display: none;
+      }
+
+      .page-wrap {
+        padding-top: 80px;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <nav class="top-nav">
+  <nav class="top-nav calc-nav">
     <div class="nav-inner">
       <a href="index.html" class="nav-logo-text" style="text-decoration:none;color:#e0e0e0">Студия аквариумного дизайна</a>
       <div class="nav-links">
@@ -230,6 +267,7 @@
         <a href="calculator.html" class="nav-link" style="color:#00bcd4">Калькулятор</a>
         <a href="index.html#контакты" class="nav-link">Контакты</a>
       </div>
+      <a href="index.html" class="calc-nav-home">← На главную</a>
     </div>
   </nav>
 
