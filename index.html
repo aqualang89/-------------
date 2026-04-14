@@ -11,6 +11,7 @@
 
   <!-- ЗАСТАВКА-ИНТРО -->
   <div id="intro-overlay">
+    <canvas id="water-canvas"></canvas>
     <div class="intro-center">
       <img src="img/logo-shrimp.png" alt="Студия аквариумного дизайна" class="intro-logo">
       <div class="bubbles">
@@ -186,21 +187,83 @@
         if (e.target === overlay) closeIntro();
       });
 
-      // движение "воды" от мыши
-      let lastX = 50;
-      let lastY = 30;
-
+      // движение "воды" от мыши (градиент)
+      let lastX = 50, lastY = 30;
       overlay.addEventListener('pointermove', (e) => {
         const rect = overlay.getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 100;
         const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-        lastX = lastX + (x - lastX) * 0.15;  // было 0.08
-        lastY = lastY + (y - lastY) * 0.15;
-
+        lastX += (x - lastX) * 0.15;
+        lastY += (y - lastY) * 0.15;
         overlay.style.setProperty('--mx', `${lastX}%`);
         overlay.style.setProperty('--my', `${lastY}%`);
       });
+
+      // Canvas волны от курсора
+      const canvas = document.getElementById('water-canvas');
+      const ctx = canvas.getContext('2d');
+      let drops = [];
+      let raf;
+
+      function resize() {
+        canvas.width = overlay.offsetWidth;
+        canvas.height = overlay.offsetHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      let lastDrop = 0;
+      overlay.addEventListener('pointermove', (e) => {
+        const now = Date.now();
+        if (now - lastDrop < 80) return;
+        lastDrop = now;
+        drops.push({
+          x: e.clientX,
+          y: e.clientY,
+          r: 0,
+          maxR: 80 + Math.random() * 60,
+          alpha: 0.5,
+          width: 1.5
+        });
+        if (drops.length > 25) drops.shift();
+      });
+
+      overlay.addEventListener('click', (e) => {
+        if (e.target !== overlay) return;
+        for (let i = 0; i < 3; i++) {
+          drops.push({
+            x: e.clientX,
+            y: e.clientY,
+            r: i * 12,
+            maxR: 120 + i * 30,
+            alpha: 0.6,
+            width: 2
+          });
+        }
+      });
+
+      function drawWaves() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = drops.length - 1; i >= 0; i--) {
+          const d = drops[i];
+          d.r += 1.5;
+          d.alpha *= 0.985;
+          if (d.r > d.maxR || d.alpha < 0.01) { drops.splice(i, 1); continue; }
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(16, 162, 122, ${d.alpha})`;
+          ctx.lineWidth = d.width * (1 - d.r / d.maxR);
+          ctx.stroke();
+        }
+        raf = requestAnimationFrame(drawWaves);
+      }
+      drawWaves();
+
+      const origClose = closeIntro;
+      closeIntro = function(scrollTo) {
+        cancelAnimationFrame(raf);
+        origClose(scrollTo);
+      };
     });
   </script>
 
