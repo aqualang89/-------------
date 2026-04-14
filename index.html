@@ -285,13 +285,13 @@
       let targetScale = 0;
       let turbSeed = 0;
 
-      overlay.addEventListener('pointermove', () => { targetScale = 28; });
+      overlay.addEventListener('pointermove', () => { targetScale = 50; });
       overlay.addEventListener('pointerleave', () => { targetScale = 0; });
 
       function animateRipple() {
-        rippleScale += (targetScale - rippleScale) * 0.08;
-        targetScale *= 0.97; // затухает если мышь не двигается
-        turbSeed += 0.3;
+        rippleScale += (targetScale - rippleScale) * 0.1;
+        targetScale *= 0.96;
+        turbSeed += 0.5;
         turbNode.setAttribute('seed', turbSeed);
         dispNode.setAttribute('scale', rippleScale.toFixed(1));
         requestAnimationFrame(animateRipple);
