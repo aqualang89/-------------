@@ -679,6 +679,7 @@ input[type="range"] {
   content: "";
   position: absolute;
   inset: -25%;
+  filter: url(#water-ripple);
   background:
     radial-gradient(circle at var(--mx) var(--my), #10a27a 0, transparent 40%),
     radial-gradient(circle at 15% 10%, rgba(255,255,255,0.10) 0, transparent 55%),
