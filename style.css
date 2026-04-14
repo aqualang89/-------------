@@ -679,7 +679,6 @@ input[type="range"] {
   content: "";
   position: absolute;
   inset: -25%;
-  filter: url(#water-ripple);
   background:
     radial-gradient(circle at var(--mx) var(--my), rgba(16,162,122,0.35) 0, transparent 25%),
     radial-gradient(circle at 15% 10%, rgba(255,255,255,0.05) 0, transparent 45%),
@@ -693,6 +692,10 @@ input[type="range"] {
   0%   { transform: translate3d(-20px, -16px, 0) scale(1.04); }
   50%  { transform: translate3d(18px, 14px, 0) scale(1.07); }
   100% { transform: translate3d(-14px, 22px, 0) scale(1.05); }
+}
+
+@media (min-width: 769px) {
+  #intro-overlay::before { filter: url(#water-ripple); }
 }
 
 #intro-overlay.hidden {

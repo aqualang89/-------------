@@ -209,94 +209,92 @@
         overlay.style.setProperty('--my', `${lastY}%`);
       });
 
-      // Canvas волны от курсора
+      // Canvas + SVG рябь — только на десктопе
+      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
       const canvas = document.getElementById('water-canvas');
-      const ctx = canvas.getContext('2d');
-      let drops = [];
       let raf;
 
-      function resize() {
-        canvas.width = overlay.offsetWidth;
-        canvas.height = overlay.offsetHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
+      if (!isMobile) {
+        const ctx = canvas.getContext('2d');
+        let drops = [];
 
-      let lastDrop = 0;
-      overlay.addEventListener('pointermove', (e) => {
-        const now = Date.now();
-        if (now - lastDrop < 50) return;
-        lastDrop = now;
-        // 2-3 кольца за раз — гуще рябь
-        const count = 2 + Math.floor(Math.random() * 2);
-        for (let i = 0; i < count; i++) {
-          drops.push({
-            x: e.clientX + (Math.random() - 0.5) * 20,
-            y: e.clientY + (Math.random() - 0.5) * 20,
-            r: i * 5,
-            maxR: 120 + Math.random() * 80,
-            alpha: 0.7 + Math.random() * 0.3,
-            width: 2 + Math.random()
-          });
+        function resize() {
+          canvas.width = overlay.offsetWidth;
+          canvas.height = overlay.offsetHeight;
         }
-        if (drops.length > 60) drops.splice(0, drops.length - 60);
-      });
+        resize();
+        window.addEventListener('resize', resize);
 
-      overlay.addEventListener('click', (e) => {
-        if (e.target !== overlay) return;
-        for (let i = 0; i < 5; i++) {
-          drops.push({
-            x: e.clientX,
-            y: e.clientY,
-            r: i * 15,
-            maxR: 180 + i * 40,
-            alpha: 0.9,
-            width: 3
-          });
+        let lastDrop = 0;
+        overlay.addEventListener('pointermove', (e) => {
+          const now = Date.now();
+          if (now - lastDrop < 50) return;
+          lastDrop = now;
+          const count = 2 + Math.floor(Math.random() * 2);
+          for (let i = 0; i < count; i++) {
+            drops.push({
+              x: e.clientX + (Math.random() - 0.5) * 20,
+              y: e.clientY + (Math.random() - 0.5) * 20,
+              r: i * 5,
+              maxR: 120 + Math.random() * 80,
+              alpha: 0.7 + Math.random() * 0.3,
+              width: 2 + Math.random()
+            });
+          }
+          if (drops.length > 60) drops.splice(0, drops.length - 60);
+        });
+
+        overlay.addEventListener('click', (e) => {
+          if (e.target !== overlay) return;
+          for (let i = 0; i < 5; i++) {
+            drops.push({
+              x: e.clientX, y: e.clientY,
+              r: i * 15, maxR: 180 + i * 40, alpha: 0.9, width: 3
+            });
+          }
+        });
+
+        function drawWaves() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          for (let i = drops.length - 1; i >= 0; i--) {
+            const d = drops[i];
+            d.r += 1.2;
+            d.alpha *= 0.988;
+            if (d.r > d.maxR || d.alpha < 0.01) { drops.splice(i, 1); continue; }
+            const fade = 1 - d.r / d.maxR;
+            ctx.beginPath();
+            ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+            ctx.shadowColor = 'rgba(16, 162, 122, 0.4)';
+            ctx.shadowBlur = 8 * fade;
+            ctx.strokeStyle = `rgba(16, 220, 150, ${d.alpha * fade})`;
+            ctx.lineWidth = d.width * fade + 0.5;
+            ctx.stroke();
+          }
+          ctx.shadowBlur = 0;
+          raf = requestAnimationFrame(drawWaves);
         }
-      });
+        drawWaves();
 
-      function drawWaves() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (let i = drops.length - 1; i >= 0; i--) {
-          const d = drops[i];
-          d.r += 1.2;
-          d.alpha *= 0.988;
-          if (d.r > d.maxR || d.alpha < 0.01) { drops.splice(i, 1); continue; }
-          const fade = 1 - d.r / d.maxR;
-          ctx.beginPath();
-          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-          // свечение
-          ctx.shadowColor = 'rgba(16, 162, 122, 0.4)';
-          ctx.shadowBlur = 8 * fade;
-          ctx.strokeStyle = `rgba(16, 220, 150, ${d.alpha * fade})`;
-          ctx.lineWidth = d.width * fade + 0.5;
-          ctx.stroke();
+        // SVG рябь
+        const turbNode = document.getElementById('water-turb');
+        const dispNode = document.getElementById('water-disp');
+        let rippleScale = 0, targetScale = 0, turbSeed = 0;
+
+        overlay.addEventListener('pointermove', () => { targetScale = 50; });
+        overlay.addEventListener('pointerleave', () => { targetScale = 0; });
+
+        function animateRipple() {
+          rippleScale += (targetScale - rippleScale) * 0.1;
+          targetScale *= 0.96;
+          turbSeed += 0.5;
+          turbNode.setAttribute('seed', turbSeed);
+          dispNode.setAttribute('scale', rippleScale.toFixed(1));
+          requestAnimationFrame(animateRipple);
         }
-        ctx.shadowBlur = 0;
-        raf = requestAnimationFrame(drawWaves);
+        animateRipple();
+      } else {
+        canvas.remove();
       }
-      drawWaves();
-
-      // SVG рябь — искажение фона при движении мыши
-      const turbNode = document.getElementById('water-turb');
-      const dispNode = document.getElementById('water-disp');
-      let rippleScale = 0;
-      let targetScale = 0;
-      let turbSeed = 0;
-
-      overlay.addEventListener('pointermove', () => { targetScale = 50; });
-      overlay.addEventListener('pointerleave', () => { targetScale = 0; });
-
-      function animateRipple() {
-        rippleScale += (targetScale - rippleScale) * 0.1;
-        targetScale *= 0.96;
-        turbSeed += 0.5;
-        turbNode.setAttribute('seed', turbSeed);
-        dispNode.setAttribute('scale', rippleScale.toFixed(1));
-        requestAnimationFrame(animateRipple);
-      }
-      animateRipple();
 
       const origClose = closeIntro;
       closeIntro = function(scrollTo) {
