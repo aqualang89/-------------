@@ -215,29 +215,33 @@
       let lastDrop = 0;
       overlay.addEventListener('pointermove', (e) => {
         const now = Date.now();
-        if (now - lastDrop < 80) return;
+        if (now - lastDrop < 50) return;
         lastDrop = now;
-        drops.push({
-          x: e.clientX,
-          y: e.clientY,
-          r: 0,
-          maxR: 80 + Math.random() * 60,
-          alpha: 0.5,
-          width: 1.5
-        });
-        if (drops.length > 25) drops.shift();
+        // 2-3 кольца за раз — гуще рябь
+        const count = 2 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) {
+          drops.push({
+            x: e.clientX + (Math.random() - 0.5) * 20,
+            y: e.clientY + (Math.random() - 0.5) * 20,
+            r: i * 5,
+            maxR: 120 + Math.random() * 80,
+            alpha: 0.7 + Math.random() * 0.3,
+            width: 2 + Math.random()
+          });
+        }
+        if (drops.length > 60) drops.splice(0, drops.length - 60);
       });
 
       overlay.addEventListener('click', (e) => {
         if (e.target !== overlay) return;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 5; i++) {
           drops.push({
             x: e.clientX,
             y: e.clientY,
-            r: i * 12,
-            maxR: 120 + i * 30,
-            alpha: 0.6,
-            width: 2
+            r: i * 15,
+            maxR: 180 + i * 40,
+            alpha: 0.9,
+            width: 3
           });
         }
       });
@@ -246,15 +250,20 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let i = drops.length - 1; i >= 0; i--) {
           const d = drops[i];
-          d.r += 1.5;
-          d.alpha *= 0.985;
+          d.r += 1.2;
+          d.alpha *= 0.988;
           if (d.r > d.maxR || d.alpha < 0.01) { drops.splice(i, 1); continue; }
+          const fade = 1 - d.r / d.maxR;
           ctx.beginPath();
           ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(16, 162, 122, ${d.alpha})`;
-          ctx.lineWidth = d.width * (1 - d.r / d.maxR);
+          // свечение
+          ctx.shadowColor = 'rgba(16, 162, 122, 0.4)';
+          ctx.shadowBlur = 8 * fade;
+          ctx.strokeStyle = `rgba(16, 220, 150, ${d.alpha * fade})`;
+          ctx.lineWidth = d.width * fade + 0.5;
           ctx.stroke();
         }
+        ctx.shadowBlur = 0;
         raf = requestAnimationFrame(drawWaves);
       }
       drawWaves();
