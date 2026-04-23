@@ -1,4 +1,0 @@
-
-import { viteNodeFetch } from "file:///C:/Users/%D0%A2%D0%B0%D1%82%D1%8C%D1%8F%D0%BD%D0%B0/Projects/--------------main/node_modules/@nuxt/vite-builder/dist/vite-node.mjs"
-export default () => viteNodeFetch.getManifest()
-    
