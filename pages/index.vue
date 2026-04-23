@@ -66,11 +66,23 @@
 onMounted(() => {
   useHead({
     script: [
-      { src: '/js/water.js', defer: true },
-      { src: '/js/chat.js', defer: true },
-      { src: '/js/quiz.js', defer: true }
+      { src: '/js/water.js', defer: true }
     ]
   })
+
+  // Динамическая загрузка чата и викторины после монтирования
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script')
+      s.src = src
+      s.onload = resolve
+      s.onerror = reject
+      document.body.appendChild(s)
+    })
+  }
+
+  loadScript('/js/chat.js').catch(err => console.error('Chat load failed:', err))
+  loadScript('/js/quiz.js').catch(err => console.error('Quiz load failed:', err))
 
   let cachedТовары = null
 
@@ -114,7 +126,7 @@ onMounted(() => {
   const фильтрЦена = document.getElementById('фильтр-цена')
   if (фильтрЦена) {
     фильтрЦена.addEventListener('input', применитьФильтр)
-    загрузитьТовары()
+    загрузитьТовары().catch(err => console.error('Товары не загрузились:', err))
   }
 
   // Логика заставки-интро + PixiJS вода
