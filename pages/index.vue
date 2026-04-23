@@ -70,19 +70,7 @@ onMounted(() => {
     ]
   })
 
-  // Динамическая загрузка чата и викторины после монтирования
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      const s = document.createElement('script')
-      s.src = src
-      s.onload = resolve
-      s.onerror = reject
-      document.body.appendChild(s)
-    })
-  }
-
-  loadScript('/js/chat.js').catch(err => console.error('Chat load failed:', err))
-  loadScript('/js/quiz.js').catch(err => console.error('Quiz load failed:', err))
+  // Чат и викторина загружаются в layouts/default.vue
 
   let cachedТовары = null
 

@@ -33,7 +33,8 @@
 <script setup>
 useHead({
   script: [
-    { src: '/js/fish.js', defer: true }
+    { src: '/js/chat.js', tagPosition: 'bodyClose' },
+    { src: '/js/quiz.js', tagPosition: 'bodyClose' }
   ]
 })
 onMounted(() => {
