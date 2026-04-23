@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
+  compatibilityVersion: 4,
   ssr: true,
   css: ['~/assets/css/main.css'],
   app: {
