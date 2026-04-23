@@ -6,19 +6,19 @@
 }
 
 :root {
-  --dark-green: #044333;
+  --dark-green: #013220;
   --light-green: #0b5c47;
   --accent: #e0c27a;
-  --text-main: #ffffff;
+  --text-main: #F0EDE5;
   --text-dark: #222222;
   --card-bg: #f9faf9;
 }
 
 /* ТЕЛО СТРАНИЦЫ */
 body {
-  font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  background: #044333;
-  color: #fff;
+  font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background: #013220;
+  color: var(--text-main);
   line-height: 1.5;
 }
 
@@ -29,7 +29,7 @@ body {
   left: 0;
   right: 0;
   height: 56px;
-  background: rgba(4, 67, 51, 0.96);
+  background: rgba(1, 50, 32, 0.96);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   z-index: 1000;
@@ -113,7 +113,7 @@ body {
   top: 56px;
   left: 0;
   right: 0;
-  background: rgba(4, 67, 51, 0.98);
+  background: rgba(1, 50, 32, 0.98);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   flex-direction: column;
@@ -171,7 +171,7 @@ body {
 .hero {
   text-align: center;
   padding: 80px 20px 60px;
-  background: radial-gradient(circle at top, #06604a 0, #044333 40%, #021f18 100%);
+  background: radial-gradient(circle at top, #024a35 0, #013220 40%, #011a10 100%);
   position: relative;
   color: #fff;
   overflow: hidden;
@@ -205,6 +205,7 @@ body {
 }
 
 .hero-title {
+  font-family: "Noto Serif", Georgia, serif;
   font-size: 30px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -241,6 +242,7 @@ body {
 }
 
 .block h2 {
+  font-family: "Noto Serif", Georgia, serif;
   font-size: 24px;
   margin-bottom: 20px;
   text-transform: uppercase;
@@ -653,9 +655,7 @@ input[type="range"] {
 #intro-overlay {
   position: fixed;
   inset: 0;
-  --mx: 50%;
-  --my: 30%;
-  background: #011710; /* базовый тёмный фон */
+  background: #013220;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -666,37 +666,20 @@ input[type="range"] {
   touch-action: none;
 }
 
-#water-canvas {
+#water-container {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
-  pointer-events: none;
+  z-index: 0;
 }
 
-#intro-overlay::before {
-  content: "";
-  position: absolute;
-  inset: -25%;
-  background:
-    radial-gradient(circle at var(--mx) var(--my), rgba(16,162,122,0.35) 0, transparent 25%),
-    radial-gradient(circle at 15% 10%, rgba(255,255,255,0.05) 0, transparent 45%),
-    radial-gradient(circle at 85% 90%, rgba(0,0,0,0.5) 0, #011710 70%);
-  mix-blend-mode: screen;
-  opacity: 0.8;
-  animation: waterDrift 10s ease-in-out infinite alternate;
+#water-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-@keyframes waterDrift {
-  0%   { transform: translate3d(-20px, -16px, 0) scale(1.04); }
-  50%  { transform: translate3d(18px, 14px, 0) scale(1.07); }
-  100% { transform: translate3d(-14px, 22px, 0) scale(1.05); }
-}
-
-@media (min-width: 769px) {
-  #intro-overlay::before { filter: url(#water-ripple); }
-}
 
 #intro-overlay.hidden {
   opacity: 0;
@@ -704,15 +687,14 @@ input[type="range"] {
   pointer-events: none;
 }
 
-/* Центр интро + лёгкое "дыхание" */
-#intro-overlay .intro-center {
+/* Центр интро — лого + кнопка, над водой */
+.intro-center {
   position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  z-index: 1;
-  animation: introFloat 3s ease-in-out infinite;
 }
 
 .intro-logo {
@@ -721,67 +703,37 @@ input[type="range"] {
   border-radius: 24px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.7);
   cursor: pointer;
+  margin-bottom: 28px;
 }
 
-.intro-text {
-  margin-top: 24px;
+/* Кнопка "ВОЙТИ НА САЙТ" — над водой */
+.intro-enter {
+  font-family: "Manrope", sans-serif;
   font-size: 14px;
+  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.8);
+  color: rgba(240, 237, 229, 0.8);
   background: none;
-  border: none;
+  border: 1px solid rgba(240, 237, 229, 0.2);
+  border-radius: 999px;
+  padding: 12px 32px;
   cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, backdrop-filter 0.2s;
+  backdrop-filter: blur(4px);
 }
 
-.intro-text:hover {
-  color: #ffffff;
+.intro-enter:hover {
+  color: #F0EDE5;
+  border-color: rgba(240, 237, 229, 0.5);
 }
 
-@keyframes introFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-/* ПУЗЫРЬКИ ВОКРУГ ЛОГОТИПА — только в интро */
-#intro-overlay .bubbles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: visible;
-}
-
-#intro-overlay .bubble {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.35);
-  box-shadow: 0 0 8px rgba(255,255,255,0.5);
-  opacity: 0;
-  animation: bubbleRise 6s ease-in-out infinite;
-}
-
-/* Позиции отдельных пузырьков */
-#intro-overlay .bubble.b1 { left: 10%; bottom: 10%; animation-delay: 0s; }
-#intro-overlay .bubble.b2 { left: 25%; bottom: 0%;  animation-delay: 1.2s; }
-#intro-overlay .bubble.b3 { left: 50%; bottom: -6%; animation-delay: 2.4s; }
-#intro-overlay .bubble.b4 { left: 75%; bottom: -2%; animation-delay: 3.6s; }
-#intro-overlay .bubble.b5 { left: 90%; bottom: 8%;  animation-delay: 4.8s; }
-
-@keyframes bubbleRise {
-  0% {
-    transform: translate3d(0, 0, 0) scale(0.4);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  60% {
-    opacity: 0.9;
-  }
-  100% {
-    transform: translate3d(0, -120px, 0) scale(1);
-    opacity: 0;
-  }
+/* Мобилка — лого вместо PixiJS */
+.intro-logo-mobile {
+  width: 220px;
+  max-width: 55vw;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  cursor: pointer;
+  z-index: 1;
 }

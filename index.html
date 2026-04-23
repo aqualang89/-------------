@@ -4,36 +4,19 @@
   <meta charset="UTF-8">
   <title>Студия аквариумного дизайна</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- SVG фильтр водной ряби -->
-  <svg style="position:absolute;width:0;height:0">
-    <defs>
-      <filter id="water-ripple">
-        <feTurbulence id="water-turb" type="fractalNoise" baseFrequency="0.015 0.015" numOctaves="3" seed="2" result="noise"/>
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" id="water-disp"/>
-      </filter>
-    </defs>
-  </svg>
-
   <!-- ЗАСТАВКА-ИНТРО -->
   <div id="intro-overlay">
-    <canvas id="water-canvas"></canvas>
+    <div id="water-container"></div>
     <div class="intro-center">
       <img src="img/logo-shrimp.png" alt="Студия аквариумного дизайна" class="intro-logo">
-      <div class="bubbles">
-        <span class="bubble b1"></span>
-        <span class="bubble b2"></span>
-        <span class="bubble b3"></span>
-        <span class="bubble b4"></span>
-        <span class="bubble b5"></span>
-      </div>
-      <button class="intro-text" type="button">ВОЙТИ НА САЙТ</button>
+      <button class="intro-enter" type="button">ВОЙТИ НА САЙТ</button>
     </div>
-  </div> <!-- ВАЖНО: здесь закрываем интро -->
+  </div>
 
   <!-- Верхнее меню -->
   <nav class="top-nav">
@@ -166,18 +149,17 @@
       });
     });
 
-    // Логика заставки-интро + "водяной" фон
+    // Логика заставки-интро + PixiJS вода
     document.addEventListener('DOMContentLoaded', () => {
       const overlay = document.getElementById('intro-overlay');
-      const logo = document.querySelector('.intro-logo');
-      const introBtn = document.querySelector('.intro-text');
+      const enterBtn = document.querySelector('.intro-enter');
 
-      // Блокируем скролл body пока интро активно
       document.body.style.overflow = 'hidden';
 
       function closeIntro(scrollTo) {
         overlay.classList.add('hidden');
         document.body.style.overflow = '';
+        if (window.waterCleanup) window.waterCleanup();
         setTimeout(() => {
           overlay.remove();
           if (scrollTo) {
@@ -187,120 +169,22 @@
         }, 700);
       }
 
-      // Если пришли с якорем — пропускаем интро автоматически
       const hash = window.location.hash.slice(1);
       if (hash) closeIntro(hash);
 
-      logo.addEventListener('click', () => closeIntro());
-      introBtn.addEventListener('click', () => closeIntro());
+      enterBtn.addEventListener('click', () => closeIntro());
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) closeIntro();
+        if (e.target === overlay || e.target.closest('#water-container')) closeIntro();
       });
 
-      // движение "воды" от мыши (градиент)
-      let lastX = 50, lastY = 30;
-      overlay.addEventListener('pointermove', (e) => {
-        const rect = overlay.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        lastX += (x - lastX) * 0.15;
-        lastY += (y - lastY) * 0.15;
-        overlay.style.setProperty('--mx', `${lastX}%`);
-        overlay.style.setProperty('--my', `${lastY}%`);
-      });
+      // лого — клик закрывает интро
+      const introLogo = document.querySelector('.intro-logo');
+      if (introLogo) introLogo.addEventListener('click', () => closeIntro());
 
-      // Canvas + SVG рябь — только на десктопе
-      const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window;
-      const canvas = document.getElementById('water-canvas');
-      let raf;
-
-      if (!isMobile) {
-        const ctx = canvas.getContext('2d');
-        let drops = [];
-
-        function resize() {
-          canvas.width = overlay.offsetWidth;
-          canvas.height = overlay.offsetHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        let lastDrop = 0;
-        overlay.addEventListener('pointermove', (e) => {
-          const now = Date.now();
-          if (now - lastDrop < 50) return;
-          lastDrop = now;
-          const count = 2 + Math.floor(Math.random() * 2);
-          for (let i = 0; i < count; i++) {
-            drops.push({
-              x: e.clientX + (Math.random() - 0.5) * 20,
-              y: e.clientY + (Math.random() - 0.5) * 20,
-              r: i * 5,
-              maxR: 120 + Math.random() * 80,
-              alpha: 0.7 + Math.random() * 0.3,
-              width: 2 + Math.random()
-            });
-          }
-          if (drops.length > 60) drops.splice(0, drops.length - 60);
-        });
-
-        overlay.addEventListener('click', (e) => {
-          if (e.target !== overlay) return;
-          for (let i = 0; i < 5; i++) {
-            drops.push({
-              x: e.clientX, y: e.clientY,
-              r: i * 15, maxR: 180 + i * 40, alpha: 0.9, width: 3
-            });
-          }
-        });
-
-        function drawWaves() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          for (let i = drops.length - 1; i >= 0; i--) {
-            const d = drops[i];
-            d.r += 1.2;
-            d.alpha *= 0.988;
-            if (d.r > d.maxR || d.alpha < 0.01) { drops.splice(i, 1); continue; }
-            const fade = 1 - d.r / d.maxR;
-            ctx.beginPath();
-            ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-            ctx.shadowColor = 'rgba(16, 162, 122, 0.4)';
-            ctx.shadowBlur = 8 * fade;
-            ctx.strokeStyle = `rgba(16, 220, 150, ${d.alpha * fade})`;
-            ctx.lineWidth = d.width * fade + 0.5;
-            ctx.stroke();
-          }
-          ctx.shadowBlur = 0;
-          raf = requestAnimationFrame(drawWaves);
-        }
-        drawWaves();
-
-        // SVG рябь
-        const turbNode = document.getElementById('water-turb');
-        const dispNode = document.getElementById('water-disp');
-        let rippleScale = 0, targetScale = 0, turbSeed = 0;
-
-        overlay.addEventListener('pointermove', () => { targetScale = 50; });
-        overlay.addEventListener('pointerleave', () => { targetScale = 0; });
-
-        function animateRipple() {
-          rippleScale += (targetScale - rippleScale) * 0.1;
-          targetScale *= 0.96;
-          turbSeed += 0.5;
-          turbNode.setAttribute('seed', turbSeed);
-          dispNode.setAttribute('scale', rippleScale.toFixed(1));
-          requestAnimationFrame(animateRipple);
-        }
-        animateRipple();
-      } else {
-        canvas.remove();
-      }
-
-      const origClose = closeIntro;
-      closeIntro = function(scrollTo) {
-        cancelAnimationFrame(raf);
-        origClose(scrollTo);
-      };
+      // Загружаем PixiJS v8 + интерактивную воду из отдельного модуля
+      const waterScript = document.createElement('script');
+      waterScript.src = 'public/js/water.js';
+      document.head.appendChild(waterScript);
     });
   </script>
 
