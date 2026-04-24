@@ -157,8 +157,9 @@ onMounted(async () => {
       })
     }
 
-    // Инициализация jquery.ripples
-    if (typeof $ !== 'undefined' && $.fn.ripples) {
+    // Инициализация jquery.ripples (только на десктопе)
+    const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
+    if (!isMobile && typeof $ !== 'undefined' && $.fn.ripples) {
       try {
         $(overlay).ripples({
           resolution: 512,
