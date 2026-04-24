@@ -73,8 +73,8 @@ onMounted(async () => {
   }
 
   try {
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js')
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js')
+    await loadScript('/js/jquery.min.js')
+    await loadScript('/js/jquery.ripples.min.js')
   } catch (err) {
     console.error('Failed to load ripples scripts:', err)
   }
