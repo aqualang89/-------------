@@ -38,25 +38,20 @@
 3. Перед закрытием сессии → быстрый чек на решения
 **Почему:** Claude постоянно забывал писать в STATE. Двойная проверка исключает забывчивость.
 
-### 2026-04-22 Водный шейдер для интро
-**Проблема:** Шейдеры воды — сложная задача, 3 попытки (Kimi + 2 от Perplexity) не дали результата как на bfd.su
-**Что пробовали:**
-- Кастомный GLSL шейдер на PixiJS v8 — артефакты, пятна
-- Шейдер v2 и v3 от Perplexity — работают, но выглядят как "зелёная рябь", не как bfd.su
-**Новый подход (2026-04-22):** DisplacementFilter + карта смещения `img/water-displace.png`
-- Perplexity: abandon procedural, use DisplacementFilter with seamless displacement map
-**Проблемы фикса:**
-- `PIXI.Assets.load()` — не работает для простых png в v8
-- `PIXI.Texture.from('path')` — возвращает `undefined`, т.к. загрузка асинхронна
-- **Фикс:** загрузка через нативный `new Image()` + `await` → затем `Texture.from(img)`
-**Текущий статус:** ⏸️ ОТЛОЖЕНО
-**Итоги попыток:**
-- Procedural GLSL (3 версии) — абстрактный шум, не вода
-- DisplacementFilter + карта смещения — не работает в PixiJS v8 (тихий фейл, ошибок нет, эффекта нет)
-- `PIXI.Assets.load`, `Texture.from`, нативный `Image()` — текстура загружается, но фильтр не применяется
-- TilingSprite → Sprite, stage filters, scale до 80, alpha debug — ничего не помогло
-**Гипотеза:** PixiJS v8 DisplacementFilter работает иначе, или требует специфической подготовки текстуры, или API фильтров изменился настолько, что нужен другой подход
-**Когда вернёмся:** либо Three.js (MeshPhysicalMaterial + video texture), либо чистый WebGL2 shader, либо найдём рабочий пример PixiJS v8 displacement
+### 2026-04-24 Интро с водой — ГОТОВО (jquery.ripples)
+**Решение:** jquery.ripples вместо PixiJS/Three.js
+**Почему:** 6+ попыток с PixiJS displacement/flow-trail/spawn-ripple — не дали результата. jquery.ripples — готовое WebGL-решение с реальной физикой ripple.
+**Параметры:**
+- resolution: 512
+- dropRadius: 20
+- perturbance: 0.04
+- interactive: true
+**Загрузка:** последовательная через Promise (jQuery → ripples → init), не defer
+**Мобилка:** guard `width <= 768 || 'ontouchstart'` → статичный фон, без ripples
+**Вход на сайт:** клик только в центральной зоне 320×200px (невидимая, cursor: pointer)
+**Фон:** `public/img/aquarium-bottom.jpg`
+**Конфиг локально:** `docs/intro-water-setup.md` (не в git)
+**Референс:** https://sirxemic.github.io/jquery.ripples/
 
 ### 2026-04-23 Миграция на Nuxt 3 завершена
 **Решение:** Полный переезд с vanilla HTML на Nuxt 3 + SSR
