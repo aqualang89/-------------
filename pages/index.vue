@@ -59,13 +59,25 @@
 </template>
 
 <script setup>
-onMounted(() => {
-  useHead({
-    script: [
-      { src: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', defer: true },
-      { src: 'https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js', defer: true }
-    ]
-  })
+onMounted(async () => {
+  // Гарантированная последовательная загрузка jQuery + ripples
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      if (document.querySelector(`script[src="${src}"]`)) { res(); return }
+      const s = document.createElement('script')
+      s.src = src
+      s.onload = res
+      s.onerror = rej
+      document.head.appendChild(s)
+    })
+  }
+
+  try {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js')
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js')
+  } catch (err) {
+    console.error('Failed to load ripples scripts:', err)
+  }
 
   // Чат и викторина загружаются в layouts/default.vue
 
@@ -146,11 +158,7 @@ onMounted(() => {
     }
 
     // Инициализация jquery.ripples
-    const initRipples = () => {
-      if (typeof $ === 'undefined' || !$.fn.ripples) {
-        setTimeout(initRipples, 100)
-        return
-      }
+    if (typeof $ !== 'undefined' && $.fn.ripples) {
       try {
         $(overlay).ripples({
           resolution: 512,
@@ -162,7 +170,6 @@ onMounted(() => {
         console.error('Ripples init failed:', err)
       }
     }
-    initRipples()
   }
 })
 </script>
