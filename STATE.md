@@ -58,4 +58,25 @@
 **Гипотеза:** PixiJS v8 DisplacementFilter работает иначе, или требует специфической подготовки текстуры, или API фильтров изменился настолько, что нужен другой подход
 **Когда вернёмся:** либо Three.js (MeshPhysicalMaterial + video texture), либо чистый WebGL2 shader, либо найдём рабочий пример PixiJS v8 displacement
 
+### 2026-04-23 Миграция на Nuxt 3 завершена
+**Решение:** Полный переезд с vanilla HTML на Nuxt 3 + SSR
+**Что сделано:**
+- Nuxt 3.16.0 + Vercel деплой
+- pages/index.vue (главная), pages/calculator.vue (калькулятор)
+- server/api/ — chat, chat-status, telegram (Nitro)
+- server/utils/ — ai, store, telegram
+- layouts/default.vue — навигация, чат, викторина
+- assets/css/main.css — все стили
+- public/ — картинки, товары.json, скрипты
+- Удалены старые файлы: index.html, calculator.html, style.css, api/, lib/
+**Фиксы:**
+- Nuxt 3.21.2 багован на Vercel → понижение до 3.16.0
+- `compatibilityDate` + `compatibilityVersion` для стабильного билда
+- Старый `index.html` в корне блокировал Nuxt → удалён
+- `.nuxt/` в git → добавлен в `.gitignore`
+- Скрипты chat.js/quiz.js через `useHead` с `tagPosition: 'bodyClose'`
+- Рыбка-маскот убрана по просьбе Макса
+**SEO:** SSR включён, каждая страница теперь серверная (лучше для поисковиков)
+**Следующий шаг:** Каталог из 1С (Excel-импорт в админку)
+
 ## Shipped

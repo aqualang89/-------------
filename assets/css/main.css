@@ -655,7 +655,7 @@ input[type="range"] {
 #intro-overlay {
   position: fixed;
   inset: 0;
-  background: #013220;
+  background: url('/img/aquarium-bottom.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -680,60 +680,23 @@ input[type="range"] {
   height: 100%;
 }
 
-
 #intro-overlay.hidden {
   opacity: 0;
   transform: scale(1.03);
   pointer-events: none;
 }
 
-/* Центр интро — лого + кнопка, над водой */
+/* Центр интро — невидимая кликабельная зона */
 .intro-center {
   position: relative;
   z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.intro-logo {
-  width: 260px;
-  max-width: 60vw;
-  border-radius: 24px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  width: 320px;
+  height: 200px;
   cursor: pointer;
-  margin-bottom: 28px;
-}
-
-/* Кнопка "ВОЙТИ НА САЙТ" — над водой */
-.intro-enter {
-  font-family: "Manrope", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(240, 237, 229, 0.8);
-  background: none;
-  border: 1px solid rgba(240, 237, 229, 0.2);
-  border-radius: 999px;
-  padding: 12px 32px;
-  cursor: pointer;
-  transition: color 0.2s, border-color 0.2s, backdrop-filter 0.2s;
-  backdrop-filter: blur(4px);
-}
-
-.intro-enter:hover {
-  color: #F0EDE5;
-  border-color: rgba(240, 237, 229, 0.5);
-}
-
-/* Мобилка — лого вместо PixiJS */
-.intro-logo-mobile {
-  width: 220px;
-  max-width: 55vw;
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  cursor: pointer;
-  z-index: 1;
+  transition: background 0.2s ease;
+}
+
+.intro-center:hover {
+  background: rgba(255,255,255,0.04);
 }

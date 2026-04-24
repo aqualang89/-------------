@@ -2,11 +2,7 @@
   <div>
     <!-- ЗАСТАВКА-ИНТРО -->
     <div id="intro-overlay">
-      <div id="water-container"></div>
-      <div class="intro-center">
-        <img src="/img/logo-shrimp.png" alt="Студия аквариумного дизайна" class="intro-logo">
-        <button class="intro-enter" type="button">ВОЙТИ НА САЙТ</button>
-      </div>
+      <div class="intro-center" title="Кликните, чтобы войти"></div>
     </div>
 
     <!-- Основной контент -->
@@ -66,7 +62,8 @@
 onMounted(() => {
   useHead({
     script: [
-      { src: '/js/water.js', defer: true }
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js', defer: true },
+      { src: 'https://cdnjs.cloudflare.com/ajax/libs/jquery.ripples/0.5.3/jquery.ripples.min.js', defer: true }
     ]
   })
 
@@ -119,7 +116,6 @@ onMounted(() => {
 
   // Логика заставки-интро + PixiJS вода
   const overlay = document.getElementById('intro-overlay')
-  const enterBtn = document.querySelector('.intro-enter')
 
   if (overlay) {
     document.body.style.overflow = 'hidden'
@@ -127,7 +123,7 @@ onMounted(() => {
     function closeIntro(scrollTo) {
       overlay.classList.add('hidden')
       document.body.style.overflow = ''
-      if (window.waterCleanup) window.waterCleanup()
+      try { $(overlay).ripples('destroy') } catch (e) {}
       setTimeout(() => {
         overlay.remove()
         if (scrollTo) {
@@ -140,16 +136,33 @@ onMounted(() => {
     const hash = window.location.hash.slice(1)
     if (hash) closeIntro(hash)
 
-    if (enterBtn) {
-      enterBtn.addEventListener('click', () => closeIntro())
+    // Клик только на центральную зону (лого или кнопка)
+    const introCenter = document.querySelector('.intro-center')
+    if (introCenter) {
+      introCenter.addEventListener('click', (e) => {
+        e.stopPropagation()
+        closeIntro()
+      })
     }
 
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay || e.target.closest('#water-container')) closeIntro()
-    })
-
-    const introLogo = document.querySelector('.intro-logo')
-    if (introLogo) introLogo.addEventListener('click', () => closeIntro())
+    // Инициализация jquery.ripples
+    const initRipples = () => {
+      if (typeof $ === 'undefined' || !$.fn.ripples) {
+        setTimeout(initRipples, 100)
+        return
+      }
+      try {
+        $(overlay).ripples({
+          resolution: 512,
+          dropRadius: 20,
+          perturbance: 0.04,
+          interactive: true
+        })
+      } catch (err) {
+        console.error('Ripples init failed:', err)
+      }
+    }
+    initRipples()
   }
 })
 </script>

@@ -2,8 +2,35 @@ import { createClient } from 'redis';
 
 let client;
 let connectPromise;
+let memoryClient;
+
+function getMemoryClient() {
+  if (!memoryClient) {
+    const store = new Map();
+    memoryClient = {
+      get: async (k) => store.get(k) || null,
+      set: async (k, v, opts) => { store.set(k, String(v)); },
+      rPush: async (k, v) => {
+        const arr = JSON.parse(store.get(k) || '[]');
+        arr.push(v);
+        store.set(k, JSON.stringify(arr));
+      },
+      lRange: async (k, start, end) => {
+        const arr = JSON.parse(store.get(k) || '[]');
+        return end === -1 ? arr : arr.slice(start, end + 1);
+      },
+      del: async (k) => store.delete(k),
+      expire: async () => {},
+    };
+  }
+  return memoryClient;
+}
 
 async function getRedis() {
+  if (!process.env.REDIS_URL) {
+    return getMemoryClient();
+  }
+
   if (!client) {
     client = createClient({
       url: process.env.REDIS_URL
