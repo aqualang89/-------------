@@ -6,7 +6,7 @@
         <span class="nav-logo-text">Студия аквариумного дизайна</span>
         <div class="nav-links">
           <a href="#услуги" class="nav-link">Услуги</a>
-          <a href="#каталог" class="nav-link">Каталог</a>
+          <a href="/catalog" class="nav-link">Каталог</a>
           <a href="/calculator" class="nav-link">Калькулятор</a>
           <a href="#контакты" class="nav-link">Контакты</a>
           <a href="#" class="nav-link nav-quiz-link" id="nav-quiz-btn">🐠 Викторина</a>
@@ -20,7 +20,7 @@
     <!-- Мобильное меню -->
     <div class="mobile-menu" id="mobile-menu">
       <a href="#услуги" class="mobile-nav-link">Услуги</a>
-      <a href="#каталог" class="mobile-nav-link">Каталог</a>
+      <a href="/catalog" class="mobile-nav-link">Каталог</a>
       <a href="/calculator" class="mobile-nav-link">Калькулятор</a>
       <a href="#контакты" class="mobile-nav-link">Контакты</a>
       <a href="#" class="mobile-nav-link mobile-quiz-link" id="mobile-quiz-btn">🐠 Викторина</a>

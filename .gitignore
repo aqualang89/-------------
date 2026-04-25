@@ -5,3 +5,12 @@ dist
 *.log
 .DS_Store
 .env
+node_modules
+.nuxt
+.output
+dist
+*.log
+.DS_Store
+.env
+STATE.md
+PROJECT_CONTEXT.md
