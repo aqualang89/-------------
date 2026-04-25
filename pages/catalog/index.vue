@@ -13,6 +13,17 @@
           <option value="">Все категории</option>
           <option v-for="c in categories" :key="c.id" :value="c.slug">{{ c.name }}</option>
         </select>
+        <div class="price-filter">
+          <label>Макс. цена: <strong>{{ maxPrice.toLocaleString() }} ₽</strong></label>
+          <input
+            v-model.number="maxPrice"
+            type="range"
+            min="0"
+            max="200000"
+            step="1000"
+            @input="page = 1; fetchProducts()"
+          >
+        </div>
       </div>
     </div>
 
@@ -52,6 +63,7 @@
 <script setup>
 const search = ref('')
 const category = ref('')
+const maxPrice = ref(200000)
 const page = ref(1)
 const products = ref([])
 const categories = ref([])
@@ -75,6 +87,7 @@ async function fetchProducts() {
   const q = new URLSearchParams()
   if (search.value) q.set('search', search.value)
   if (category.value) q.set('category', category.value)
+  if (maxPrice.value < 200000) q.set('maxPrice', maxPrice.value)
   q.set('page', page.value)
 
   const res = await fetch(`/api/products?${q}`)
@@ -126,6 +139,20 @@ function mainPhoto(p) {
   border: 1px solid #333;
   background: #0a1f15;
   color: #F0EDE5;
+}
+.price-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+.price-filter label {
+  font-size: 0.9rem;
+  color: #bbb;
+}
+.price-filter input[type="range"] {
+  width: 100%;
+  cursor: pointer;
 }
 .product-grid {
   display: grid;

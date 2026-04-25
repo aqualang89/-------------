@@ -3,11 +3,13 @@
     <!-- Верхнее меню -->
     <nav class="top-nav">
       <div class="nav-inner">
-        <span class="nav-logo-text">Студия аквариумного дизайна</span>
+        <a href="/" class="nav-logo-text">Студия аквариумного дизайна</a>
         <div class="nav-links">
-          <a href="#услуги" class="nav-link">Услуги</a>
+          <a href="/" class="nav-link">Главная</a>
+          <a href="/services" class="nav-link">Услуги</a>
           <a href="/catalog" class="nav-link">Каталог</a>
           <a href="/calculator" class="nav-link">Калькулятор</a>
+          <a href="/admin" class="nav-link">Админ</a>
           <a href="#контакты" class="nav-link">Контакты</a>
           <a href="#" class="nav-link nav-quiz-link" id="nav-quiz-btn">🐠 Викторина</a>
         </div>
@@ -19,9 +21,11 @@
 
     <!-- Мобильное меню -->
     <div class="mobile-menu" id="mobile-menu">
-      <a href="#услуги" class="mobile-nav-link">Услуги</a>
+      <a href="/" class="mobile-nav-link">Главная</a>
+      <a href="/services" class="mobile-nav-link">Услуги</a>
       <a href="/catalog" class="mobile-nav-link">Каталог</a>
       <a href="/calculator" class="mobile-nav-link">Калькулятор</a>
+      <a href="/admin" class="mobile-nav-link">Админ</a>
       <a href="#контакты" class="mobile-nav-link">Контакты</a>
       <a href="#" class="mobile-nav-link mobile-quiz-link" id="mobile-quiz-btn">🐠 Викторина</a>
     </div>
@@ -56,7 +60,7 @@ onMounted(() => {
       })
     })
 
-    // Плавный скролл для мобильного меню
+    // Плавный скролл для мобильного меню (только якоря)
     mobileMenu.querySelectorAll('.mobile-nav-link[href^="#"]').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault()
@@ -67,7 +71,7 @@ onMounted(() => {
     })
   }
 
-  // Плавный скролл по клику на пункты десктопного меню
+  // Плавный скролл по клику на пункты десктопного меню (только якоря)
   document.querySelectorAll('a.nav-link[href^="#"]').forEach((link) => {
     link.addEventListener('click', function (e) {
       e.preventDefault()
