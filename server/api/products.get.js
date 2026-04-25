@@ -14,8 +14,13 @@ export default defineEventHandler(async (event) => {
     .select('*, categories(name, slug), product_photos(url, is_main)', { count: 'exact' })
     .eq('is_available', true)
 
+  let categoryId = null
   if (categorySlug) {
-    dbQuery = dbQuery.eq('categories.slug', categorySlug)
+    const { data: cat } = await supabase.from('categories').select('id').eq('slug', categorySlug).maybeSingle()
+    if (cat) {
+      categoryId = cat.id
+      dbQuery = dbQuery.eq('category_id', categoryId)
+    }
   }
 
   if (search) {
