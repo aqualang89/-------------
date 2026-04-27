@@ -4,24 +4,22 @@
       <h1>Каталог</h1>
       <div class="catalog-filters">
         <input
-          v-model="search"
+          v-model="searchInput"
           placeholder="Поиск по названию или артикулу..."
           class="search-input"
-          @input="page = 1; fetchProducts()"
         >
-        <select v-model="category" @change="page = 1; fetchProducts()">
+        <select v-model="category" @change="onCategoryChange">
           <option value="">Все категории</option>
           <option v-for="c in categories" :key="c.id" :value="c.slug">{{ c.name }}</option>
         </select>
         <div class="price-filter">
-          <label>Макс. цена: <strong>{{ maxPrice.toLocaleString() }} ₽</strong></label>
+          <label>Макс. цена: <strong>{{ maxPriceInput.toLocaleString() }} ₽</strong></label>
           <input
-            v-model.number="maxPrice"
+            v-model.number="maxPriceInput"
             type="range"
             min="0"
-            max="200000"
+            :max="MAX_PRICE"
             step="1000"
-            @input="page = 1; fetchProducts()"
           >
         </div>
       </div>
@@ -53,48 +51,63 @@
     </div>
 
     <div v-if="totalPages > 1" class="pagination">
-      <button :disabled="page === 1" @click="page--; fetchProducts()">←</button>
+      <button :disabled="page === 1" @click="prevPage">←</button>
       <span>{{ page }} / {{ totalPages }}</span>
-      <button :disabled="page >= totalPages" @click="page++; fetchProducts()">→</button>
+      <button :disabled="page >= totalPages" @click="nextPage">→</button>
     </div>
   </div>
 </template>
 
 <script setup>
-const search = ref('')
+const MAX_PRICE = 200000
+
+const searchInput = ref('')
 const category = ref('')
-const maxPrice = ref(200000)
+const maxPriceInput = ref(MAX_PRICE)
 const page = ref(1)
-const products = ref([])
-const categories = ref([])
-const totalPages = ref(1)
-const pending = ref(false)
+
+const search = ref('')
+const maxPrice = ref(MAX_PRICE)
+
+const { data: categories } = await useFetch('/api/categories')
+
+const { data: productsData, pending } = await useFetch('/api/products', {
+  query: computed(() => {
+    const q = { page: page.value }
+    if (search.value) q.search = search.value
+    if (category.value) q.category = category.value
+    if (maxPrice.value < MAX_PRICE) q.maxPrice = maxPrice.value
+    return q
+  })
+})
+
+const products = computed(() => productsData.value?.products || [])
+const totalPages = computed(() => productsData.value?.totalPages || 1)
 
 useHead({ title: 'Каталог — Студия аквариумного дизайна' })
 
-onMounted(() => {
-  fetchCategories()
-  fetchProducts()
+let searchTimer
+watch(searchInput, (val) => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => { search.value = val; page.value = 1 }, 300)
 })
 
-async function fetchCategories() {
-  const res = await fetch('/api/categories')
-  categories.value = await res.json()
+let priceTimer
+watch(maxPriceInput, (val) => {
+  clearTimeout(priceTimer)
+  priceTimer = setTimeout(() => { maxPrice.value = val; page.value = 1 }, 150)
+})
+
+function onCategoryChange() {
+  page.value = 1
 }
 
-async function fetchProducts() {
-  pending.value = true
-  const q = new URLSearchParams()
-  if (search.value) q.set('search', search.value)
-  if (category.value) q.set('category', category.value)
-  if (maxPrice.value < 200000) q.set('maxPrice', maxPrice.value)
-  q.set('page', page.value)
+function prevPage() {
+  if (page.value > 1) page.value--
+}
 
-  const res = await fetch(`/api/products?${q}`)
-  const data = await res.json()
-  products.value = data.products
-  totalPages.value = data.totalPages
-  pending.value = false
+function nextPage() {
+  if (page.value < totalPages.value) page.value++
 }
 
 function mainPhoto(p) {

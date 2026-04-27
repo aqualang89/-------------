@@ -24,7 +24,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (search) {
-    dbQuery = dbQuery.or(`name.ilike.%${search}%,article.ilike.%${search}%`)
+    const safe = search.replace(/[%_,]/g, '')
+    if (safe) {
+      dbQuery = dbQuery.or(`name.ilike.%${safe}%,article.ilike.%${safe}%`)
+    }
   }
 
   if (minPrice !== null) {
