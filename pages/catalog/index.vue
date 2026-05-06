@@ -8,12 +8,34 @@
           placeholder="Поиск по названию или артикулу..."
           class="search-input"
         >
-        <select v-model="category" @change="onCategoryChange">
-          <option value="">Все категории</option>
-          <option v-for="c in flatCategories" :key="c.id" :value="c.slug">
-            {{ '\u00A0\u00A0'.repeat(c.level - 1) + c.name }}
-          </option>
-        </select>
+        <div class="category-tree">
+          <div
+            class="cat-item"
+            :class="{ active: category === '' }"
+            @click="category = ''; onCategoryChange()"
+          >
+            Все категории
+          </div>
+          <template v-for="c in visibleCategories" :key="c.id">
+            <div
+              class="cat-item"
+              :class="{ active: category === c.slug, indent: c.level > 1 }"
+              :style="{ paddingLeft: (c.level - 1) * 16 + 8 + 'px' }"
+            >
+              <span
+                v-if="c.hasChildren"
+                class="cat-toggle"
+                @click.stop="toggleExpand(c.id)"
+              >
+                {{ expanded.has(c.id) ? '−' : '+' }}
+              </span>
+              <span v-else class="cat-spacer"></span>
+              <span class="cat-name" @click="category = c.slug; onCategoryChange()">
+                {{ c.name }}
+              </span>
+            </div>
+          </template>
+        </div>
         <div class="price-filter">
           <label>Макс. цена: <strong>{{ maxPriceInput.toLocaleString() }} ₽</strong></label>
           <input v-model.number="maxPriceInput" type="range" min="0" :max="MAX_PRICE" step="1000">
@@ -67,17 +89,54 @@ const maxPrice = ref(MAX_PRICE)
 
 const { data: categoryTree } = await useFetch('/api/categories')
 
+const expanded = ref(new Set())
+
 const flatCategories = computed(() => {
   const result = []
   function walk(nodes, level = 1) {
     for (const node of nodes) {
-      result.push({ id: node.id, name: node.name, slug: node.slug, level })
+      result.push({
+        id: node.id,
+        name: node.name,
+        slug: node.slug,
+        level,
+        hasChildren: (node.children?.length || 0) > 0,
+        parentId: node.parent_id
+      })
       if (node.children?.length) walk(node.children, level + 1)
     }
   }
   walk(categoryTree.value || [])
   return result
 })
+
+const visibleCategories = computed(() => {
+  return flatCategories.value.filter(c => {
+    if (c.level === 1) return true
+    // Показываем только если родитель раскрыт
+    const parent = flatCategories.value.find(p => p.id === c.parentId)
+    return parent && expanded.value.has(parent.id)
+  })
+})
+
+function toggleExpand(id) {
+  const next = new Set(expanded.value)
+  if (next.has(id)) {
+    next.delete(id)
+    // Скрываем всех потомков тоже
+    function hideChildren(parentId) {
+      const children = flatCategories.value.filter(c => c.parentId === parentId)
+      for (const child of children) {
+        next.delete(child.id)
+        hideChildren(child.id)
+      }
+    }
+    hideChildren(id)
+  } else {
+    next.add(id)
+  }
+  expanded.value = next
+}
 
 const { data: productsData, pending } = await useFetch('/api/products', {
   query: computed(() => {
@@ -160,6 +219,54 @@ function mainPhoto(p) {
   border: 1px solid #333;
   background: #0a1f15;
   color: #F0EDE5;
+}
+.category-tree {
+  background: #0a1f15;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 0;
+  max-height: 400px;
+  overflow-y: auto;
+  min-width: 260px;
+}
+.cat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.95rem;
+}
+.cat-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+.cat-item.active {
+  background: #013220;
+  color: #6fcf97;
+}
+.cat-toggle {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cat-toggle:hover {
+  background: rgba(255,255,255,0.2);
+}
+.cat-spacer {
+  width: 20px;
+  flex-shrink: 0;
+}
+.cat-name {
+  flex: 1;
 }
 .price-filter {
   display: flex;
