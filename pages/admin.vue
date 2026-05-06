@@ -24,6 +24,12 @@
             {{ uploading ? 'Загрузка...' : 'Загрузить' }}
           </button>
         </div>
+        <div v-if="uploading" class="progress-wrap">
+          <div class="progress-bar" :style="{ width: uploadProgress + '%' }">
+            <div class="progress-shine"></div>
+          </div>
+          <p class="progress-text">{{ uploadMessage }}</p>
+        </div>
         <div v-if="uploadResult" class="upload-result">
           <p>Обработано: {{ uploadResult.processed }}</p>
           <p>Создано: {{ uploadResult.created }}</p>
@@ -100,6 +106,8 @@ const password = ref('')
 const isAuth = ref(false)
 const loginError = ref('')
 const uploading = ref(false)
+const uploadProgress = ref(0)
+const uploadMessage = ref('')
 const uploadResult = ref(null)
 const file = ref(null)
 const products = ref([])
@@ -236,23 +244,59 @@ async function uploadExcel() {
   if (!file.value) return
   uploading.value = true
   uploadResult.value = null
+  uploadProgress.value = 0
+  uploadMessage.value = 'Читаем файл...'
 
   const form = new FormData()
   form.append('file', file.value)
 
-  const res = await fetch('/api/catalog-upload', {
-    method: 'POST',
-    headers: { 'x-admin-password': password.value },
-    body: form
-  })
+  // Эмулируем прогресс — ~25 секунд на 756 товаров
+  const duration = 25000
+  const interval = 200
+  const step = 100 / (duration / interval)
+  let progress = 0
+  const messages = [
+    'Читаем файл...',
+    'Определяем формат...',
+    'Ищем товары в базе...',
+    'Обновляем цены...',
+    'Почти готово...'
+  ]
+  const timer = setInterval(() => {
+    progress += step + Math.random() * 0.5
+    if (progress > 95) progress = 95
+    uploadProgress.value = Math.min(progress, 95)
+    const msgIdx = Math.min(Math.floor((progress / 100) * messages.length), messages.length - 1)
+    uploadMessage.value = messages[msgIdx]
+  }, interval)
 
-  const data = await res.json()
-  uploadResult.value = data
-  uploading.value = false
+  try {
+    const res = await fetch('/api/catalog-upload', {
+      method: 'POST',
+      headers: { 'x-admin-password': password.value },
+      body: form
+    })
 
-  if (res.ok) {
-    file.value = null
-    fetchProducts()
+    clearInterval(timer)
+    uploadProgress.value = 100
+    uploadMessage.value = 'Готово!'
+
+    const data = await res.json()
+    uploadResult.value = data
+
+    if (res.ok) {
+      file.value = null
+      await fetchProducts()
+    }
+  } catch (e) {
+    clearInterval(timer)
+    uploadMessage.value = 'Ошибка загрузки'
+    uploadResult.value = { errors: ['Сетевая ошибка: ' + e.message] }
+  } finally {
+    setTimeout(() => {
+      uploading.value = false
+      uploadProgress.value = 0
+    }, 800)
   }
 }
 
@@ -491,5 +535,34 @@ async function uploadPhoto(e, productId) {
 }
 .error {
   color: #ff6b6b;
+}
+.progress-wrap {
+  margin-top: 16px;
+}
+.progress-bar {
+  height: 8px;
+  background: linear-gradient(90deg, #013220 0%, #0f5c3e 100%);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  transition: width 0.3s ease;
+}
+.progress-shine {
+  position: absolute;
+  top: 0;
+  left: -40px;
+  width: 40px;
+  height: 100%;
+  background: rgba(255,255,255,0.3);
+  animation: progress-shine 1.2s infinite ease-in-out;
+}
+@keyframes progress-shine {
+  0% { left: -40px; }
+  100% { left: 100%; }
+}
+.progress-text {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #aaa;
 }
 </style>
