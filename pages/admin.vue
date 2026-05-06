@@ -247,57 +247,137 @@ async function uploadExcel() {
   uploadProgress.value = 0
   uploadMessage.value = 'Читаем файл...'
 
-  const form = new FormData()
-  form.append('file', file.value)
-
-  // Эмулируем прогресс — ~25 секунд на 756 товаров
-  const duration = 25000
-  const interval = 200
-  const step = 100 / (duration / interval)
-  let progress = 0
-  const messages = [
-    'Читаем файл...',
-    'Определяем формат...',
-    'Ищем товары в базе...',
-    'Обновляем цены...',
-    'Почти готово...'
-  ]
-  const timer = setInterval(() => {
-    progress += step + Math.random() * 0.5
-    if (progress > 95) progress = 95
-    uploadProgress.value = Math.min(progress, 95)
-    const msgIdx = Math.min(Math.floor((progress / 100) * messages.length), messages.length - 1)
-    uploadMessage.value = messages[msgIdx]
-  }, interval)
-
   try {
-    const res = await fetch('/api/catalog-upload', {
-      method: 'POST',
-      headers: { 'x-admin-password': password.value },
-      body: form
-    })
+    const arrayBuffer = await file.value.arrayBuffer()
+    const XLSX = await import('xlsx')
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
 
-    clearInterval(timer)
-    uploadProgress.value = 100
-    uploadMessage.value = 'Готово!'
+    // Определяем формат
+    const is1C = rows.some(r =>
+      r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
+    )
 
-    const data = await res.json()
-    uploadResult.value = data
-
-    if (res.ok) {
-      file.value = null
-      await fetchProducts()
+    if (is1C) {
+      await upload1C(rows)
+    } else {
+      await uploadReference(arrayBuffer)
     }
   } catch (e) {
-    clearInterval(timer)
     uploadMessage.value = 'Ошибка загрузки'
-    uploadResult.value = { errors: ['Сетевая ошибка: ' + e.message] }
-  } finally {
-    setTimeout(() => {
-      uploading.value = false
-      uploadProgress.value = 0
-    }, 800)
+    uploadResult.value = { errors: ['Ошибка: ' + e.message] }
+    uploading.value = false
   }
+}
+
+async function uploadReference(arrayBuffer) {
+  // 555.xlsx — отправляем на сервер как раньше
+  uploadMessage.value = 'Загружаем справочник...'
+  const form = new FormData()
+  form.append('file', new Blob([arrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+
+  const res = await fetch('/api/catalog-upload', {
+    method: 'POST',
+    headers: { 'x-admin-password': password.value },
+    body: form
+  })
+
+  const data = await res.json()
+  uploadResult.value = data
+  uploadProgress.value = 100
+  uploadMessage.value = 'Готово!'
+
+  if (res.ok) {
+    file.value = null
+    await fetchProducts()
+  }
+  uploading.value = false
+}
+
+async function upload1C(rows) {
+  // Парсим 333.xlsx
+  uploadMessage.value = 'Парсим файл...'
+
+  let headerIdx = rows.findIndex(r =>
+    r.some(c => String(c || '').toLowerCase().includes('артикул')) &&
+    r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
+  )
+  if (headerIdx === -1) {
+    throw new Error('Не найдены заголовки 1С')
+  }
+
+  const dataRows = rows.slice(headerIdx + 1)
+  const parentSet = new Set()
+  for (const row of dataRows) {
+    const parent = row[6]
+    if (parent) parentSet.add(String(parent).trim())
+  }
+
+  const items = []
+  for (const row of dataRows) {
+    const article = row[0] ? String(row[0]).trim() : null
+    const name = row[2] ? String(row[2]).trim() : null
+    const price = parseFloat(String(row[7] || '0').replace(/\s/g, '').replace(',', '.')) || 0
+    const qty = parseFloat(String(row[8] || '0').replace(/\s/g, '').replace(',', '.')) || 0
+
+    if (!name) continue
+    if (parentSet.has(name) || name === 'Аквариумистика / Террариумистика') continue
+    if (/^(Валентина|Дубовик|ИП Гончаров)/.test(name)) continue
+
+    items.push({ article, name, price, qty, slug: slugify(name) || `p-${Date.now()}` })
+  }
+
+  // Отправляем batch'ами по 30
+  const CHUNK = 30
+  let updated = 0
+  let created = 0
+  let errors = []
+
+  for (let i = 0; i < items.length; i += CHUNK) {
+    const chunk = items.slice(i, i + CHUNK)
+    uploadProgress.value = Math.round((i / items.length) * 100)
+    uploadMessage.value = `Обработано ${Math.min(i + CHUNK, items.length)} / ${items.length} товаров`
+
+    const res = await fetch('/api/catalog-update-batch', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-admin-password': password.value
+      },
+      body: JSON.stringify({ items: chunk })
+    })
+
+    const data = await res.json()
+    if (data.updated) updated += data.updated
+    if (data.created) created += data.created
+    if (data.errors && data.errors.length) errors.push(...data.errors)
+  }
+
+  uploadProgress.value = 100
+  uploadMessage.value = 'Готово!'
+  uploadResult.value = { processed: items.length, updated, created, errors, skipped: dataRows.length - items.length }
+
+  file.value = null
+  await fetchProducts()
+  uploading.value = false
+}
+
+function slugify(str) {
+  if (!str) return ''
+  const map = {
+    а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'yo', ж: 'zh', з: 'z', и: 'i',
+    й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't',
+    у: 'u', ф: 'f', х: 'h', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '',
+    э: 'e', ю: 'yu', я: 'ya'
+  }
+  return str
+    .toLowerCase()
+    .split('')
+    .map(c => map[c] || c)
+    .join('')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
 }
 
 async function saveProduct(p) {
