@@ -1,10 +1,10 @@
 import { supabase } from '~/server/utils/supabase'
 
 export default defineEventHandler(async (event) => {
-  const slug = event.context.params?.slug
+  const slug = event.context.params?.slug || event.path?.split('/').pop()
 
   if (!slug) {
-    console.error('No slug in context.params. URL:', event.node.req.url, 'params:', event.context.params)
+    console.error('No slug found. URL:', event.node.req.url, 'path:', event.path, 'params:', event.context.params)
     throw createError({ statusCode: 400, statusMessage: 'Slug is required' })
   }
 
