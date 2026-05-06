@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "server/api/*.post.js": {
+      "maxDuration": 60
+    },
+    "server/api/*.js": {
+      "maxDuration": 30
+    }
+  }
+}

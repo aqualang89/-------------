@@ -272,7 +272,6 @@ async function process1C(rows) {
   let updated = 0
   let skipped = 0
 
-  // Находим индекс строки с заголовками
   let headerIdx = rows.findIndex(r =>
     r.some(c => String(c || '').toLowerCase().includes('артикул')) &&
     r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
@@ -283,10 +282,9 @@ async function process1C(rows) {
 
   const dataRows = rows.slice(headerIdx + 1)
 
-  // Собираем все группы (названия, которые встречаются в колонке "Входит в группу")
   const parentSet = new Set()
   for (const row of dataRows) {
-    const parent = row[6] // G
+    const parent = row[6]
     if (parent) parentSet.add(String(parent).trim())
   }
 
@@ -301,19 +299,27 @@ async function process1C(rows) {
     novinkiId = nc.id
   }
 
+  // Загружаем все товары из Supabase одним запросом
+  const { data: allProducts } = await supabase.from('products').select('id, name, article')
+  const productByName = {}
+  for (const p of allProducts || []) {
+    productByName[p.name] = p
+  }
+
   let newCounter = 1
+  const updates = []
+  const inserts = []
 
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i]
-    const article = row[0] ? String(row[0]).trim() : null // A
-    const name = row[2] ? String(row[2]).trim() : null     // C
-    const parent = row[6] ? String(row[6]).trim() : null   // G
-    const price = parseFloat(String(row[7] || '0').replace(/\s/g, '').replace(',', '.')) || 0 // H
-    const qty = parseFloat(String(row[8] || '0').replace(/\s/g, '').replace(',', '.')) || 0   // I
+    const article = row[0] ? String(row[0]).trim() : null
+    const name = row[2] ? String(row[2]).trim() : null
+    const parent = row[6] ? String(row[6]).trim() : null
+    const price = parseFloat(String(row[7] || '0').replace(/\s/g, '').replace(',', '.')) || 0
+    const qty = parseFloat(String(row[8] || '0').replace(/\s/g, '').replace(',', '.')) || 0
 
     if (!name) continue
 
-    // Пропускаем группы и мусор
     if (parentSet.has(name) || name === 'Аквариумистика / Террариумистика') {
       skipped++
       continue
@@ -323,35 +329,48 @@ async function process1C(rows) {
       continue
     }
 
-    // Ищем товар по названию (строгое совпадение)
-    const { data: existing } = await supabase
-      .from('products')
-      .select('id, article')
-      .eq('name', name)
-      .maybeSingle()
-
+    const existing = productByName[name]
     if (existing) {
-      const { error } = await supabase.from('products').update({
-        price,
-        is_available: qty > 0
-      }).eq('id', existing.id)
-      if (error) errors.push(`Строка ${i + 1}: ${error.message}`)
-      else updated++
+      updates.push({ id: existing.id, price, is_available: qty > 0 })
     } else {
-      // Новый товар — генерируем артикул
       const newArticle = article || `NEW-${String(newCounter).padStart(3, '0')}`
       newCounter++
-      const { error } = await supabase.from('products').insert({
+      inserts.push({
         article: newArticle,
         name,
-        slug: slugify(name) || `p-${Date.now()}`,
+        slug: slugify(name) || `p-${Date.now()}-${i}`,
         category_id: novinkiId,
         price,
         is_available: qty > 0,
         is_new: true
       })
-      if (error) errors.push(`Строка ${i + 1}: ${error.message}`)
-      else created++
+    }
+  }
+
+  // Batch update
+  const UBATCH = 100
+  for (let i = 0; i < updates.length; i += UBATCH) {
+    const batch = updates.slice(i, i + UBATCH)
+    const promises = batch.map(u =>
+      supabase.from('products').update({ price: u.price, is_available: u.is_available }).eq('id', u.id)
+    )
+    const results = await Promise.all(promises)
+    let errs = 0
+    for (const r of results) {
+      if (r.error) errs++
+    }
+    updated += batch.length - errs
+  }
+
+  // Batch insert
+  const IBATCH = 50
+  for (let i = 0; i < inserts.length; i += IBATCH) {
+    const batch = inserts.slice(i, i + IBATCH)
+    const { error } = await supabase.from('products').insert(batch)
+    if (error) {
+      errors.push(`Batch ${i}: ${error.message}`)
+    } else {
+      created += batch.length
     }
   }
 
