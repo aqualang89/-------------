@@ -80,12 +80,27 @@ onMounted(async () => {
     const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
     if (!isMobile && typeof $ !== 'undefined' && $.fn.ripples) {
       try {
+        const origRAF = window.requestAnimationFrame
+
         $(overlay).ripples({
           resolution: 512,
           dropRadius: 20,
-          perturbance: 0.02,
+          perturbance: 0.04,
           interactive: true
         })
+
+        // Stop ripples' internal rAF loop after first frame
+        window.requestAnimationFrame = () => {}
+        setTimeout(() => { window.requestAnimationFrame = origRAF }, 100)
+
+        // Run ripples at fixed ~60 FPS via setInterval for consistent speed
+        const ripples = $(overlay).data('ripples')
+        if (ripples) {
+          const origStep = ripples.step.bind(ripples)
+          setInterval(() => {
+            if (ripples.visible && ripples.running) origStep()
+          }, 1000 / 60)
+        }
       } catch (err) {
         console.error('Ripples init failed:', err)
       }
