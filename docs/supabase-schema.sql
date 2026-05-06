@@ -1,11 +1,13 @@
 -- Схема базы данных для каталога
 -- Запустить в SQL Editor Supabase
 
--- Категории товаров
+-- Категории товаров (дерево: parent_id + level)
 CREATE TABLE categories (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   slug TEXT UNIQUE NOT NULL,
+  parent_id INT REFERENCES categories(id) ON DELETE SET NULL,
+  level INT DEFAULT 1,
   sort_order INT DEFAULT 0,
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -21,6 +23,7 @@ CREATE TABLE products (
   old_price DECIMAL(10,2),
   description TEXT,
   is_available BOOLEAN DEFAULT TRUE,
+  is_new BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -47,6 +50,7 @@ CREATE TABLE import_logs (
 );
 
 -- Индексы для скорости
+CREATE INDEX idx_categories_parent ON categories(parent_id);
 CREATE INDEX idx_products_category ON products(category_id);
 CREATE INDEX idx_products_article ON products(article);
 CREATE INDEX idx_products_slug ON products(slug);

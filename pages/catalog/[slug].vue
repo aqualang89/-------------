@@ -5,7 +5,11 @@
     <div v-else-if="product" class="product-inner">
       <nav class="breadcrumbs">
         <NuxtLink to="/catalog">Каталог</NuxtLink>
-        <span v-if="product.categories"> / {{ product.categories.name }}</span>
+        <template v-for="(cat, i) in categoryPath" :key="cat.id">
+          <span> / </span>
+          <NuxtLink v-if="i < categoryPath.length - 1" :to="`/catalog?category=${cat.slug}`">{{ cat.name }}</NuxtLink>
+          <span v-else>{{ cat.name }}</span>
+        </template>
         <span> / {{ product.name }}</span>
       </nav>
 
@@ -63,21 +67,39 @@ const pending = ref(true)
 const currentIndex = ref(0)
 const zoomStyle = ref({})
 const mainImg = ref(null)
+const categoryTree = ref([])
 
 useHead(() => ({
   title: product.value ? `${product.value.name} — Каталог` : 'Товар'
 }))
 
 onMounted(async () => {
-  const res = await fetch(`/api/products/${slug}`)
-  if (res.ok) {
-    product.value = await res.json()
-  }
+  const [prodRes, treeRes] = await Promise.all([
+    fetch(`/api/products/${slug}`),
+    fetch('/api/categories')
+  ])
+  if (prodRes.ok) product.value = await prodRes.json()
+  if (treeRes.ok) categoryTree.value = await treeRes.json()
   pending.value = false
 })
 
 const photos = computed(() => product.value?.product_photos || [])
 const currentPhoto = computed(() => photos.value[currentIndex.value]?.url)
+
+const categoryPath = computed(() => {
+  if (!product.value?.categories) return []
+  function findPath(nodes, targetSlug, path = []) {
+    for (const node of nodes) {
+      if (node.slug === targetSlug) return [...path, node]
+      if (node.children?.length) {
+        const res = findPath(node.children, targetSlug, [...path, node])
+        if (res) return res
+      }
+    }
+    return null
+  }
+  return findPath(categoryTree.value, product.value.categories.slug) || []
+})
 
 function onZoom(e) {
   if (!mainImg.value) return

@@ -3,12 +3,7 @@
     <!-- Авторизация -->
     <div v-if="!isAuth" class="admin-login">
       <h2>Вход в админку</h2>
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Пароль"
-        @keyup.enter="login"
-      >
+      <input v-model="password" type="password" placeholder="Пароль" @keyup.enter="login">
       <button @click="login">Войти</button>
       <p v-if="loginError" class="error">{{ loginError }}</p>
     </div>
@@ -33,6 +28,7 @@
           <p>Обработано: {{ uploadResult.processed }}</p>
           <p>Создано: {{ uploadResult.created }}</p>
           <p>Обновлено: {{ uploadResult.updated }}</p>
+          <p v-if="uploadResult.skipped">Пропущено (группы/мусор): {{ uploadResult.skipped }}</p>
           <p v-if="uploadResult.errors.length" class="error">
             Ошибки: {{ uploadResult.errors.join('; ') }}
           </p>
@@ -46,7 +42,9 @@
           <input v-model="search" placeholder="Поиск..." @input="fetchProducts">
           <select v-model="filterCategory" @change="fetchProducts">
             <option value="">Все категории</option>
-            <option v-for="c in categories" :key="c.id" :value="c.slug">{{ c.name }}</option>
+            <option v-for="c in flatCategories" :key="c.id" :value="c.slug">
+              {{ '\u00A0\u00A0'.repeat(c.level - 1) + c.name }}
+            </option>
           </select>
         </div>
 
@@ -62,10 +60,23 @@
             </div>
             <input v-model="p.name" class="product-input">
             <input v-model.number="p.price" type="number" class="product-input">
-            <select v-model="p.category_id" class="product-input">
-              <option :value="null">Без категории</option>
-              <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
+
+            <!-- Каскадные категории -->
+            <div class="category-cascade">
+              <select v-model="p._group" class="product-input" @change="p._subgroup = null; p._leaf = null">
+                <option :value="null">Группа</option>
+                <option v-for="g in tree" :key="g.id" :value="g.id">{{ g.name }}</option>
+              </select>
+              <select v-model="p._subgroup" class="product-input" @change="p._leaf = null">
+                <option :value="null">Подгруппа</option>
+                <option v-for="sg in subgroupsOf(p._group)" :key="sg.id" :value="sg.id">{{ sg.name }}</option>
+              </select>
+              <select v-model="p._leaf" class="product-input">
+                <option :value="null">Категория</option>
+                <option v-for="leaf in leavesOf(p._subgroup || p._group)" :key="leaf.id" :value="leaf.id">{{ leaf.name }}</option>
+              </select>
+            </div>
+
             <textarea v-model="p.description" rows="2" class="product-input" placeholder="Описание" />
             <div class="product-actions">
               <button @click="saveProduct(p)">Сохранить</button>
@@ -92,7 +103,7 @@ const uploading = ref(false)
 const uploadResult = ref(null)
 const file = ref(null)
 const products = ref([])
-const categories = ref([])
+const tree = ref([])
 const search = ref('')
 const filterCategory = ref('')
 const page = ref(1)
@@ -127,8 +138,78 @@ async function init() {
 
 async function fetchCategories() {
   const res = await fetch('/api/categories')
-  categories.value = await res.json()
+  tree.value = await res.json()
 }
+
+function findPathById(nodes, id, path = []) {
+  for (const node of nodes) {
+    if (node.id === id) return [...path, node]
+    if (node.children?.length) {
+      const res = findPathById(node.children, id, [...path, node])
+      if (res) return res
+    }
+  }
+  return null
+}
+
+function initProductSelectors(p) {
+  if (!p.category_id) {
+    p._group = null
+    p._subgroup = null
+    p._leaf = null
+    return
+  }
+  const path = findPathById(tree.value, p.category_id)
+  if (path) {
+    p._group = path[0]?.id || null
+    p._subgroup = path[1]?.id || null
+    p._leaf = path[path.length - 1]?.id || null
+  } else {
+    p._group = null
+    p._subgroup = null
+    p._leaf = null
+  }
+}
+
+function subgroupsOf(groupId) {
+  const g = tree.value.find(c => c.id === groupId)
+  return g?.children || []
+}
+
+function leavesOf(nodeId) {
+  if (!nodeId) return []
+  const result = []
+  function findNode(nodes, id) {
+    for (const n of nodes) {
+      if (n.id === id) return n
+      if (n.children?.length) {
+        const found = findNode(n.children, id)
+        if (found) return found
+      }
+    }
+    return null
+  }
+  const node = findNode(tree.value, nodeId)
+  if (!node) return []
+  function collect(n) {
+    result.push(n)
+    if (n.children?.length) n.children.forEach(collect)
+  }
+  collect(node)
+  return result
+}
+
+const flatCategories = computed(() => {
+  const result = []
+  function walk(nodes, level = 1) {
+    for (const node of nodes) {
+      result.push({ ...node, level })
+      if (node.children?.length) walk(node.children, level + 1)
+    }
+  }
+  walk(tree.value)
+  return result
+})
 
 async function fetchProducts() {
   const q = new URLSearchParams()
@@ -136,10 +217,14 @@ async function fetchProducts() {
   if (filterCategory.value) q.set('category', filterCategory.value)
   q.set('page', page.value)
   q.set('limit', '12')
+  q.set('showUnavailable', 'true')
 
   const res = await fetch(`/api/products?${q}`)
   const data = await res.json()
-  products.value = data.products
+  products.value = (data.products || []).map(p => {
+    initProductSelectors(p)
+    return p
+  })
   totalPages.value = data.totalPages
 }
 
@@ -172,6 +257,7 @@ async function uploadExcel() {
 }
 
 async function saveProduct(p) {
+  const categoryId = p._leaf || p._subgroup || p._group || p.category_id
   const res = await fetch('/api/products/' + p.id, {
     method: 'PATCH',
     headers: {
@@ -181,7 +267,7 @@ async function saveProduct(p) {
     body: JSON.stringify({
       name: p.name,
       price: p.price,
-      category_id: p.category_id,
+      category_id: categoryId,
       description: p.description
     })
   })
@@ -222,7 +308,6 @@ async function uploadPhoto(e, productId) {
 
   const { url } = await res.json()
 
-  // Сохранить фото к товару
   await fetch('/api/product-photos', {
     method: 'POST',
     headers: {
@@ -301,6 +386,7 @@ async function uploadPhoto(e, productId) {
   display: flex;
   gap: 12px;
   margin: 16px 0;
+  flex-wrap: wrap;
 }
 .filters input, .filters select {
   padding: 10px;
@@ -311,7 +397,7 @@ async function uploadPhoto(e, productId) {
 }
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
 }
 .product-card {
@@ -354,6 +440,18 @@ async function uploadPhoto(e, productId) {
   display: none;
 }
 .product-input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #000;
+  color: #F0EDE5;
+}
+.category-cascade {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.category-cascade select {
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #333;

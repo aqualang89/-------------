@@ -10,17 +10,13 @@
         >
         <select v-model="category" @change="onCategoryChange">
           <option value="">Все категории</option>
-          <option v-for="c in categories" :key="c.id" :value="c.slug">{{ c.name }}</option>
+          <option v-for="c in flatCategories" :key="c.id" :value="c.slug">
+            {{ '\u00A0\u00A0'.repeat(c.level - 1) + c.name }}
+          </option>
         </select>
         <div class="price-filter">
           <label>Макс. цена: <strong>{{ maxPriceInput.toLocaleString() }} ₽</strong></label>
-          <input
-            v-model.number="maxPriceInput"
-            type="range"
-            min="0"
-            :max="MAX_PRICE"
-            step="1000"
-          >
+          <input v-model.number="maxPriceInput" type="range" min="0" :max="MAX_PRICE" step="1000">
         </div>
       </div>
     </div>
@@ -69,7 +65,19 @@ const page = ref(1)
 const search = ref('')
 const maxPrice = ref(MAX_PRICE)
 
-const { data: categories } = await useFetch('/api/categories')
+const { data: categoryTree } = await useFetch('/api/categories')
+
+const flatCategories = computed(() => {
+  const result = []
+  function walk(nodes, level = 1) {
+    for (const node of nodes) {
+      result.push({ id: node.id, name: node.name, slug: node.slug, level })
+      if (node.children?.length) walk(node.children, level + 1)
+    }
+  }
+  walk(categoryTree.value || [])
+  return result
+})
 
 const { data: productsData, pending } = await useFetch('/api/products', {
   query: computed(() => {

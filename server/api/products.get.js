@@ -1,5 +1,14 @@
 import { supabase } from '~/server/utils/supabase'
 
+function getDescendantIds(cats, parentId) {
+  const ids = [parentId]
+  const children = cats.filter(c => c.parent_id === parentId)
+  for (const child of children) {
+    ids.push(...getDescendantIds(cats, child.id))
+  }
+  return ids
+}
+
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const categorySlug = query.category
@@ -9,22 +18,26 @@ export default defineEventHandler(async (event) => {
   const page = parseInt(query.page) || 1
   const limit = parseInt(query.limit) || 24
 
+  const showUnavailable = query.showUnavailable === 'true'
   let dbQuery = supabase
     .from('products')
-    .select('*, categories(name, slug), product_photos(url, is_main)', { count: 'exact' })
-    .eq('is_available', true)
+    .select('*, categories(name, slug, parent_id), product_photos(url, is_main)', { count: 'exact' })
+  if (!showUnavailable) {
+    dbQuery = dbQuery.eq('is_available', true)
+  }
 
-  let categoryId = null
+  let categoryIds = null
   if (categorySlug) {
-    const { data: cat } = await supabase.from('categories').select('id').eq('slug', categorySlug).maybeSingle()
-    if (cat) {
-      categoryId = cat.id
-      dbQuery = dbQuery.eq('category_id', categoryId)
+    const { data: allCats } = await supabase.from('categories').select('id, parent_id, slug')
+    const target = (allCats || []).find(c => c.slug === categorySlug)
+    if (target) {
+      categoryIds = getDescendantIds(allCats || [], target.id)
+      dbQuery = dbQuery.in('category_id', categoryIds)
     }
   }
 
   if (search) {
-    const safe = search.replace(/[%_,]/g, '')
+    const safe = search.replace(/[%_,*]/g, '')
     if (safe) {
       dbQuery = dbQuery.or(`name.ilike.%${safe}%,article.ilike.%${safe}%`)
     }

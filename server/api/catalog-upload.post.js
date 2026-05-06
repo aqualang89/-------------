@@ -18,6 +18,340 @@ function slugify(str) {
     .replace(/^-|-$/g, '')
 }
 
+// ─── Эталонное дерево категорий (по скрину заказчика) ───
+const REF_TREE = [
+  { name: 'Аквариумы и тумбы', children: [{ name: 'Коврики' }] },
+  {
+    name: 'Оборудование',
+    children: [
+      {
+        name: 'Освещение',
+        children: [{ name: 'Светильники' }, { name: 'Аксессуары' }]
+      },
+      {
+        name: 'Фильтрация',
+        children: [
+          {
+            name: 'Фильтры',
+            children: [
+              { name: 'Внутренние' },
+              { name: 'Рюкзачного типа' },
+              { name: 'Скиммеры' },
+              { name: 'Внешние' }
+            ]
+          },
+          { name: 'Наполнители для фильтра' },
+          { name: 'Аксессуары' }
+        ]
+      },
+      {
+        name: 'Помпы',
+        children: [{ name: 'Помпы подъемные' }, { name: 'Помпы течения' }]
+      },
+      {
+        name: 'Аэрация и подача CO2',
+        children: [{ name: 'Компрессоры' }, { name: 'Системы CO2' }, { name: 'Аксессуары' }]
+      },
+      { name: 'Терморегуляция' },
+      { name: 'Подача удобрений' },
+      { name: 'Стерилизация' },
+      { name: 'Кормушки' },
+      { name: 'Запасные части' },
+      { name: 'Разное' }
+    ]
+  },
+  {
+    name: 'Средства для воды',
+    children: [
+      {
+        name: 'Водоподготовка',
+        children: [{ name: 'Кондиционеры' }, { name: 'Минерализация' }]
+      },
+      { name: 'Удобрения' },
+      { name: 'Борьба с водорослями' },
+      { name: 'Аптечка и борьба с вредителями' },
+      { name: 'Средства для запуска' }
+    ]
+  },
+  { name: 'Тесты и измерительное оборудование' },
+  { name: 'Корма' },
+  { name: 'Инструменты для обслуживания' },
+  {
+    name: 'Декор',
+    children: [{ name: 'Камни' }, { name: 'Коряги' }, { name: 'Керамические укрытия' }]
+  },
+  {
+    name: 'Грунты',
+    children: [{ name: 'Питательные' }, { name: 'Декоративные' }]
+  },
+  {
+    name: 'Растения',
+    children: [
+      {
+        name: 'На питательной основе',
+        children: [{ name: 'Длинностебельные' }, { name: 'Почвопокровные' }]
+      },
+      {
+        name: 'Без питательной основы',
+        children: [
+          { name: 'Длинностебельные' },
+          { name: 'Кустовые' },
+          { name: 'Почвопокровные' },
+          { name: 'Ароидные' },
+          { name: 'Мхи' },
+          { name: 'Палюдариумные' },
+          { name: 'Водоросли' }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'Животные',
+    children: [
+      { name: 'Рыба' },
+      { name: 'Ракообразные' },
+      { name: 'Моллюски' },
+      { name: 'Амфибии' }
+    ]
+  },
+  { name: 'Морская аквариумистика' },
+  { name: 'Разное' }
+]
+
+const NAME_MAP = {
+  'Внутренние фильтры': 'Внутренние',
+  'Фильтры рюкзачного типа': 'Рюкзачного типа',
+  'Внешние фильтры': 'Внешние',
+  'Керамика': 'Керамические укрытия',
+  'Инструменты': 'Инструменты для обслуживания'
+}
+
+// Предвычисляем все пути эталонного дерева
+const ALL_PATHS = []
+function collectPaths(node, path = []) {
+  const cur = [...path, node.name]
+  ALL_PATHS.push(cur)
+  if (node.children) {
+    for (const child of node.children) collectPaths(child, cur)
+  }
+}
+for (const root of REF_TREE) collectPaths(root)
+
+function findBestPath(leafName, prevPath = []) {
+  const mapped = NAME_MAP[leafName] || leafName
+  const candidates = ALL_PATHS.filter(p => p[p.length - 1] === mapped)
+  if (candidates.length === 0) return [leafName]
+  if (candidates.length === 1) return candidates[0]
+
+  let best = candidates[0]
+  let bestScore = -1
+  for (const cand of candidates) {
+    let score = 0
+    for (let i = 0; i < Math.min(prevPath.length, cand.length); i++) {
+      if (prevPath[i] === cand[i]) score++
+    }
+    if (score > bestScore) {
+      bestScore = score
+      best = cand
+    }
+  }
+  return best
+}
+
+async function ensureCategories(path) {
+  let parentId = null
+  let currentId = null
+  for (let i = 0; i < path.length; i++) {
+    const name = path[i]
+    const level = i + 1
+    const slug = slugify(name)
+    const { data: existing } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', slug)
+      .eq('parent_id', parentId)
+      .maybeSingle()
+
+    if (existing) {
+      currentId = existing.id
+    } else {
+      const { data: created, error } = await supabase
+        .from('categories')
+        .insert({ name, slug, parent_id: parentId, level })
+        .select('id')
+        .single()
+      if (error) throw new Error(`Ошибка создания категории ${name}: ${error.message}`)
+      currentId = created.id
+    }
+    parentId = currentId
+  }
+  return currentId
+}
+
+// ─── Обработка справочника 555.xlsx ───
+async function processReference(rows) {
+  const errors = []
+  let created = 0
+  let updated = 0
+  let prevPath = []
+  let lastHeader = null
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i]
+    const b = row[1]
+    const c = row[2]
+    const d = row[3]
+    const e = row[4]
+
+    if (!b && !c) {
+      lastHeader = null
+      continue
+    }
+
+    // Заголовок группы
+    if (b && !c && !d && !e) {
+      lastHeader = String(b).trim()
+      continue
+    }
+
+    // Товар
+    if (c) {
+      const article = b ? String(b).trim() : null
+      const name = String(c).trim()
+      const price = parseFloat(String(d || '0').replace(/\s/g, '').replace(',', '.')) || 0
+      const qty = parseFloat(String(e || '0').replace(/\s/g, '').replace(',', '.')) || 0
+
+      if (!article || !name) continue
+
+      let path
+      if (lastHeader) {
+        path = findBestPath(lastHeader, prevPath)
+        prevPath = path
+        lastHeader = null
+      } else {
+        path = prevPath
+      }
+
+      const categoryId = await ensureCategories(path)
+      const slug = slugify(article)
+      const productData = {
+        article,
+        name,
+        slug: slug || `p-${Date.now()}`,
+        category_id: categoryId,
+        price,
+        is_available: qty > 0
+      }
+
+      const { data: existing } = await supabase.from('products').select('id').eq('article', article).maybeSingle()
+      if (existing) {
+        const { error } = await supabase.from('products').update(productData).eq('id', existing.id)
+        if (error) errors.push(`Строка ${i + 1}: ${error.message}`)
+        else updated++
+      } else {
+        const { error } = await supabase.from('products').insert(productData)
+        if (error) errors.push(`Строка ${i + 1}: ${error.message}`)
+        else created++
+      }
+    }
+  }
+
+  return { processed: rows.length, created, updated, errors }
+}
+
+// ─── Обработка выгрузки 1С 333.xlsx ───
+async function process1C(rows) {
+  const errors = []
+  let created = 0
+  let updated = 0
+  let skipped = 0
+
+  // Находим индекс строки с заголовками
+  let headerIdx = rows.findIndex(r =>
+    r.some(c => String(c || '').toLowerCase().includes('артикул')) &&
+    r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
+  )
+  if (headerIdx === -1) {
+    throw createError({ statusCode: 400, message: 'Не найдены заголовки 1С (Артикул / Входит в группу)' })
+  }
+
+  const dataRows = rows.slice(headerIdx + 1)
+
+  // Собираем все группы (названия, которые встречаются в колонке "Входит в группу")
+  const parentSet = new Set()
+  for (const row of dataRows) {
+    const parent = row[6] // G
+    if (parent) parentSet.add(String(parent).trim())
+  }
+
+  // Категория "НОВИНКИ"
+  const novinkiSlug = slugify('НОВИНКИ')
+  let novinkiId = null
+  const { data: novCat } = await supabase.from('categories').select('id').eq('slug', novinkiSlug).maybeSingle()
+  if (novCat) {
+    novinkiId = novCat.id
+  } else {
+    const { data: nc } = await supabase.from('categories').insert({ name: 'НОВИНКИ', slug: novinkiSlug, level: 1 }).select('id').single()
+    novinkiId = nc.id
+  }
+
+  let newCounter = 1
+
+  for (let i = 0; i < dataRows.length; i++) {
+    const row = dataRows[i]
+    const article = row[0] ? String(row[0]).trim() : null // A
+    const name = row[2] ? String(row[2]).trim() : null     // C
+    const parent = row[6] ? String(row[6]).trim() : null   // G
+    const price = parseFloat(String(row[7] || '0').replace(/\s/g, '').replace(',', '.')) || 0 // H
+    const qty = parseFloat(String(row[8] || '0').replace(/\s/g, '').replace(',', '.')) || 0   // I
+
+    if (!name) continue
+
+    // Пропускаем группы и мусор
+    if (parentSet.has(name) || name === 'Аквариумистика / Террариумистика') {
+      skipped++
+      continue
+    }
+    if (/^(Валентина|Дубовик|ИП Гончаров)/.test(name)) {
+      skipped++
+      continue
+    }
+
+    // Ищем товар по названию (строгое совпадение)
+    const { data: existing } = await supabase
+      .from('products')
+      .select('id, article')
+      .eq('name', name)
+      .maybeSingle()
+
+    if (existing) {
+      const { error } = await supabase.from('products').update({
+        price,
+        is_available: qty > 0
+      }).eq('id', existing.id)
+      if (error) errors.push(`Строка ${i + 1}: ${error.message}`)
+      else updated++
+    } else {
+      // Новый товар — генерируем артикул
+      const newArticle = article || `NEW-${String(newCounter).padStart(3, '0')}`
+      newCounter++
+      const { error } = await supabase.from('products').insert({
+        article: newArticle,
+        name,
+        slug: slugify(name) || `p-${Date.now()}`,
+        category_id: novinkiId,
+        price,
+        is_available: qty > 0,
+        is_new: true
+      })
+      if (error) errors.push(`Строка ${i + 1}: ${error.message}`)
+      else created++
+    }
+  }
+
+  return { processed: dataRows.length, created, updated, errors, skipped }
+}
+
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
   if (password !== process.env.ADMIN_PASSWORD) {
@@ -47,102 +381,31 @@ export default defineEventHandler(async (event) => {
     rows.push(row.values.slice(1))
   })
 
-  // Определяем колонки по заголовкам (первая строка)
-  const headers = rows[0].map(h => String(h).toLowerCase().trim())
-  const idx = {
-    article: headers.findIndex(h => h.includes('артикул') || h.includes('article') || h.includes('код')),
-    name: headers.findIndex(h => h.includes('название') || h.includes('наименование') || h.includes('name') || h.includes('товар')),
-    price: headers.findIndex(h => h.includes('цена') || h.includes('price') || h.includes('стоимость')),
-    category: headers.findIndex(h => h.includes('категория') || h.includes('category') || h.includes('группа')),
-    oldPrice: headers.findIndex(h => h.includes('старая цена') || h.includes('old price') || h.includes('розница')),
-    available: headers.findIndex(h => h.includes('остаток') || h.includes('наличие') || h.includes('available') || h.includes('количество'))
+  // Определяем формат
+  const is1C = rows.some(r =>
+    r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
+  )
+
+  let result
+  if (is1C) {
+    result = await process1C(rows)
+  } else {
+    result = await processReference(rows)
   }
 
-  if (idx.article === -1 || idx.name === -1) {
-    throw createError({ statusCode: 400, message: 'Не найдены обязательные колонки: артикул и название' })
-  }
-
-  const dataRows = rows.slice(1).filter(r => r[idx.article] || r[idx.name])
-  const errors = []
-  let created = 0
-  let updated = 0
-
-  // Получаем существующие категории
-  const { data: existingCats } = await supabase.from('categories').select('id, name')
-  const catMap = new Map((existingCats || []).map(c => [c.name.toLowerCase().trim(), c.id]))
-
-  for (let i = 0; i < dataRows.length; i++) {
-    const row = dataRows[i]
-    const article = String(row[idx.article] || '').trim()
-    const name = String(row[idx.name] || '').trim()
-    const price = parseFloat(String(row[idx.price] || '0').replace(/\s/g, '').replace(',', '.')) || 0
-    const categoryName = idx.category !== -1 ? String(row[idx.category] || '').trim() : ''
-    const oldPrice = idx.oldPrice !== -1 ? parseFloat(String(row[idx.oldPrice] || '').replace(/\s/g, '').replace(',', '.')) || null : null
-    const availableQty = idx.available !== -1 ? parseFloat(String(row[idx.available] || '0').replace(/\s/g, '').replace(',', '.')) : 1
-
-    if (!article || !name) continue
-
-    let categoryId = null
-    if (categoryName) {
-      const key = categoryName.toLowerCase()
-      if (catMap.has(key)) {
-        categoryId = catMap.get(key)
-      } else {
-        const slug = slugify(categoryName) || `cat-${Date.now()}`
-        const { data: newCat, error: catErr } = await supabase
-          .from('categories')
-          .insert({ name: categoryName, slug })
-          .select('id')
-          .single()
-        if (!catErr && newCat) {
-          categoryId = newCat.id
-          catMap.set(key, categoryId)
-        }
-      }
-    }
-
-    const slug = article ? slugify(article) : slugify(name)
-    const productData = {
-      article,
-      name,
-      slug: slug || `p-${Date.now()}`,
-      category_id: categoryId,
-      price,
-      old_price: oldPrice,
-      is_available: availableQty > 0
-    }
-
-    // Upsert по артикулу
-    const { data: existing } = await supabase
-      .from('products')
-      .select('id')
-      .eq('article', article)
-      .maybeSingle()
-
-    if (existing) {
-      const { error } = await supabase.from('products').update(productData).eq('id', existing.id)
-      if (error) errors.push(`Строка ${i + 2}: ${error.message}`)
-      else updated++
-    } else {
-      const { error } = await supabase.from('products').insert(productData)
-      if (error) errors.push(`Строка ${i + 2}: ${error.message}`)
-      else created++
-    }
-  }
-
-  // Лог
   await supabase.from('import_logs').insert({
     filename: file.filename || 'unknown.xlsx',
-    rows_processed: dataRows.length,
-    rows_created: created,
-    rows_updated: updated,
-    errors: errors.length ? errors.join('\n') : null
+    rows_processed: result.processed,
+    rows_created: result.created,
+    rows_updated: result.updated,
+    errors: result.errors.length ? result.errors.join('\n') : null
   })
 
   return {
-    processed: dataRows.length,
-    created,
-    updated,
-    errors: errors.length ? errors.slice(0, 20) : []
+    processed: result.processed,
+    created: result.created,
+    updated: result.updated,
+    skipped: result.skipped || 0,
+    errors: result.errors.length ? result.errors.slice(0, 20) : []
   }
 })
