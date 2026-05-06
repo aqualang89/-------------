@@ -328,6 +328,10 @@ async function process1C(rows) {
       skipped++
       continue
     }
+    if (name === 'Растение в ассортитменте') {
+      skipped++
+      continue
+    }
 
     const existing = productByName[name]
     if (existing) {

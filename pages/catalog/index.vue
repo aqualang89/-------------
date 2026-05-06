@@ -2,76 +2,96 @@
   <div class="catalog-wrap">
     <div class="catalog-header">
       <h1>Каталог</h1>
-      <div class="catalog-filters">
-        <input
-          v-model="searchInput"
-          placeholder="Поиск по названию или артикулу..."
-          class="search-input"
-        >
-        <div class="category-tree">
-          <div
-            class="cat-item"
-            :class="{ active: category === '' }"
-            @click="category = ''; onCategoryChange()"
-          >
-            Все категории
+      <input
+        v-model="searchInput"
+        placeholder="Поиск по названию или артикулу..."
+        class="search-input"
+      >
+      <div class="catalog-layout">
+        <!-- Сайдбар категорий -->
+        <aside class="catalog-sidebar">
+          <div class="sidebar-header">
+            <h3>Категории</h3>
+            <button v-if="isMobile" class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+              {{ sidebarOpen ? 'Скрыть' : 'Показать' }}
+            </button>
           </div>
-          <template v-for="c in visibleCategories" :key="c.id">
+          <div v-show="!isMobile || sidebarOpen" class="category-tree">
             <div
               class="cat-item"
-              :class="{ active: category === c.slug, indent: c.level > 1 }"
-              :style="{ paddingLeft: (c.level - 1) * 16 + 8 + 'px' }"
+              :class="{ active: category === '' }"
+              @click="category = ''; onCategoryChange()"
             >
-              <span
-                v-if="c.hasChildren"
-                class="cat-toggle"
-                @click.stop="toggleExpand(c.id)"
-              >
-                {{ expanded.has(c.id) ? '−' : '+' }}
-              </span>
-              <span v-else class="cat-spacer"></span>
-              <span class="cat-name" @click="category = c.slug; onCategoryChange()">
-                {{ c.name }}
-              </span>
+              <span class="cat-spacer"></span>
+              <span class="cat-name">Все категории</span>
             </div>
-          </template>
-        </div>
-        <div class="price-filter">
-          <label>Макс. цена: <strong>{{ maxPriceInput.toLocaleString() }} ₽</strong></label>
-          <input v-model.number="maxPriceInput" type="range" min="0" :max="MAX_PRICE" step="1000">
+            <template v-for="c in visibleCategories" :key="c.id">
+              <div
+                class="cat-item"
+                :class="{ active: category === c.slug }"
+                :style="{ paddingLeft: (c.level - 1) * 16 + 8 + 'px' }"
+              >
+                <span
+                  v-if="c.hasChildren"
+                  class="cat-toggle"
+                  @click.stop="toggleExpand(c.id)"
+                >
+                  {{ expanded.has(c.id) ? '−' : '+' }}
+                </span>
+                <span v-else class="cat-spacer"></span>
+                <span class="cat-name" @click="category = c.slug; onCategoryChange()">
+                  {{ c.name }}
+                </span>
+              </div>
+            </template>
+          </div>
+        </aside>
+
+        <!-- Контент -->
+        <div class="catalog-main">
+          <div class="catalog-toolbar">
+            <div class="price-filter">
+              <label>Макс. цена: <strong>{{ maxPriceInput.toLocaleString() }} ₽</strong></label>
+              <input v-model.number="maxPriceInput" type="range" min="0" :max="MAX_PRICE" step="1000">
+            </div>
+            <p v-if="category" class="active-cat">
+              {{ activeCategoryName }}
+              <button class="btn-reset" @click="category = ''; onCategoryChange()">×</button>
+            </p>
+          </div>
+
+          <div v-if="pending" class="catalog-loading">Загрузка...</div>
+
+          <div v-else-if="products.length" class="product-grid">
+            <NuxtLink
+              v-for="p in products"
+              :key="p.id"
+              :to="`/catalog/${p.slug}`"
+              class="product-card"
+            >
+              <div class="card-img-wrap">
+                <img v-if="mainPhoto(p)" :src="mainPhoto(p)" :alt="p.name">
+                <div v-else class="card-no-photo">Нет фото</div>
+              </div>
+              <h3 class="card-title">{{ p.name }}</h3>
+              <p class="card-price">
+                {{ p.price.toLocaleString() }} ₽
+                <span v-if="p.old_price" class="card-old-price">{{ p.old_price.toLocaleString() }} ₽</span>
+              </p>
+            </NuxtLink>
+          </div>
+
+          <div v-else class="catalog-empty">
+            Ничего не найдено
+          </div>
+
+          <div v-if="totalPages > 1" class="pagination">
+            <button :disabled="page === 1" @click="prevPage">←</button>
+            <span>{{ page }} / {{ totalPages }}</span>
+            <button :disabled="page >= totalPages" @click="nextPage">→</button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div v-if="pending" class="catalog-loading">Загрузка...</div>
-
-    <div v-else-if="products.length" class="product-grid">
-      <NuxtLink
-        v-for="p in products"
-        :key="p.id"
-        :to="`/catalog/${p.slug}`"
-        class="product-card"
-      >
-        <div class="card-img-wrap">
-          <img v-if="mainPhoto(p)" :src="mainPhoto(p)" :alt="p.name">
-          <div v-else class="card-no-photo">Нет фото</div>
-        </div>
-        <h3 class="card-title">{{ p.name }}</h3>
-        <p class="card-price">
-          {{ p.price.toLocaleString() }} ₽
-          <span v-if="p.old_price" class="card-old-price">{{ p.old_price.toLocaleString() }} ₽</span>
-        </p>
-      </NuxtLink>
-    </div>
-
-    <div v-else class="catalog-empty">
-      Ничего не найдено
-    </div>
-
-    <div v-if="totalPages > 1" class="pagination">
-      <button :disabled="page === 1" @click="prevPage">←</button>
-      <span>{{ page }} / {{ totalPages }}</span>
-      <button :disabled="page >= totalPages" @click="nextPage">→</button>
     </div>
   </div>
 </template>
@@ -83,6 +103,8 @@ const searchInput = ref('')
 const category = ref('')
 const maxPriceInput = ref(MAX_PRICE)
 const page = ref(1)
+const sidebarOpen = ref(false)
+const isMobile = ref(false)
 
 const search = ref('')
 const maxPrice = ref(MAX_PRICE)
@@ -113,17 +135,20 @@ const flatCategories = computed(() => {
 const visibleCategories = computed(() => {
   return flatCategories.value.filter(c => {
     if (c.level === 1) return true
-    // Показываем только если родитель раскрыт
     const parent = flatCategories.value.find(p => p.id === c.parentId)
     return parent && expanded.value.has(parent.id)
   })
+})
+
+const activeCategoryName = computed(() => {
+  const cat = flatCategories.value.find(c => c.slug === category.value)
+  return cat ? cat.name : ''
 })
 
 function toggleExpand(id) {
   const next = new Set(expanded.value)
   if (next.has(id)) {
     next.delete(id)
-    // Скрываем всех потомков тоже
     function hideChildren(parentId) {
       const children = flatCategories.value.filter(c => c.parentId === parentId)
       for (const child of children) {
@@ -167,6 +192,7 @@ watch(maxPriceInput, (val) => {
 
 function onCategoryChange() {
   page.value = 1
+  if (isMobile.value) sidebarOpen.value = false
 }
 
 function prevPage() {
@@ -181,6 +207,13 @@ function mainPhoto(p) {
   const photo = p.product_photos?.find(ph => ph.is_main) || p.product_photos?.[0]
   return photo?.url
 }
+
+onMounted(() => {
+  isMobile.value = window.innerWidth < 768
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth < 768
+  })
+})
 </script>
 
 <style scoped>
@@ -190,44 +223,56 @@ function mainPhoto(p) {
   padding: 100px 20px 40px;
   color: #F0EDE5;
 }
-.catalog-header {
-  margin-bottom: 32px;
-}
 .catalog-header h1 {
   font-family: 'Noto Serif', serif;
   font-size: 2.2rem;
   margin-bottom: 20px;
 }
-.catalog-filters {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
 .search-input {
-  flex: 1;
-  min-width: 240px;
+  width: 100%;
   padding: 12px 16px;
   border-radius: 8px;
   border: 1px solid #333;
   background: #0a1f15;
   color: #F0EDE5;
   font-size: 1rem;
+  margin-bottom: 20px;
 }
-.catalog-filters select {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: #0a1f15;
+.catalog-layout {
+  display: flex;
+  gap: 24px;
+}
+.catalog-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+}
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.sidebar-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.sidebar-toggle {
+  display: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  background: #013220;
   color: #F0EDE5;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 .category-tree {
   background: #0a1f15;
   border: 1px solid #333;
   border-radius: 8px;
   padding: 8px 0;
-  max-height: 400px;
+  max-height: 600px;
   overflow-y: auto;
-  min-width: 260px;
 }
 .cat-item {
   display: flex;
@@ -268,6 +313,18 @@ function mainPhoto(p) {
 .cat-name {
   flex: 1;
 }
+.catalog-main {
+  flex: 1;
+  min-width: 0;
+}
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .price-filter {
   display: flex;
   flex-direction: column;
@@ -281,6 +338,23 @@ function mainPhoto(p) {
 .price-filter input[type="range"] {
   width: 100%;
   cursor: pointer;
+}
+.active-cat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #013220;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.btn-reset {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
 }
 .product-grid {
   display: grid;
@@ -353,5 +427,24 @@ function mainPhoto(p) {
 .pagination button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .catalog-layout {
+    flex-direction: column;
+  }
+  .catalog-sidebar {
+    width: 100%;
+  }
+  .sidebar-toggle {
+    display: inline-block;
+  }
+  .category-tree {
+    max-height: 300px;
+  }
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 }
 </style>

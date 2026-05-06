@@ -324,6 +324,7 @@ async function upload1C(rows) {
     if (!name) continue
     if (parentSet.has(name) || name === 'Аквариумистика / Террариумистика') continue
     if (/^(Валентина|Дубовик|ИП Гончаров)/.test(name)) continue
+    if (name === 'Растение в ассортитменте') continue
 
     items.push({ article, name, price, qty, slug: slugify(name) || `p-${Date.now()}` })
   }
