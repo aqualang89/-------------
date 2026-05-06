@@ -1,32 +1,14 @@
-import fs from 'fs'
+import Excel from 'exceljs'
 import { createClient } from '@supabase/supabase-js'
-import fetch from 'node-fetch'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import xlsx from 'xlsx'
 
-// Загружаем .env вручную
-const envContent = fs.readFileSync('.env', 'utf-8')
-envContent.split('\n').forEach(line => {
-  const eq = line.indexOf('=')
-  if (eq > 0 && !line.trim().startsWith('#')) {
-    const key = line.slice(0, eq).trim()
-    const val = line.slice(eq + 1).trim().replace(/^['"]|['"]$/g, '')
-    process.env[key] = val
-  }
-})
+const PROXY = 'http://FOHVRM3A:GYADGLVN@31.57.204.165:45324'
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://vbopaqxxhumyauwpqgbs.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY
 
-const url = process.env.SUPABASE_URL
-const key = process.env.SUPABASE_SERVICE_KEY
-if (!url || !key) {
-  console.error('Нужны SUPABASE_URL и SUPABASE_SERVICE_KEY в .env')
-  process.exit(1)
-}
-
-const agent = new HttpsProxyAgent('http://FOHVRM3A:GYADGLVN@31.57.204.165:45324')
-const supabase = createClient(url, key, {
-  global: {
-    fetch: (url, opts) => fetch(url, { ...opts, agent })
-  }
+const agent = new HttpsProxyAgent(PROXY)
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  global: { fetch: (url, opts) => fetch(url, { ...opts, agent }) }
 })
 
 function slugify(str) {
@@ -51,34 +33,17 @@ const REF_TREE = [
   {
     name: 'Оборудование',
     children: [
-      {
-        name: 'Освещение',
-        children: [{ name: 'Светильники' }, { name: 'Аксессуары' }]
-      },
+      { name: 'Освещение', children: [{ name: 'Светильники' }, { name: 'Аксессуары' }] },
       {
         name: 'Фильтрация',
         children: [
-          {
-            name: 'Фильтры',
-            children: [
-              { name: 'Внутренние' },
-              { name: 'Рюкзачного типа' },
-              { name: 'Скиммеры' },
-              { name: 'Внешние' }
-            ]
-          },
+          { name: 'Фильтры', children: [{ name: 'Внутренние' }, { name: 'Рюкзачного типа' }, { name: 'Скиммеры' }, { name: 'Внешние' }] },
           { name: 'Наполнители для фильтра' },
           { name: 'Аксессуары' }
         ]
       },
-      {
-        name: 'Помпы',
-        children: [{ name: 'Помпы подъемные' }, { name: 'Помпы течения' }]
-      },
-      {
-        name: 'Аэрация и подача CO2',
-        children: [{ name: 'Компрессоры' }, { name: 'Системы CO2' }, { name: 'Аксессуары' }]
-      },
+      { name: 'Помпы', children: [{ name: 'Помпы подъемные' }, { name: 'Помпы течения' }] },
+      { name: 'Аэрация и подача CO2', children: [{ name: 'Компрессоры' }, { name: 'Системы CO2' }, { name: 'Аксессуары' }] },
       { name: 'Терморегуляция' },
       { name: 'Подача удобрений' },
       { name: 'Стерилизация' },
@@ -90,10 +55,7 @@ const REF_TREE = [
   {
     name: 'Средства для воды',
     children: [
-      {
-        name: 'Водоподготовка',
-        children: [{ name: 'Кондиционеры' }, { name: 'Минерализация' }]
-      },
+      { name: 'Водоподготовка', children: [{ name: 'Кондиционеры' }, { name: 'Минерализация' }] },
       { name: 'Удобрения' },
       { name: 'Борьба с водорослями' },
       { name: 'Аптечка и борьба с вредителями' },
@@ -103,44 +65,19 @@ const REF_TREE = [
   { name: 'Тесты и измерительное оборудование' },
   { name: 'Корма' },
   { name: 'Инструменты для обслуживания' },
-  {
-    name: 'Декор',
-    children: [{ name: 'Камни' }, { name: 'Коряги' }, { name: 'Керамические укрытия' }]
-  },
-  {
-    name: 'Грунты',
-    children: [{ name: 'Питательные' }, { name: 'Декоративные' }]
-  },
+  { name: 'Декор', children: [{ name: 'Камни' }, { name: 'Коряги' }, { name: 'Керамические укрытия' }] },
+  { name: 'Грунты', children: [{ name: 'Питательные' }, { name: 'Декоративные' }] },
   {
     name: 'Растения',
     children: [
-      {
-        name: 'На питательной основе',
-        children: [{ name: 'Длинностебельные' }, { name: 'Почвопокровные' }]
-      },
+      { name: 'На питательной основе', children: [{ name: 'Длинностебельные' }, { name: 'Почвопокровные' }] },
       {
         name: 'Без питательной основы',
-        children: [
-          { name: 'Длинностебельные' },
-          { name: 'Кустовые' },
-          { name: 'Почвопокровные' },
-          { name: 'Ароидные' },
-          { name: 'Мхи' },
-          { name: 'Палюдариумные' },
-          { name: 'Водоросли' }
-        ]
+        children: [{ name: 'Длинностебельные' }, { name: 'Кустовые' }, { name: 'Почвопокровные' }, { name: 'Ароидные' }, { name: 'Мхи' }, { name: 'Палюдариумные' }, { name: 'Водоросли' }]
       }
     ]
   },
-  {
-    name: 'Животные',
-    children: [
-      { name: 'Рыба' },
-      { name: 'Ракообразные' },
-      { name: 'Моллюски' },
-      { name: 'Амфибии' }
-    ]
-  },
+  { name: 'Животные', children: [{ name: 'Рыба' }, { name: 'Ракообразные' }, { name: 'Моллюски' }, { name: 'Амфибии' }] },
   { name: 'Морская аквариумистика' },
   { name: 'Разное' }
 ]
@@ -150,7 +87,9 @@ const NAME_MAP = {
   'Фильтры рюкзачного типа': 'Рюкзачного типа',
   'Внешние фильтры': 'Внешние',
   'Керамика': 'Керамические укрытия',
-  'Инструменты': 'Инструменты для обслуживания'
+  'Инструменты': 'Инструменты для обслуживания',
+  'Системы СО₂': 'Системы CO2',
+  'Аэрация и подача СО₂': 'Аэрация и подача CO2'
 }
 
 const ALL_PATHS = []
@@ -168,7 +107,6 @@ function findBestPath(leafName, prevPath = []) {
   const candidates = ALL_PATHS.filter(p => p[p.length - 1] === mapped)
   if (candidates.length === 0) return [leafName]
   if (candidates.length === 1) return candidates[0]
-
   let best = candidates[0]
   let bestScore = -1
   for (const cand of candidates) {
@@ -179,88 +117,61 @@ function findBestPath(leafName, prevPath = []) {
     if (score > bestScore) {
       bestScore = score
       best = cand
+    } else if (score === bestScore && score === 0) {
+      if (cand.length < best.length) {
+        best = cand
+      }
     }
   }
   return best
 }
 
-// Кэш категорий в памяти
-const catCache = new Map()
-
-async function ensureCategories(path) {
-  let parentId = null
-  let currentId = null
-  for (let i = 0; i < path.length; i++) {
-    const name = path[i]
-    const level = i + 1
-    const slug = slugify(name)
-    const cacheKey = `${slug}:${parentId}`
-
-    if (catCache.has(cacheKey)) {
-      currentId = catCache.get(cacheKey)
-    } else {
-      const { data: created, error } = await supabase
-        .from('categories')
-        .insert({ name, slug, parent_id: parentId, level })
-        .select('id')
-        .single()
-      if (error && error.code === '23505') {
-        // Unique violation — уже существует
-        const { data: existing } = await supabase
-          .from('categories')
-          .select('id')
-          .eq('slug', slug)
-          .eq('parent_id', parentId)
-          .single()
-        currentId = existing.id
-      } else if (error) {
-        throw new Error(`Ошибка создания категории ${name}: ${error.message}`)
-      } else {
-        currentId = created.id
-      }
-      catCache.set(cacheKey, currentId)
-    }
-    parentId = currentId
-  }
-  return currentId
-}
-
 async function main() {
-  const { data: cols, error: colsErr } = await supabase
-    .from('categories')
-    .select('parent_id')
-    .limit(1)
-  if (colsErr && colsErr.message.includes('parent_id')) {
-    console.error('❌ Колонка parent_id не найдена. Сначала выполни миграцию SQL.')
-    process.exit(1)
+  console.log('📦 Загружаем категории из Supabase...')
+  const { data: allCats, error: catError } = await supabase.from('categories').select('*')
+  if (catError) throw catError
+
+  const catMap = {}
+  for (const c of allCats) {
+    const key = c.name + '|' + (c.parent_id || 'null')
+    catMap[key] = c.id
   }
-  if (colsErr) {
-    console.error('❌ Ошибка подключения к Supabase:', colsErr.message)
-    process.exit(1)
+
+  function getCategoryIdByPath(path) {
+    let parentId = 'null'
+    let currentId = null
+    for (const name of path) {
+      const key = name + '|' + parentId
+      if (!catMap[key]) return null
+      currentId = catMap[key]
+      parentId = String(currentId)
+    }
+    return currentId
   }
 
   console.log('📖 Читаем 555-with-articles.xlsx...')
-  const wb = xlsx.readFile('C:\\Users\\Татьяна\\Pictures\\555-with-articles.xlsx')
-  const data = xlsx.utils.sheet_to_json(wb.Sheets['Лист1'], { header: 1 })
+  const wb = new Excel.Workbook()
+  await wb.xlsx.readFile('C:\\Users\\Татьяна\\Pictures\\555-with-articles.xlsx')
+  const ws = wb.getWorksheet(1)
 
   const items = []
+  const seenArticles = new Set()
   let prevPath = []
   let lastHeader = null
 
-  console.log('🌳 Парсим товары...')
-  for (let i = 1; i < data.length; i++) {
-    const row = data[i]
-    const b = row[1]
-    const c = row[2]
-    const d = row[3]
-    const e = row[4]
+  for (let rowNum = 3; rowNum <= ws.rowCount; rowNum++) {
+    const row = ws.getRow(rowNum)
+    const b = row.getCell(2).value
+    const c = row.getCell(3).value
+    const d = row.getCell(4).value
+    const e = row.getCell(5).value
 
     if (!b && !c) {
       lastHeader = null
       continue
     }
 
-    if (b && !c && !d && !e) {
+    if (b && (!c || String(b).trim() === String(c).trim()) && !d && !e) {
       lastHeader = String(b).trim()
       continue
     }
@@ -272,6 +183,8 @@ async function main() {
       const qty = parseFloat(String(e || '0').replace(/\s/g, '').replace(',', '.')) || 0
 
       if (!article || !name) continue
+      if (seenArticles.has(article)) continue
+      seenArticles.add(article)
 
       let path
       if (lastHeader) {
@@ -282,49 +195,55 @@ async function main() {
         path = prevPath
       }
 
-      items.push({ article, name, price, qty, path })
+      if (!path || path.length === 0) continue
+
+      const catId = getCategoryIdByPath(path)
+      if (!catId) continue
+
+      items.push({
+        article,
+        name,
+        slug: slugify(article) || `p-${Date.now()}-${items.length}`,
+        category_id: catId,
+        price,
+        is_available: qty > 0
+      })
     }
   }
 
-  console.log(`🌳 Создаём категории (${items.length} товаров)...`)
-  for (const item of items) {
-    item.category_id = await ensureCategories(item.path)
-  }
+  console.log(`🌳 Найдено ${items.length} товаров, заливаем batch-ами по 100...`)
 
-  // Batch upsert по 100 штук
-  const BATCH = 100
+  const BATCH = 25
   let created = 0
-  let updated = 0
-
-  console.log('💾 Заливаем товары batch-ами...')
   for (let i = 0; i < items.length; i += BATCH) {
-    const batch = items.slice(i, i + BATCH).map(it => ({
-      article: it.article,
-      name: it.name,
-      slug: slugify(it.article) || `p-${Date.now()}-${i}`,
-      category_id: it.category_id,
-      price: it.price,
-      is_available: it.qty > 0
-    }))
+    const batch = items.slice(i, i + BATCH)
+    let attempts = 0
+    let success = false
+    while (attempts < 3 && !success) {
+      const { data: upserted, error } = await supabase
+        .from('products')
+        .upsert(batch, { onConflict: 'article' })
+        .select('id')
 
-    const { data: upserted, error } = await supabase
-      .from('products')
-      .upsert(batch, { onConflict: 'article' })
-      .select('id')
-
-    if (error) {
-      console.error(`❌ Ошибка batch ${i}-${i + batch.length}:`, error.message)
-    } else {
-      // upsert не говорит created/updated, считаем все как upserted
-      created += upserted.length
+      if (error) {
+        attempts++
+        console.log(`  ⚠️ Batch ${i}-${i + batch.length} попытка ${attempts}: ${error.message}`)
+        await new Promise(r => setTimeout(r, 2000))
+      } else {
+        created += upserted.length
+        success = true
+      }
+    }
+    if (!success) {
+      console.error(`❌ Batch ${i}-${i + batch.length} не удался после 3 попыток`)
     }
 
-    if (i % 200 === 0) {
-      console.log(`  ... обработано ${Math.min(i + BATCH, items.length)} / ${items.length}`)
+    if (i % 100 === 0) {
+      console.log(`  ... ${Math.min(i + BATCH, items.length)} / ${items.length}`)
     }
   }
 
-  console.log(`✅ Готово! Обработано: ${items.length}, batch-upsert: ${created}`)
+  console.log(`✅ Готово! Загружено: ${created} / ${items.length}`)
 }
 
 main().catch(err => {
