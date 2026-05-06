@@ -18,6 +18,10 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
-    // preset автоопределяется Vercel
+    vercel: {
+      config: {
+        maxDuration: 60
+      }
+    }
   }
 })
