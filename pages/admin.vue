@@ -46,12 +46,35 @@
         <h2>Товары</h2>
         <div class="filters">
           <input v-model="search" placeholder="Поиск..." @input="fetchProducts">
-          <select v-model="filterCategory" @change="fetchProducts">
-            <option value="">Все категории</option>
-            <option v-for="c in flatCategories" :key="c.id" :value="c.slug">
-              {{ '\u00A0\u00A0'.repeat(c.level - 1) + c.name }}
-            </option>
-          </select>
+          <div class="admin-cat-tree">
+            <div
+              class="cat-item"
+              :class="{ active: filterCategory === '' }"
+              @click="filterCategory = ''; fetchProducts()"
+            >
+              <span class="cat-spacer"></span>
+              <span class="cat-name">Все категории</span>
+            </div>
+            <template v-for="c in adminVisibleCats" :key="c.id">
+              <div
+                class="cat-item"
+                :class="{ active: filterCategory === c.slug }"
+                :style="{ paddingLeft: (c.level - 1) * 16 + 8 + 'px' }"
+              >
+                <span
+                  v-if="c.hasChildren"
+                  class="cat-toggle"
+                  @click.stop="toggleExpand(c.id)"
+                >
+                  {{ expanded.has(c.id) ? '−' : '+' }}
+                </span>
+                <span v-else class="cat-spacer"></span>
+                <span class="cat-name" @click="filterCategory = c.slug; fetchProducts()">
+                  {{ c.name }}
+                </span>
+              </div>
+            </template>
+          </div>
         </div>
 
         <div class="product-grid">
@@ -207,17 +230,52 @@ function leavesOf(nodeId) {
   return result
 }
 
+const expanded = ref(new Set())
+
 const flatCategories = computed(() => {
   const result = []
   function walk(nodes, level = 1) {
     for (const node of nodes) {
-      result.push({ ...node, level })
+      result.push({
+        id: node.id,
+        name: node.name,
+        slug: node.slug,
+        level,
+        hasChildren: (node.children?.length || 0) > 0,
+        parentId: node.parent_id
+      })
       if (node.children?.length) walk(node.children, level + 1)
     }
   }
   walk(tree.value)
   return result
 })
+
+const adminVisibleCats = computed(() => {
+  return flatCategories.value.filter(c => {
+    if (c.level === 1) return true
+    const parent = flatCategories.value.find(p => p.id === c.parentId)
+    return parent && expanded.value.has(parent.id)
+  })
+})
+
+function toggleExpand(id) {
+  const next = new Set(expanded.value)
+  if (next.has(id)) {
+    next.delete(id)
+    function hideChildren(parentId) {
+      const children = flatCategories.value.filter(c => c.parentId === parentId)
+      for (const child of children) {
+        next.delete(child.id)
+        hideChildren(child.id)
+      }
+    }
+    hideChildren(id)
+  } else {
+    next.add(id)
+  }
+  expanded.value = next
+}
 
 async function fetchProducts() {
   const q = new URLSearchParams()
@@ -645,5 +703,54 @@ async function uploadPhoto(e, productId) {
   margin-top: 8px;
   font-size: 13px;
   color: #aaa;
+}
+.admin-cat-tree {
+  background: #0a1f15;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 8px 0;
+  max-height: 400px;
+  overflow-y: auto;
+  min-width: 260px;
+  margin-top: 8px;
+}
+.cat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.95rem;
+}
+.cat-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+.cat-item.active {
+  background: #013220;
+  color: #6fcf97;
+}
+.cat-toggle {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cat-toggle:hover {
+  background: rgba(255,255,255,0.2);
+}
+.cat-spacer {
+  width: 20px;
+  flex-shrink: 0;
+}
+.cat-name {
+  flex: 1;
 }
 </style>
