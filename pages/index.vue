@@ -86,6 +86,19 @@ onMounted(async () => {
           perturbance: 0.04,
           interactive: true
         })
+        // Throttle ripples to ~60 FPS for consistent speed on high-refresh monitors
+        const ripples = $(overlay).data('ripples')
+        if (ripples) {
+          const origStep = ripples.step.bind(ripples)
+          let last = 0
+          const interval = 1000 / 60
+          ripples.step = function () {
+            const now = performance.now()
+            if (now - last < interval) return
+            last = now
+            return origStep()
+          }
+        }
       } catch (err) {
         console.error('Ripples init failed:', err)
       }
