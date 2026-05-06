@@ -1,7 +1,12 @@
+import { getRouterParam } from 'h3'
 import { supabase } from '~/server/utils/supabase'
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
+
+  if (!slug) {
+    throw createError({ statusCode: 400, statusMessage: 'Slug is required' })
+  }
 
   const { data, error } = await supabase
     .from('products')
@@ -10,8 +15,13 @@ export default defineEventHandler(async (event) => {
     .eq('is_available', true)
     .single()
 
-  if (error || !data) {
-    throw createError({ statusCode: 404, message: 'Товар не найден' })
+  if (error) {
+    console.error('Product fetch error:', error.message, 'slug:', slug)
+    throw createError({ statusCode: 404, statusMessage: 'Товар не найден' })
+  }
+
+  if (!data) {
+    throw createError({ statusCode: 404, statusMessage: 'Товар не найден' })
   }
 
   return data
