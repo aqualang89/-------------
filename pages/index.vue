@@ -401,6 +401,8 @@ onMounted(async () => {
 .sh-stage {
   position: relative;
   width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
   min-height: 100vh;
   overflow: hidden;
   background: #1e2933;
@@ -981,24 +983,24 @@ onMounted(async () => {
     opacity: 1;
     margin: 24px 0 0;
   }
-  /* Градиенты по краям аквариума */
+  /* Градиенты сверху и снизу аквариума (от края до края экрана) */
   .sh-interior::before,
   .sh-interior::after {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 40px;
+    left: 0;
+    right: 0;
+    height: 60px;
     pointer-events: none;
     z-index: 1;
   }
   .sh-interior::before {
-    left: 0;
-    background: linear-gradient(to right, #1e2933 0%, transparent 100%);
+    top: 0;
+    background: linear-gradient(to bottom, #1e2933 0%, transparent 100%);
   }
   .sh-interior::after {
-    right: 0;
-    background: linear-gradient(to left, #1e2933 0%, transparent 100%);
+    bottom: 0;
+    background: linear-gradient(to top, #1e2933 0%, transparent 100%);
   }
   .sh-hero-lede {
     font-size: 14px;

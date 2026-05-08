@@ -67,8 +67,9 @@ useHead({
   max-width: 1440px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: flex-start;
+  gap: 28px;
   pointer-events: auto;
 }
 .sh-nav-links {
