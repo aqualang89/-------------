@@ -64,7 +64,7 @@
             <NuxtLink to="/services/nature" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <div class="sh-placeholder">Фото скоро</div>
+            <img src="/img/services/nature.jpg" alt="Nature Aquarium" loading="lazy" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -75,7 +75,7 @@
             <NuxtLink to="/services/iwagumi" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <div class="sh-placeholder">Фото скоро</div>
+            <img src="/img/services/iwagumi.jpg" alt="Iwagumi" loading="lazy" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -86,7 +86,7 @@
             <NuxtLink to="/services/dutch" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <div class="sh-placeholder">Фото скоро</div>
+            <img src="/img/services/dutch.jpg" alt="Голландский аквариум" loading="lazy" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -97,7 +97,7 @@
             <NuxtLink to="/services/biotope" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <div class="sh-placeholder">Фото скоро</div>
+            <img src="/img/services/biotope.jpg" alt="Биотоп" loading="lazy" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -108,7 +108,7 @@
             <NuxtLink to="/services/paludarium" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <div class="sh-placeholder">Фото скоро</div>
+            <img src="/img/services/paludarium.jpg" alt="Палюдариум" loading="lazy" />
           </div>
         </div>
       </div>
@@ -844,20 +844,13 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
 }
-.sh-placeholder {
+.sh-hcard-img img {
   width: 100%;
   max-width: 480px;
   aspect-ratio: 16 / 10;
-  background: var(--ink-mid);
-  border: 1px solid var(--rule);
+  object-fit: cover;
   border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-size: 18px;
-  font-style: italic;
-  color: var(--cream-faint);
+  display: block;
 }
 
 /* Анимация разделителя */
@@ -943,7 +936,7 @@ onMounted(async () => {
     grid-template-columns: 1fr;
     gap: 24px;
   }
-  .sh-placeholder {
+  .sh-hcard-img img {
     max-width: 100%;
   }
   .sh-divider {
