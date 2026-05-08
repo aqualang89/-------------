@@ -2,10 +2,6 @@
   <div>
     <nav class="sh-nav">
       <div class="sh-nav-inner">
-        <NuxtLink to="/" class="sh-nav-logo" aria-label="Главная">
-          <img src="/img/logo-main.png" alt="Рипарий — студия аквадизайна" height="52" loading="eager" />
-        </NuxtLink>
-
         <div class="sh-nav-links">
           <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-nav-link">{{ link.label }}</NuxtLink>
           <a href="#" class="sh-nav-link sh-nav-quiz" @click.prevent="openQuiz">Викторина</a>
@@ -74,16 +70,6 @@ useHead({
   justify-content: space-between;
   align-items: flex-start;
   pointer-events: auto;
-}
-.sh-nav-logo {
-  flex-shrink: 0;
-  line-height: 0;
-  display: block;
-}
-.sh-nav-logo img {
-  height: 156px;
-  width: auto;
-  display: block;
 }
 .sh-nav-links {
   display: flex;
@@ -201,9 +187,6 @@ useHead({
   .sh-nav {
     padding: 12px 20px;
     height: 72px;
-  }
-  .sh-nav-logo img {
-    height: 26px;
   }
   .sh-nav-links {
     display: none;

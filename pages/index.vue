@@ -7,6 +7,9 @@
 
     <!-- HERO -->
     <div class="sh-stage">
+      <NuxtLink to="/" class="sh-hero-logo" aria-label="Главная">
+        <img src="/img/logo-main.png" alt="Рипарий — студия аквадизайна" loading="eager" />
+      </NuxtLink>
       <div class="sh-interior"></div>
       <div class="sh-lamp-glow" aria-hidden="true"></div>
 
@@ -401,6 +404,19 @@ onMounted(async () => {
   min-height: 100vh;
   overflow: hidden;
   background: #1e2933;
+}
+.sh-hero-logo {
+  position: absolute;
+  top: 22px;
+  left: 48px;
+  z-index: 10;
+  line-height: 0;
+  display: block;
+}
+.sh-hero-logo img {
+  height: 156px;
+  width: auto;
+  display: block;
 }
 
 .sh-interior {
@@ -918,10 +934,39 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
+  .sh-stage {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+  }
+  .sh-stage::before,
+  .sh-stage::after {
+    display: none;
+  }
+  .sh-hero-logo {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+  }
+  .sh-hero-logo img {
+    height: 52px;
+  }
+  .sh-interior {
+    position: relative;
+    order: 2;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    height: 40vh;
+    min-height: 260px;
+    opacity: 1;
+  }
   .sh-hero {
+    order: 1;
     padding: 0 20px;
     min-height: auto;
-    padding-bottom: 38vh;
+    padding-bottom: 0;
   }
   .sh-hero-title {
     font-size: 36px;
@@ -939,15 +984,8 @@ onMounted(async () => {
     font-size: 14px;
     max-width: 100%;
   }
-  .sh-interior {
-    position: absolute;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 35vh;
-    max-height: none;
-    opacity: 1;
+  .sh-lamp-glow {
+    display: none;
   }
   .sh-bubbles {
     display: none;
@@ -989,6 +1027,5 @@ onMounted(async () => {
   .sh-form-row {
     grid-template-columns: 1fr;
   }
-
 }
 </style>
