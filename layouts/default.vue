@@ -199,7 +199,11 @@ useHead({
 
 @media (max-width: 768px) {
   .sh-nav {
-    padding: 16px 24px;
+    padding: 12px 20px;
+    height: 72px;
+  }
+  .sh-nav-logo img {
+    height: 120px;
   }
   .sh-nav-links {
     display: none;
@@ -209,10 +213,11 @@ useHead({
   }
   .sh-mobile-menu {
     display: flex;
+    top: 72px;
   }
   .sh-back {
-    left: 24px;
-    top: 80px;
+    left: 20px;
+    top: 90px;
   }
 }
 </style>

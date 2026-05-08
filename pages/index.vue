@@ -919,17 +919,40 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .sh-hero {
-    padding: 0 24px;
+    padding: 0 20px;
+    min-height: auto;
+    padding-bottom: 40px;
   }
   .sh-hero-title {
-    font-size: 56px;
-    padding-top: 70px;
+    font-size: 36px;
+    padding-top: 90px;
+    line-height: 1.15;
   }
   .sh-hero-bottom {
+    position: static;
+    transform: none;
+    left: auto;
     margin-top: 24px;
+    max-width: 100%;
+  }
+  .sh-hero-lede {
+    font-size: 14px;
+    max-width: 100%;
   }
   .sh-interior {
-    max-height: 50vh;
+    top: 8vh;
+    max-height: 45vh;
+    opacity: 0.6;
+  }
+  .sh-bubbles {
+    display: none;
+  }
+  .sh-toc {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    margin: 32px auto 0;
+    right: auto;
   }
   .sh-hcard {
     width: 85vw;
@@ -940,7 +963,24 @@ onMounted(async () => {
     max-width: 100%;
   }
   .sh-divider {
-    padding: 48px 24px;
+    padding: 48px 20px;
+    font-size: 12px;
+  }
+  .sh-contacts {
+    padding: 40px 20px 60px;
+  }
+  .sh-contacts-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .sh-contact-form {
+    padding: 24px;
+  }
+  .sh-form-row {
+    grid-template-columns: 1fr;
+  }
+  .sh-horizontal-section {
+    overflow: hidden;
   }
 }
 </style>

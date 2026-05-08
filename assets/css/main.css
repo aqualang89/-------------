@@ -25,6 +25,9 @@
 }
 
 /* ТЕЛО СТРАНИЦЫ */
+html, body {
+  overflow-x: hidden;
+}
 body {
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   background: #1e2933;
