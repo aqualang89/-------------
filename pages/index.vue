@@ -2,6 +2,10 @@
   <div>
     <!-- ИНТРО -->
     <div id="intro-overlay">
+      <!-- CSS-ripples для мобилы (вместо WebGL) -->
+      <div class="intro-ripples" aria-hidden="true">
+        <div v-for="n in 6" :key="n" class="intro-ripple" :style="rippleDelay(n)"></div>
+      </div>
       <div class="intro-center" title="Кликните, чтобы войти"></div>
     </div>
 
@@ -868,6 +872,36 @@ onMounted(async () => {
   object-fit: cover;
   border-radius: 4px;
   display: block;
+}
+
+/* CSS-ripples на интро (мобила) */
+.intro-ripples {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.intro-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(241, 230, 200, 0.12);
+  animation: intro-ripple-expand 2.8s ease-out infinite;
+  transform: translate(-50%, -50%) scale(0);
+}
+@keyframes intro-ripple-expand {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+@media (min-width: 769px) {
+  .intro-ripples {
+    display: none;
+  }
 }
 
 /* Анимация разделителя */
