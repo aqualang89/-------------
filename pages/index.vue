@@ -921,7 +921,7 @@ onMounted(async () => {
   .sh-hero {
     padding: 0 20px;
     min-height: auto;
-    padding-bottom: 40px;
+    padding-bottom: 38vh;
   }
   .sh-hero-title {
     font-size: 36px;
@@ -940,9 +940,14 @@ onMounted(async () => {
     max-width: 100%;
   }
   .sh-interior {
-    top: 8vh;
-    max-height: 45vh;
-    opacity: 0.6;
+    position: absolute;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 35vh;
+    max-height: none;
+    opacity: 1;
   }
   .sh-bubbles {
     display: none;
@@ -964,7 +969,12 @@ onMounted(async () => {
   }
   .sh-divider {
     padding: 48px 20px;
-    font-size: 12px;
+    gap: 12px;
+  }
+  .sh-divider-text {
+    font-size: 24px;
+    white-space: normal;
+    text-align: center;
   }
   .sh-contacts {
     padding: 40px 20px 60px;
@@ -979,8 +989,6 @@ onMounted(async () => {
   .sh-form-row {
     grid-template-columns: 1fr;
   }
-  .sh-horizontal-section {
-    overflow: hidden;
-  }
+
 }
 </style>

@@ -81,7 +81,7 @@ useHead({
   display: block;
 }
 .sh-nav-logo img {
-  height: 52px;
+  height: 156px;
   width: auto;
   display: block;
 }
@@ -203,7 +203,7 @@ useHead({
     height: 72px;
   }
   .sh-nav-logo img {
-    height: 120px;
+    height: 26px;
   }
   .sh-nav-links {
     display: none;
