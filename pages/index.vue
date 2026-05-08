@@ -225,6 +225,27 @@ function scrollToContacts() {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+function rippleDelay(n) {
+  const positions = [
+    { left: '20%', top: '30%' },
+    { left: '60%', top: '20%' },
+    { left: '40%', top: '50%' },
+    { left: '75%', top: '40%' },
+    { left: '30%', top: '65%' },
+    { left: '55%', top: '75%' }
+  ]
+  const pos = positions[(n - 1) % positions.length]
+  const delay = (n - 1) * 0.7
+  const size = 50 + (n % 3) * 25
+  return {
+    left: pos.left,
+    top: pos.top,
+    width: size + 'px',
+    height: size + 'px',
+    animationDelay: delay + 's'
+  }
+}
+
 function bubbleStyle(n) {
   const left = 35 + (n - 1) * 6 + Math.random() * 4
   const delay = n * 1.5
