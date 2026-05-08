@@ -949,29 +949,16 @@ onMounted(async () => {
     left: 20px;
   }
   .sh-hero-logo img {
-    height: 52px;
-  }
-  .sh-interior {
-    position: relative;
-    order: 2;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    height: 40vh;
-    min-height: 260px;
-    opacity: 1;
+    height: 80px;
   }
   .sh-hero {
-    order: 1;
-    padding: 0 20px;
-    min-height: auto;
-    padding-bottom: 0;
+    display: contents;
   }
   .sh-hero-title {
     font-size: 36px;
-    padding-top: 90px;
+    padding: 90px 20px 0;
     line-height: 1.15;
+    order: 1;
   }
   .sh-hero-bottom {
     position: static;
@@ -979,6 +966,39 @@ onMounted(async () => {
     left: auto;
     margin-top: 24px;
     max-width: 100%;
+    padding: 0 20px;
+    order: 2;
+  }
+  .sh-interior {
+    position: relative;
+    order: 3;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    height: 40vh;
+    min-height: 260px;
+    opacity: 1;
+    margin: 24px 0 0;
+  }
+  /* Градиенты по краям аквариума */
+  .sh-interior::before,
+  .sh-interior::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .sh-interior::before {
+    left: 0;
+    background: linear-gradient(to right, #1e2933 0%, transparent 100%);
+  }
+  .sh-interior::after {
+    right: 0;
+    background: linear-gradient(to left, #1e2933 0%, transparent 100%);
   }
   .sh-hero-lede {
     font-size: 14px;
@@ -994,8 +1014,10 @@ onMounted(async () => {
     position: static;
     width: 100%;
     max-width: 100%;
-    margin: 32px auto 0;
+    margin: 32px 0 0;
     right: auto;
+    padding: 0 20px;
+    order: 4;
   }
   .sh-hcard {
     width: 85vw;

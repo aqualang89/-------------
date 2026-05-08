@@ -28,18 +28,22 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const response = await fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'sonar-pro',
-      messages: [
-        {
-          role: 'system',
-          content: `Ты — консультант студии аквариумного дизайна Scaper's House (Калининград).
+  let reply;
+  let responseMode = 'ai';
+
+  try {
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'sonar-pro',
+        messages: [
+          {
+            role: 'system',
+            content: `Ты — консультант студии аквариумного дизайна Scaper's House (Калининград).
 Отвечай только по-русски. Пиши тепло, живо, как эксперт-друг — не как робот. Без лишней официальности.
 Без Markdown: никаких звёздочек, решёток, сносок [1][2], тире-списков. Только обычный текст.
 
@@ -60,35 +64,42 @@ export default defineEventHandler(async (event) => {
 — В конце скажи: "Оставьте контакт или напишите нам в Telegram @scapers_house — рассчитаем под вас"
 
 Никогда не придумывай конкретные цены на оборудование конкретных брендов.`
-        },
-        ...previousHistory.slice(-10).map(h => ({ role: h.role, content: h.content })),
-        {
-          role: 'user',
-          content: cleanText
-        }
-      ]
-    })
-  });
+          },
+          ...previousHistory.slice(-10).map(h => ({ role: h.role, content: h.content })),
+          {
+            role: 'user',
+            content: cleanText
+          }
+        ]
+      })
+    });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error('Perplexity error:', response.status, errText);
-    throw createError({ statusCode: 500, statusMessage: 'AI request failed' });
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Perplexity error:', response.status, errText);
+      throw new Error('AI request failed');
+    }
+
+    const data = await response.json();
+    const raw = data?.choices?.[0]?.message?.content;
+    if (!raw) throw new Error('Empty AI response');
+
+    reply = raw
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/#{1,6}\s*/g, '')
+      .replace(/\[[\d,\s]+\]/g, '')
+      .replace(/^[-•]\s/gm, '— ')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  } catch (aiErr) {
+    console.error('AI fallback:', aiErr);
+    responseMode = 'manual';
+    reply = 'Консультант сейчас недоступен. Ваш вопрос передан специалисту — он ответит в ближайшее время. Также можете написать нам в Telegram @scapers_house.';
   }
 
-  const data = await response.json();
-  const raw = data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
-  const reply = raw
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/#{1,6}\s*/g, '')
-    .replace(/\[[\d,\s]+\]/g, '')
-    .replace(/^[-•]\s/gm, '— ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-
   await addHistory(sessionId, 'assistant', reply);
-  await sendOwnerCard({ sessionId, userText: cleanText, aiReply: reply, mode: 'ai' });
+  await sendOwnerCard({ sessionId, userText: cleanText, aiReply: responseMode === 'ai' ? reply : null, mode: responseMode });
 
-  return { reply, mode: 'ai' };
+  return { reply, mode: responseMode };
 });

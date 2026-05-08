@@ -188,6 +188,9 @@ useHead({
     padding: 12px 20px;
     height: 72px;
   }
+  .sh-nav-inner {
+    justify-content: flex-end;
+  }
   .sh-nav-links {
     display: none;
   }

@@ -73,16 +73,26 @@ async function onChatSubmit(e) {
       body: JSON.stringify({ sessionId: chatState.sessionId, text })
     });
 
+    if (!res.ok) {
+      const errText = await res.text().catch(() => 'unknown');
+      console.error('Chat server error:', res.status, errText);
+      throw new Error('Server error');
+    }
+
     const data = await res.json();
     const reply = data.reply || 'Что-то пошло не так.';
 
     // заменяем последний "думаю..." на нормальный ответ
     const msgs = document.querySelectorAll('.ai-chat-msg.ai-chat-assistant');
-    msgs[msgs.length - 1].textContent = reply;
+    if (msgs.length) msgs[msgs.length - 1].textContent = reply;
 
     chatState.history.push({ role: 'assistant', content: reply });
   } catch (err) {
     console.error(err);
+    const msgs = document.querySelectorAll('.ai-chat-msg.ai-chat-assistant');
+    if (msgs.length) {
+      msgs[msgs.length - 1].textContent = 'Консультант сейчас недоступен. Напишите нам в Telegram @scapers_house — ответим лично.';
+    }
   }
 }
 
