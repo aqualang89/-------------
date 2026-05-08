@@ -18,6 +18,18 @@
         <div v-for="n in 6" :key="n" class="sh-bubble" :style="bubbleStyle(n)"></div>
       </div>
 
+      <!-- Оглавление (привязано к правому краю экрана = к лампе) -->
+      <aside class="sh-toc" aria-label="Содержание">
+        <div class="sh-toc-title">Содержание</div>
+        <ol class="sh-toc-list">
+          <li><NuxtLink to="/services/nature" class="sh-toc-link">Nature Aquarium</NuxtLink><span class="sh-toc-num">01</span></li>
+          <li><NuxtLink to="/services/iwagumi" class="sh-toc-link">Iwagumi</NuxtLink><span class="sh-toc-num">02</span></li>
+          <li><NuxtLink to="/services/dutch" class="sh-toc-link">Голландский аквариум</NuxtLink><span class="sh-toc-num">03</span></li>
+          <li><NuxtLink to="/services/biotope" class="sh-toc-link">Биотоп</NuxtLink><span class="sh-toc-num">04</span></li>
+          <li><NuxtLink to="/services/paludarium" class="sh-toc-link">Палюдариум</NuxtLink><span class="sh-toc-num">05</span></li>
+        </ol>
+      </aside>
+
       <!-- Hero контент -->
       <section class="sh-hero">
         <h1 class="sh-hero-title">
@@ -33,18 +45,6 @@
             Заказать консультацию
           </button>
         </div>
-
-        <!-- Оглавление -->
-        <aside class="sh-toc" aria-label="Содержание">
-          <div class="sh-toc-title">Содержание</div>
-          <ol class="sh-toc-list">
-            <li><NuxtLink to="/services/nature" class="sh-toc-link">Nature Aquarium</NuxtLink><span class="sh-toc-num">01</span></li>
-            <li><NuxtLink to="/services/iwagumi" class="sh-toc-link">Iwagumi</NuxtLink><span class="sh-toc-num">02</span></li>
-            <li><NuxtLink to="/services/dutch" class="sh-toc-link">Голландский аквариум</NuxtLink><span class="sh-toc-num">03</span></li>
-            <li><NuxtLink to="/services/biotope" class="sh-toc-link">Биотоп</NuxtLink><span class="sh-toc-num">04</span></li>
-            <li><NuxtLink to="/services/paludarium" class="sh-toc-link">Палюдариум</NuxtLink><span class="sh-toc-num">05</span></li>
-          </ol>
-        </aside>
       </section>
     </div>
 
@@ -401,8 +401,6 @@ onMounted(async () => {
 .sh-stage {
   position: relative;
   width: 100%;
-  max-width: 1920px;
-  margin: 0 auto;
   min-height: 100vh;
   overflow: hidden;
   background: #1e2933;
