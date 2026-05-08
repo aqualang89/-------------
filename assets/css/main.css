@@ -691,20 +691,9 @@ input[type="range"] {
 }
 
 /* INTRO OVERLAY */
+/* Критические стили (position, background, display) в inline <style> head — см. nuxt.config.js */
 #intro-overlay {
-  position: fixed;
-  inset: 0;
-  background: url('/img/aquarium-bottom.jpg') center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
   transition: opacity 0.6s ease, transform 0.6s ease;
-}
-html.intro-skip #intro-overlay {
-  display: none !important;
-}
-#intro-overlay {
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: none;

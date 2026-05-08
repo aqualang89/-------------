@@ -15,6 +15,12 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
         { name: 'description', content: 'Дизайн, монтаж и обслуживание аквариумов в Калининграде' }
       ],
+      style: [
+        {
+          innerHTML: `#intro-overlay{position:fixed;inset:0;background:#0e1a24 url('/img/aquarium-bottom.jpg') center/cover no-repeat;display:flex;align-items:center;justify-content:center;z-index:2000}html.intro-skip #intro-overlay{display:none!important}`,
+          tagPriority: 'critical'
+        }
+      ],
       script: [
         {
           innerHTML: `(function(){try{if(sessionStorage.getItem('leftHome')){document.documentElement.classList.add('intro-skip')}}catch(e){}})();`,
