@@ -126,15 +126,15 @@ function scrollToContacts() {
   max-width: 1200px;
   margin: 0 auto;
   padding: 100px 20px 40px;
-  color: #F0EDE5;
+  color: var(--cream);
 }
 .breadcrumbs {
   margin-bottom: 24px;
-  color: #888;
+  color: var(--cream-dim);
   font-size: 0.95rem;
 }
 .breadcrumbs a {
-  color: #6fcf97;
+  color: var(--gold);
   text-decoration: none;
 }
 .product-main {
@@ -156,7 +156,7 @@ function scrollToContacts() {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #0a1f15;
+  background: var(--ink-mid);
   border-radius: 12px;
   overflow: hidden;
   cursor: crosshair;
@@ -183,15 +183,15 @@ function scrollToContacts() {
 }
 .thumbs img.active, .thumbs img:hover {
   opacity: 1;
-  border-color: #6fcf97;
+  border-color: var(--gold);
 }
 .product-info h1 {
-  font-family: 'Noto Serif', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 2rem;
   margin-bottom: 8px;
 }
 .product-article {
-  color: #888;
+  color: var(--cream-dim);
   margin-bottom: 20px;
 }
 .product-price-wrap {
@@ -199,44 +199,46 @@ function scrollToContacts() {
 }
 .product-price {
   font-size: 1.8rem;
-  color: #6fcf97;
+  color: var(--gold);
   font-weight: 600;
 }
 .product-old-price {
   font-size: 1.2rem;
-  color: #888;
+  color: var(--cream-dim);
   text-decoration: line-through;
   margin-left: 12px;
 }
 .product-desc h3 {
+  font-family: 'Cormorant Garamond', serif;
   font-size: 1.1rem;
   margin-bottom: 8px;
-  color: #ccc;
+  color: var(--cream);
 }
 .product-desc p {
   line-height: 1.6;
-  color: #bbb;
+  color: var(--cream-dim);
 }
 .product-cta {
   margin-top: 32px;
   padding: 16px 32px;
   border-radius: 10px;
   border: none;
-  background: #013220;
-  color: #F0EDE5;
+  background: var(--gold);
+  color: var(--ink-deep);
   font-size: 1.1rem;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
 }
 .product-cta:hover {
-  background: #024d30;
+  background: var(--gold-soft);
+  transform: translateY(-2px);
 }
 .product-loading, .product-not-found {
   text-align: center;
   padding: 80px 20px;
 }
 .product-not-found a {
-  color: #6fcf97;
+  color: var(--gold);
   text-decoration: none;
 }
 </style>

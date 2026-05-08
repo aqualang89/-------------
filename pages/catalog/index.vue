@@ -221,10 +221,10 @@ onMounted(() => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 100px 20px 40px;
-  color: #F0EDE5;
+  color: var(--cream);
 }
 .catalog-header h1 {
-  font-family: 'Noto Serif', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 2.2rem;
   margin-bottom: 20px;
 }
@@ -232,9 +232,9 @@ onMounted(() => {
   width: 100%;
   padding: 12px 16px;
   border-radius: 8px;
-  border: 1px solid #333;
-  background: #0a1f15;
-  color: #F0EDE5;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream);
   font-size: 1rem;
   margin-bottom: 20px;
 }
@@ -261,14 +261,14 @@ onMounted(() => {
   padding: 4px 10px;
   border-radius: 6px;
   border: none;
-  background: #013220;
-  color: #F0EDE5;
+  background: var(--gold);
+  color: var(--ink-deep);
   font-size: 0.85rem;
   cursor: pointer;
 }
 .category-tree {
-  background: #0a1f15;
-  border: 1px solid #333;
+  background: var(--ink-mid);
+  border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 8px 0;
   max-height: 600px;
@@ -287,8 +287,8 @@ onMounted(() => {
   background: rgba(255,255,255,0.05);
 }
 .cat-item.active {
-  background: #013220;
-  color: #6fcf97;
+  background: rgba(217, 180, 106, 0.12);
+  color: var(--gold);
 }
 .cat-toggle {
   width: 20px;
@@ -333,7 +333,7 @@ onMounted(() => {
 }
 .price-filter label {
   font-size: 0.9rem;
-  color: #bbb;
+  color: var(--cream-dim);
 }
 .price-filter input[type="range"] {
   width: 100%;
@@ -343,15 +343,16 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #013220;
+  background: rgba(217, 180, 106, 0.12);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.9rem;
+  color: var(--cream);
 }
 .btn-reset {
   background: none;
   border: none;
-  color: #ff6b6b;
+  color: #ff8a8a;
   font-size: 1.2rem;
   cursor: pointer;
   line-height: 1;
@@ -362,11 +363,11 @@ onMounted(() => {
   gap: 24px;
 }
 .product-card {
-  background: #0a1f15;
+  background: var(--ink-mid);
   border-radius: 12px;
   overflow: hidden;
   text-decoration: none;
-  color: #F0EDE5;
+  color: var(--cream);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .product-card:hover {
@@ -375,7 +376,7 @@ onMounted(() => {
 }
 .card-img-wrap {
   height: 220px;
-  background: #111;
+  background: var(--ink-soft);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -386,7 +387,7 @@ onMounted(() => {
   object-fit: cover;
 }
 .card-no-photo {
-  color: #555;
+  color: var(--cream-dim);
 }
 .card-title {
   padding: 16px 16px 8px;
@@ -396,18 +397,18 @@ onMounted(() => {
 .card-price {
   padding: 0 16px 16px;
   font-size: 1.2rem;
-  color: #6fcf97;
+  color: var(--gold);
 }
 .card-old-price {
   text-decoration: line-through;
-  color: #888;
+  color: var(--cream-dim);
   font-size: 0.95rem;
   margin-left: 8px;
 }
 .catalog-empty, .catalog-loading {
   text-align: center;
   padding: 60px;
-  color: #888;
+  color: var(--cream-dim);
 }
 .pagination {
   display: flex;
@@ -420,8 +421,8 @@ onMounted(() => {
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  background: #013220;
-  color: #F0EDE5;
+  background: var(--gold);
+  color: var(--ink-deep);
   cursor: pointer;
 }
 .pagination button:disabled {

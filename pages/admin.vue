@@ -509,7 +509,11 @@ async function uploadPhoto(e, productId) {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-  color: #F0EDE5;
+  color: var(--cream);
+}
+.admin-wrap h1,
+.admin-wrap h2 {
+  font-family: 'Cormorant Garamond', serif;
 }
 .admin-login {
   max-width: 320px;
@@ -521,17 +525,18 @@ async function uploadPhoto(e, productId) {
 .admin-login input {
   padding: 12px;
   border-radius: 8px;
-  border: 1px solid #555;
-  background: #111;
-  color: #F0EDE5;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream);
 }
 .admin-login button {
   padding: 12px;
   border-radius: 8px;
-  background: #013220;
-  color: #F0EDE5;
+  background: var(--gold);
+  color: var(--ink-deep);
   border: none;
   cursor: pointer;
+  font-weight: 600;
 }
 .admin-header {
   display: flex;
@@ -540,8 +545,8 @@ async function uploadPhoto(e, productId) {
   margin-bottom: 32px;
 }
 .btn-logout {
-  background: #444;
-  color: #F0EDE5;
+  background: var(--ink-soft);
+  color: var(--cream);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -549,7 +554,7 @@ async function uploadPhoto(e, productId) {
 }
 .admin-section {
   margin-bottom: 40px;
-  background: #0a1f15;
+  background: var(--ink-mid);
   padding: 24px;
   border-radius: 12px;
 }
@@ -562,7 +567,7 @@ async function uploadPhoto(e, productId) {
 .upload-result {
   margin-top: 16px;
   padding: 12px;
-  background: #013220;
+  background: rgba(217, 180, 106, 0.1);
   border-radius: 8px;
 }
 .filters {
@@ -574,9 +579,9 @@ async function uploadPhoto(e, productId) {
 .filters input, .filters select {
   padding: 10px;
   border-radius: 6px;
-  border: 1px solid #333;
-  background: #111;
-  color: #F0EDE5;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream);
 }
 .product-grid {
   display: grid;
@@ -584,7 +589,7 @@ async function uploadPhoto(e, productId) {
   gap: 20px;
 }
 .product-card {
-  background: #111;
+  background: var(--ink-mid);
   border-radius: 10px;
   padding: 16px;
   display: flex;
@@ -594,7 +599,7 @@ async function uploadPhoto(e, productId) {
 .product-img-wrap {
   position: relative;
   height: 160px;
-  background: #222;
+  background: var(--ink-soft);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
@@ -607,13 +612,13 @@ async function uploadPhoto(e, productId) {
   object-fit: cover;
 }
 .no-photo {
-  color: #666;
+  color: var(--cream-dim);
 }
 .upload-photo-btn {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(14,26,36,0.8);
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
@@ -625,9 +630,9 @@ async function uploadPhoto(e, productId) {
 .product-input {
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #333;
-  background: #000;
-  color: #F0EDE5;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream);
 }
 .category-cascade {
   display: flex;
@@ -637,9 +642,9 @@ async function uploadPhoto(e, productId) {
 .category-cascade select {
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid #333;
-  background: #000;
-  color: #F0EDE5;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream);
 }
 .product-actions {
   display: flex;
@@ -651,11 +656,13 @@ async function uploadPhoto(e, productId) {
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  background: #013220;
-  color: #F0EDE5;
+  background: var(--gold);
+  color: var(--ink-deep);
+  font-weight: 600;
 }
 .btn-danger {
-  background: #521414 !important;
+  background: #6b1e1e !important;
+  color: var(--cream) !important;
 }
 .pagination {
   display: flex;
@@ -668,19 +675,19 @@ async function uploadPhoto(e, productId) {
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
-  background: #013220;
-  color: #F0EDE5;
+  background: var(--gold);
+  color: var(--ink-deep);
   cursor: pointer;
 }
 .error {
-  color: #ff6b6b;
+  color: #ff8a8a;
 }
 .progress-wrap {
   margin-top: 16px;
 }
 .progress-bar {
   height: 8px;
-  background: linear-gradient(90deg, #013220 0%, #0f5c3e 100%);
+  background: linear-gradient(90deg, var(--ink-mid) 0%, var(--gold) 100%);
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -702,11 +709,11 @@ async function uploadPhoto(e, productId) {
 .progress-text {
   margin-top: 8px;
   font-size: 13px;
-  color: #aaa;
+  color: var(--cream-dim);
 }
 .admin-cat-tree {
-  background: #0a1f15;
-  border: 1px solid #333;
+  background: var(--ink-mid);
+  border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 8px 0;
   max-height: 400px;
@@ -727,8 +734,8 @@ async function uploadPhoto(e, productId) {
   background: rgba(255,255,255,0.05);
 }
 .cat-item.active {
-  background: #013220;
-  color: #6fcf97;
+  background: rgba(217, 180, 106, 0.12);
+  color: var(--gold);
 }
 .cat-toggle {
   width: 20px;
