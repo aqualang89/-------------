@@ -556,6 +556,7 @@ onMounted(async () => {
   top: 80px;
   right: 60px;
   width: 200px;
+  z-index: 10;
 }
 
 .sh-toc-title {
