@@ -176,6 +176,59 @@
 import { onBeforeRouteLeave } from 'vue-router'
 useScrollReveal()
 
+// Template refs for horizontal scroll
+const hSection = ref(null)
+const hSticky = ref(null)
+const hTrack = ref(null)
+
+// Horizontal scroll state
+let hScrollRaf = null
+let hScrollHandler = null
+let hResizeHandler = null
+
+function initHorizontalScroll() {
+  const section = hSection.value
+  const track = hTrack.value
+  if (!section || !track) return
+  let maxTranslate = track.scrollWidth - window.innerWidth
+  function updateLayout() {
+    maxTranslate = track.scrollWidth - window.innerWidth
+    section.style.height = `${maxTranslate + window.innerHeight}px`
+    applyScroll()
+  }
+  function applyScroll() {
+    if (!document.body.contains(section)) return
+    const rect = section.getBoundingClientRect()
+    const scrolled = Math.max(0, -rect.top)
+    if (maxTranslate <= 0) return
+    const progress = Math.min(1, scrolled / maxTranslate)
+    track.style.transform = `translateX(${-progress * maxTranslate}px)`
+  }
+  function onScroll() {
+    if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
+    hScrollRaf = requestAnimationFrame(applyScroll)
+  }
+  hScrollHandler = onScroll
+  hResizeHandler = updateLayout
+  window.addEventListener('scroll', hScrollHandler, { passive: true })
+  window.addEventListener('resize', hResizeHandler)
+  updateLayout()
+}
+
+function cleanupHorizontalScroll() {
+  if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
+  if (hScrollHandler) window.removeEventListener('scroll', hScrollHandler, { passive: true })
+  if (hResizeHandler) window.removeEventListener('resize', hResizeHandler)
+  hScrollRaf = null
+  hScrollHandler = null
+  hResizeHandler = null
+}
+
+onMounted(() => { initHorizontalScroll() })
+onUnmounted(() => { cleanupHorizontalScroll() })
+onActivated(() => { initHorizontalScroll() })
+onDeactivated(() => { cleanupHorizontalScroll() })
+
 // Флаг: пользователь уходил с главной через SPA-навигацию
 onBeforeRouteLeave(() => {
   try { sessionStorage.setItem('leftHome', '1') } catch (e) {}
@@ -262,9 +315,6 @@ function bubbleStyle(n) {
 
 onMounted(async () => {
   let rippleInterval = null
-  let hScrollRaf = null
-  let hScrollHandler = null
-  let hResizeHandler = null
   function loadScript(src) {
     return new Promise((res, rej) => {
       if (document.querySelector(`script[src="${src}"]`)) { res(); return }
@@ -406,41 +456,10 @@ onMounted(async () => {
     }
   }
 
-  // Horizontal scroll animation (sticky)
-  const hSection = document.querySelector('.sh-horizontal-section')
-  const hSticky = document.querySelector('.sh-horizontal-sticky')
-  const hTrack = document.querySelector('.sh-horizontal-track')
-  if (hSection && hSticky && hTrack) {
-    let maxTranslate = hTrack.scrollWidth - window.innerWidth
-    function updateHorizontalLayout() {
-      maxTranslate = hTrack.scrollWidth - window.innerWidth
-      hSection.style.height = `${maxTranslate + window.innerHeight}px`
-      applyHorizontalScroll()
-    }
-    function applyHorizontalScroll() {
-      const rect = hSection.getBoundingClientRect()
-      const scrolled = Math.max(0, -rect.top)
-      const progress = Math.min(1, scrolled / maxTranslate)
-      hTrack.style.transform = `translateX(${-progress * maxTranslate}px)`
-    }
-    function onHorizontalScroll() {
-      if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
-      hScrollRaf = requestAnimationFrame(applyHorizontalScroll)
-    }
-    hScrollHandler = onHorizontalScroll
-    hResizeHandler = updateHorizontalLayout
-    window.addEventListener('scroll', hScrollHandler, { passive: true })
-    window.addEventListener('resize', hResizeHandler)
-    updateHorizontalLayout()
-  }
-
   // Cleanup on unmount
   onUnmounted(() => {
     if (introClickHandler && introCenter) introCenter.removeEventListener('click', introClickHandler)
     if (rippleInterval) clearInterval(rippleInterval)
-    if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
-    if (hScrollHandler) window.removeEventListener('scroll', hScrollHandler, { passive: true })
-    if (hResizeHandler) window.removeEventListener('resize', hResizeHandler)
   })
 })
 </script>
@@ -928,7 +947,7 @@ onMounted(async () => {
   transition: transform 0.5s ease;
 }
 .sh-hcard:hover .sh-hcard-img img {
-  transform: scale(1.07);
+  transform: scale(1.7);
 }
 
 /* CSS-ripples на интро (мобила) */
