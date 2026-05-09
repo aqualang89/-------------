@@ -1,6 +1,6 @@
 <template>
   <div class="layout-root">
-    <nav class="sh-nav">
+    <nav class="sh-nav" :class="{ 'sh-nav--compact': compact }">
       <div class="sh-nav-inner">
         <div class="sh-nav-links">
           <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-nav-link">{{ link.label }}</NuxtLink>
@@ -30,6 +30,7 @@
 
 <script setup>
 const menuOpen = ref(false)
+const compact = ref(false)
 
 const regularLinks = [
   { to: '/', label: 'Главная' },
@@ -38,6 +39,25 @@ const regularLinks = [
   { to: '/calculator', label: 'Калькулятор' },
   { to: '/about', label: 'О нас' },
 ]
+
+/* Scroll-based compact nav (desktop only) */
+let scrollTick = false
+function onScroll () {
+  if (!scrollTick) {
+    requestAnimationFrame(() => {
+      compact.value = window.scrollY > 80
+      scrollTick = false
+    })
+    scrollTick = true
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 
 /* function openQuiz() {
   menuOpen.value = false
@@ -60,6 +80,17 @@ useHead({
   position: relative;
   padding: 22px 48px;
   pointer-events: none;
+  transition: background 0.3s ease, padding 0.3s ease;
+}
+.sh-nav--compact {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 14px 48px;
+  background: rgba(14, 26, 36, 0.92);
+  backdrop-filter: blur(10px);
 }
 .sh-nav-inner {
   max-width: 1440px;
@@ -80,6 +111,7 @@ useHead({
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .sh-nav-link {
   color: rgba(241, 230, 200, 0.65);
@@ -102,8 +134,10 @@ useHead({
   border-radius: 50%;
   background: #d9b46a;
 }
+
+/* Burger always visible but hidden by default on desktop */
 .sh-nav-burger {
-  display: none;
+  display: flex;
   flex-direction: column;
   justify-content: space-between;
   width: 26px;
@@ -112,6 +146,15 @@ useHead({
   border: none;
   cursor: pointer;
   padding: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.9);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.sh-nav--compact .sh-nav-burger {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
 }
 .sh-nav-burger span {
   display: block;
@@ -124,6 +167,13 @@ useHead({
 .sh-nav-burger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
 .sh-nav-burger.open span:nth-child(2) { opacity: 0; }
 .sh-nav-burger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+.sh-nav--compact .sh-nav-links {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  position: absolute;
+}
 
 .sh-mobile-menu {
   display: none;
@@ -182,6 +232,22 @@ useHead({
   color: var(--gold);
 }
 
+/* Desktop compact menu position */
+@media (min-width: 769px) {
+  .sh-nav--compact ~ .sh-mobile-menu {
+    top: 60px;
+    left: auto;
+    right: 48px;
+    width: 220px;
+    border-radius: 8px;
+    border: 1px solid rgba(241, 230, 200, 0.08);
+    transform: translateY(-6px) scale(0.98);
+  }
+  .sh-nav--compact ~ .sh-mobile-menu.open {
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 768px) {
   .sh-nav {
     position: fixed;
@@ -199,11 +265,18 @@ useHead({
     display: none;
   }
   .sh-nav-burger {
-    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
   }
   .sh-mobile-menu {
     display: flex;
     top: 72px;
+    left: 0;
+    right: 0;
+    width: auto;
+    border-radius: 0;
+    transform: translateY(-10px);
   }
   .sh-back {
     position: static;
