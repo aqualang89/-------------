@@ -261,6 +261,10 @@ function bubbleStyle(n) {
 }
 
 onMounted(async () => {
+  let rippleInterval = null
+  let hScrollRaf = null
+  let hScrollHandler = null
+  let hResizeHandler = null
   function loadScript(src) {
     return new Promise((res, rej) => {
       if (document.querySelector(`script[src="${src}"]`)) { res(); return }
@@ -373,12 +377,14 @@ onMounted(async () => {
     }, 700)
   }
 
+  let introClickHandler = null
   const introCenter = document.querySelector('.intro-center')
   if (introCenter) {
-    introCenter.addEventListener('click', (e) => {
+    introClickHandler = (e) => {
       e.stopPropagation()
       closeIntro()
-    })
+    }
+    introCenter.addEventListener('click', introClickHandler)
   }
 
   const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
@@ -391,7 +397,7 @@ onMounted(async () => {
       const ripples = $(overlay).data('ripples')
       if (ripples) {
         const origStep = ripples.step.bind(ripples)
-        setInterval(() => {
+        rippleInterval = setInterval(() => {
           if (ripples.visible && ripples.running) origStep()
         }, 1000 / 60)
       }
@@ -405,20 +411,37 @@ onMounted(async () => {
   const hSticky = document.querySelector('.sh-horizontal-sticky')
   const hTrack = document.querySelector('.sh-horizontal-track')
   if (hSection && hSticky && hTrack) {
-    function updateHorizontalScroll() {
-      const maxTranslate = hTrack.scrollWidth - window.innerWidth
-      // Высота секции = точно сколько нужно для полной прокрутки + viewport
+    let maxTranslate = hTrack.scrollWidth - window.innerWidth
+    function updateHorizontalLayout() {
+      maxTranslate = hTrack.scrollWidth - window.innerWidth
       hSection.style.height = `${maxTranslate + window.innerHeight}px`
+      applyHorizontalScroll()
+    }
+    function applyHorizontalScroll() {
       const rect = hSection.getBoundingClientRect()
       const scrolled = Math.max(0, -rect.top)
-      const totalScroll = maxTranslate
-      const progress = Math.min(1, scrolled / totalScroll)
+      const progress = Math.min(1, scrolled / maxTranslate)
       hTrack.style.transform = `translateX(${-progress * maxTranslate}px)`
     }
-    window.addEventListener('scroll', updateHorizontalScroll, { passive: true })
-    window.addEventListener('resize', updateHorizontalScroll)
-    updateHorizontalScroll()
+    function onHorizontalScroll() {
+      if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
+      hScrollRaf = requestAnimationFrame(applyHorizontalScroll)
+    }
+    hScrollHandler = onHorizontalScroll
+    hResizeHandler = updateHorizontalLayout
+    window.addEventListener('scroll', hScrollHandler, { passive: true })
+    window.addEventListener('resize', hResizeHandler)
+    updateHorizontalLayout()
   }
+
+  // Cleanup on unmount
+  onUnmounted(() => {
+    if (introClickHandler && introCenter) introCenter.removeEventListener('click', introClickHandler)
+    if (rippleInterval) clearInterval(rippleInterval)
+    if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
+    if (hScrollHandler) window.removeEventListener('scroll', hScrollHandler, { passive: true })
+    if (hResizeHandler) window.removeEventListener('resize', hResizeHandler)
+  })
 })
 </script>
 
@@ -891,6 +914,10 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
 }
+.sh-hcard-img {
+  overflow: hidden;
+  border-radius: 4px;
+}
 .sh-hcard-img img {
   width: 100%;
   max-width: 480px;
@@ -898,6 +925,10 @@ onMounted(async () => {
   object-fit: cover;
   border-radius: 4px;
   display: block;
+  transition: transform 0.5s ease;
+}
+.sh-hcard:hover .sh-hcard-img img {
+  transform: scale(1.07);
 }
 
 /* CSS-ripples на интро (мобила) */
