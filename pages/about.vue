@@ -1,186 +1,507 @@
 <template>
   <div class="sh-about">
-    <div class="sh-about-hero" data-reveal-up>
-      <span class="sh-about-label">О студии</span>
-      <h1 class="sh-about-title">Рипарий</h1>
-      <p class="sh-about-lead">
-        Студия аквариумного дизайна в Калининграде. Создаём живые подводные пейзажи 
-        для домов, офисов и общественных пространств.
+    <!-- HERO -->
+    <div class="sh-about-hero">
+      <div class="sh-about-hero-bg" style="background-image: url(/img/about/1.jpg)"></div>
+      <div class="sh-about-hero-overlay"></div>
+      <div class="sh-about-hero-inner" data-reveal-up>
+        <span class="sh-about-label">История</span>
+        <h1 class="sh-about-title">От шкафа до студии</h1>
+        <p class="sh-about-lead">
+          Десять лет пути. От первых продаж из родительского дома — до студии аквариумного дизайна.
+        </p>
+      </div>
+    </div>
+
+    <!-- INTRO -->
+    <div class="sh-about-intro" data-reveal>
+      <p class="sh-about-intro-text">
+        Здесь вы не найдёте информации о местонахождении или контактов.
+        Но здесь вы сможете прочесть историю отрывка моей жизни длиной в&nbsp;10&nbsp;лет.
       </p>
     </div>
 
-    <div class="sh-about-content" data-reveal>
-      <div class="sh-about-img" data-reveal-left>
-        <div class="sh-placeholder">Фото скоро</div>
-      </div>
-      <div class="sh-about-text" data-reveal-right>
+    <!-- SECTION 01 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">01</span>
+        <h2 class="sh-section-title">Зарождение</h2>
+        <span class="sh-section-year">2016</span>
+      </header>
+      <div class="sh-section-body">
         <p>
-          Каждый проект начинается с разговора. Мы узнаём, какое пространство доступно, 
-          какой уход планируется, какие рыбы нравятся — и предлагаем решение, которое 
-          будет жить долго и радовать каждый день.
+          «Рипарий» создан не сегодня — он появился в теперь уже далёком 2016-м.
+          Просто назывался и выглядел тогда иначе. Именно в 2016 году из ничем не примечательной
+          болтовни друзей о планах на жизнь и поисках способов заработка возникла та самая идея —
+          создать аквариумный магазин или хоть некое его подобие.
         </p>
         <p>
-          Работаем с натуральными материалами: камни, коряги, живые растения, 
-          натуральный грунт. Подбираем оборудование под конкретный объём и задачу.
+          Сейчас понимаю, как же по-детски наивно это выглядело со стороны. Мне 26, живу с девушкой
+          в родительском доме, едва устроился на стабильную работу, которая сулила хоть сколько-нибудь
+          достойную жизнь, и нет буквально ничего своего. Казалось бы, стоит сосредоточиться,
+          копить на жильё, думать о серьёзных вещах, а не лепетать о каких-то вабикусах.
         </p>
-        <p>
-          После запуска остаёмся на связи: консультируем по уходу, помогаем 
-          с подменами воды, подкормкой растений, решением вопросов.
-        </p>
-      </div>
-    </div>
 
-    <div class="sh-about-contacts">
-      <h2>Контакты</h2>
-      <div class="sh-about-list">
-        <div class="sh-about-item">
-          <span class="sh-about-item-label">Адрес</span>
-          <p>Калининград <em>(уточним позже)</em></p>
-        </div>
-        <div class="sh-about-item">
-          <span class="sh-about-item-label">Телефон</span>
-          <p><a href="tel:+70000000000">+7 (XXX) XXX-XX-XX</a></p>
-        </div>
-        <div class="sh-about-item">
-          <span class="sh-about-item-label">Email</span>
-          <p><a href="mailto:info@riparium.ru">info@riparium.ru</a></p>
-        </div>
-        <div class="sh-about-item">
-          <span class="sh-about-item-label">Telegram</span>
-          <p><a href="https://t.me/riparium" target="_blank" rel="noopener">@riparium</a></p>
-        </div>
-        <div class="sh-about-item">
-          <span class="sh-about-item-label">Часы работы</span>
-          <p>Пн–Пт 10:00–19:00</p>
-        </div>
+        <blockquote class="sh-section-quote">
+          «Мы приступим к созданию аквариумной корпорации планетарных масштабов!»
+        </blockquote>
+
+        <p>
+          Отчасти я так и планировал. Рассматривал вариант уйти с работы лет через 10–12
+          и открыть небольшой магазинчик, посвящённый моему хобби. Но эти планы нарушил
+          друг детства, предложив заниматься этим прямо сейчас. Пусть параллельно
+          с основной работой, но не через 10 лет, не через год — а прямо сейчас.
+        </p>
+        <p>
+          Нужно название. Пусть будет <strong>Planta</strong>. Мы же про растения.
+          Капитал — по 10 тысяч рублей с человека, итого 30. Сейчас перечитываю
+          и улыбаюсь: уже не дети, но откуда столько наивности?
+        </p>
+        <p>
+          С таким «уставным капиталом» открытие физического магазина было проблематично.
+          Значит, идём в онлайн. Создаём сообщество в ВК, закупаем микропартии товаров,
+          параллельно выкладываем объявления на Авито. Торговля пошла —
+          продаж в месяц на 1500–2000&nbsp;₽.
+        </p>
+        <p>
+          Денег недостаточно. Скидываемся ещё по 5000&nbsp;₽, принимаем в «ОАО»
+          девушку друга, она даёт ещё 15&nbsp;000&nbsp;₽. Сумасшедшие деньги, вам не кажется?
+        </p>
+        <p>
+          Интерес компаньонов к делу со временем поугас — ожидания разошлись с реальностью.
+          Девушка друга ушла первой, ещё спустя полгода и сам друг отказался от участия.
+          Остались я и моя вторая половинка.
+        </p>
+        <p>
+          <strong>Planta</strong> превратилась в хобби. Мне было интересно наблюдать,
+          как наполняется группа ВК, как появляются первые комментарии.
+          За это время девушка-компаньон стала моей женой,
+          а микро-дело — по-настоящему семейным.
+        </p>
+        <p>
+          Продажи постепенно росли, но торговля из шкафа родительского дома
+          вряд ли сулила приток клиентов. Тогда мы поставили товары «под реализацию»
+          в зоомагазинчик наших знакомых. Фантастика — мы начали материализоваться.
+          Уже не просто пост в интернете, а полочка в настоящем магазине.
+        </p>
+        <p>
+          Так продолжалось, но летом 2018 года жизненные обстоятельства
+          владельца магазина изменились и он решил его продать.
+          Такой шанс мог больше и не представиться.
+        </p>
       </div>
+    </section>
+
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 02 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">02</span>
+        <h2 class="sh-section-title">Кот да Винчи</h2>
+        <span class="sh-section-year">2018 – 2021</span>
+      </header>
+      <div class="sh-section-body">
+        <p>
+          Но как быть? Свою работу я бросить не мог — она составляла основу дохода
+          и давала надежду на собственное жильё. Тогда мы с женой, имевшей
+          пятилетний опыт работы в крупной сети зоомагазинов, решили:
+          ей пора обзавестись собственным делом.
+        </p>
+
+        <blockquote class="sh-section-quote">
+          «Здесь романтикой уже не пахнет. Теперь ты должен вести бухгалтерию,
+          платить налоги, аренду и зарплату продавцу. И всё это независимо от продаж.»
+        </blockquote>
+
+        <p>
+          Кредиты на покупку, оформления, регистрация ИП, открытие счетов,
+          касса, эквайринг, приведение магазина к нашим стандартам — всё то,
+          что не замечаешь, пока сам не окунёшься. И вот мы владельцы
+          целого зоомагазина площадью в невероятные <strong>12 квадратных метров</strong>
+          без санузла и с электрическим отоплением. Имя сему — <strong>Кот да Винчи</strong>!
+        </p>
+        <p>
+          Я не зря заострил внимание на отсутствии санузла.
+          Аквариум предполагает необходимость воду откуда-то брать и куда-то сливать.
+          Отсутствие водоснабжения и канализации мягко говоря сковывало развитие
+          аквариумного сегмента. Но я всё же запустил пару небольших аквариумов.
+          Воду для подмен возили из дома, а сливали — на ближайшие кустарники.
+        </p>
+        <p>
+          Дело мало-помалу пошло. Мы договорились с легендарным аквариумным магазином
+          о сбыте наших вабикус — пусть под реализацию, но для меня это было нечто невероятное.
+          Со временем подтянулись и другие. Мы занимались мелким, но всё же оптом.
+          Параллельно расширяли ассортимент, вливая всё больше денег и сил.
+        </p>
+        <p>
+          И вот вроде бы безоблачное будущее — но открывается крупный зоосетевик
+          и начинает демпинговать, продавая товары в розницу дешевле,
+          чем нам их отпускают поставщики. Продажи скатываются.
+          А где-то между этими событиями наш магазин в тёплую летнюю ночь ограбили.
+          Отжали дверь, своровали телефон и мелочь.
+          Тот случай, когда радуешься, что брать особо нечего.
+        </p>
+        <p>
+          Мы приспосабливались. Увеличили ассортимент аквариумистики —
+          сегмент занял уже не пару полок, а стеллаж, затем ещё один.
+          На дворе шёл 2019-й. На смену ему приходит 20-й, а вместе с ним
+          — COVID-19. Ограничения, маски, закрытие границ, рост цен,
+          снижение ассортимента. Чтобы держаться на плаву, мы продавали маски и перчатки.
+          Каким-то чудом прошли этот период, приспособились.
+          А весной 2021-го нас попросили покинуть помещение.
+        </p>
+      </div>
+    </section>
+
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 03 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">03</span>
+        <h2 class="sh-section-title">Новый дом</h2>
+        <span class="sh-section-year">2021 – 2023</span>
+      </header>
+      <div class="sh-section-body">
+        <p>
+          Под лозунгом «Что не делается — всё к лучшему!» мы заправились оптимизмом,
+          смазали шестерни потрёпанной ИПэшной души энтузиазмом и поехали на новое место.
+          Новый магазин был недалеко от старого, выигрывал в площади и цене,
+          а главное — имел отдельный санузел. Но бо́льшую площадь нужно было чем-то заставить.
+          Стеллажи, товары, столы. Мы снова вложили свои деньги и за месяц наполнили магазин.
+          На переезд было запланировано два дня.
+        </p>
+
+        <blockquote class="sh-section-quote">
+          «25 мая 2021 года свои двери открыл обновлённый «Кот да Винчи».
+          Светлый и просторный магазин на трамвайном кольце.»
+        </blockquote>
+
+        <p>
+          Я наконец получил то, чего ждал — возможность развивать аквариумный отдел
+          в полный рост. День за днём вкладывали силы и средства.
+          Наклейка <strong>Planta</strong> красовалась на окне.
+          Случайным прохожим она ни о чём не говорила, но служила маячком
+          для тех, кто наблюдал за нами в соцсетях.
+        </p>
+        <p>
+          Тот сетевой магазин, что душил нас на старом месте, продолжал экспансию.
+          Наш не стал исключением. Но с одной поправкой:
+          полки «Кота», на которых неконкурентоспособный товар более не держался,
+          не простаивали — их занимала Planta. Параллельно с ухудшением в зоосегменте
+          происходил наш локальный подъём в аквариумистике.
+          Нас всё чаще рассматривали не как зоомагазин с отделом аквариумистики,
+          а наоборот — как аквариумный магазин с наличием зоотоваров.
+        </p>
+        <p>
+          Спустя полгода пришла зима. И показала настоящее лицо помещения:
+          холодные полы, сырые стены, несостоятельность отопления.
+          В феврале 22-го случилось нечто пострашнее COVID.
+          Удорожание товаров, проблемы с логистикой. Но люди привыкли к новой реальности,
+          поток клиентов выровнялся.
+        </p>
+        <p>
+          Мы перезимовали ещё одну зиму и ближе к концу 2023-го
+          решили искать более подходящее, менее сырое и холодное помещение.
+          Но вместе с ним созрело и ещё одно решение: «Кот» с нами не переезжал.
+        </p>
+      </div>
+    </section>
+
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 04 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">04</span>
+        <h2 class="sh-section-title">Испытание</h2>
+        <span class="sh-section-year">2023</span>
+      </header>
+      <div class="sh-section-body">
+        <p>
+          За всё время мы пережили несколько переездов: трижды меняли место жительства
+          и один раз перевозили магазин. Но этот переезд стал настоящим испытанием
+          — с финансовой, физической и моральной точки зрения.
+          Процедуры заняли около месяца, и весь месяц мы жили в сумасшедшем напряжении.
+          Ссоры стали обычным делом, физическое истощение по вечерам — нормой.
+        </p>
+
+        <blockquote class="sh-section-quote">
+          «Каким-то неимоверным чудом мы пережили этот непростой момент
+          в нашей жизни и жизни магазина.»
+        </blockquote>
+
+        <p>
+          И вот долгожданный момент — новый формат и новый, вдвое более просторный дом.
+          Теперь-то мы развернёмся! Здесь нашлось место товарам, выставочным аквариумам,
+          расширению ассортимента. Да чего уж там — у нас теперь есть кресла для клиентов
+          с журнальным столиком и детская зона!
+        </p>
+      </div>
+    </section>
+
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 05 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">05</span>
+        <h2 class="sh-section-title">Рипарий</h2>
+        <span class="sh-section-year">2023 – н.в.</span>
+      </header>
+      <div class="sh-section-body">
+        <p>
+          Это уже не «Кот да Винчи» — здесь ничего от него не осталось.
+          Но и не Planta. Как показало время, Planta была тренировочной моделью.
+          Тем, на чём учатся, чтобы в итоге создать нечто по-настоящему хорошее.
+        </p>
+
+        <blockquote class="sh-section-quote">
+          «Теперь мы были готовы открыть не просто магазин,
+          а арт-пространство, где можно не только купить товары для хобби,
+          но и обсудить волнующие вопросы, посмотреть, как запускают
+          и содержат аквариумы те, кто занимается этим как работой.»
+        </blockquote>
+
+        <p>
+          Следующей реинкарнацией должна была стать настоящая студия —
+          студия аквариумного дизайна. Но это не название, это уточнение.
+          Мне хотелось, чтобы название отражало не только направленность,
+          а степень погружения в неё. Я долго искал, балансируя
+          между звучностью, смыслом и лёгкостью восприятия.
+          С последним пролетел практически в сухую.
+        </p>
+        <p>
+          <strong>Scaper's House</strong> давался не всем — и в произношении, и в понимании.
+          Но несмотря на это, удавалось услышать и очень лестные отзывы.
+          Так или иначе, с декабря 2023-го наше дело носит именно это имя.
+        </p>
+        <p>
+          Шло время. Мы продолжали расширять ассортимент, осваивать новые направления
+          и техники. Обставили выставочный зал. Там появились пресноводные
+          и морские аквариумы, палюдариумы.
+        </p>
+        <p>
+          А дальше — вы уже здесь. Спасибо, что заглянули.
+        </p>
+      </div>
+    </section>
+
+    <!-- CLOSING -->
+    <div class="sh-about-closing" data-reveal>
+      <div class="sh-closing-line"></div>
+      <p class="sh-closing-text">Спасибо, что прочли.</p>
     </div>
   </div>
 </template>
 
 <script setup>
 useScrollReveal()
-useHead({ title: 'О нас — Студия аквариумного дизайна' })
+useHead({ title: 'О нас — История студии' })
 </script>
 
 <style scoped>
 .sh-about {
-  background: #1e2933;
+  background: var(--ink-deep);
   min-height: 100vh;
-  padding: 120px 48px 80px;
   color: var(--cream);
-  max-width: 1200px;
-  margin: 0 auto;
 }
+
+/* ─── HERO ─── */
 .sh-about-hero {
+  position: relative;
+  height: 70vh;
+  min-height: 480px;
+  max-height: 800px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin-bottom: 64px;
+  overflow: hidden;
+}
+.sh-about-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.45) saturate(0.85);
+}
+.sh-about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 26, 36, 0.3) 0%,
+    rgba(14, 26, 36, 0.65) 60%,
+    var(--ink-deep) 100%
+  );
+}
+.sh-about-hero-inner {
+  position: relative;
+  z-index: 1;
+  padding: 0 24px;
+  max-width: 720px;
 }
 .sh-about-label {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.35em;
   text-transform: uppercase;
   color: var(--gold);
 }
 .sh-about-title {
   font-family: var(--font-serif);
-  font-size: clamp(36px, 5vw, 56px);
+  font-size: clamp(40px, 6vw, 72px);
   font-weight: 400;
-  margin: 16px 0 24px;
-  line-height: 1.1;
+  line-height: 1.05;
+  margin: 16px 0 20px;
 }
 .sh-about-lead {
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 300;
   line-height: 1.7;
   color: var(--cream-dim);
-  max-width: 560px;
+  max-width: 480px;
   margin: 0 auto;
 }
-.sh-about-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
-  margin-bottom: 80px;
-}
-.sh-about-img {
-  display: flex;
-  justify-content: center;
-}
-.sh-about-text {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--cream-dim);
-}
-.sh-about-text p {
-  margin: 0 0 16px;
-}
-.sh-placeholder {
-  width: 100%;
-  max-width: 520px;
-  aspect-ratio: 16 / 10;
-  background: var(--ink-mid);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-size: 18px;
-  font-style: italic;
-  color: var(--cream-faint);
-}
-.sh-about-contacts h2 {
-  font-family: var(--font-serif);
-  font-size: 32px;
-  margin-bottom: 32px;
+
+/* ─── INTRO ─── */
+.sh-about-intro {
+  padding: 80px 48px 40px;
+  max-width: 780px;
+  margin: 0 auto;
   text-align: center;
 }
-.sh-about-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 24px;
+.sh-about-intro-text {
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--cream-dim);
 }
-.sh-about-item {
+
+/* ─── SECTIONS ─── */
+.sh-about-section {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 48px;
+}
+.sh-section-header {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
 }
-.sh-about-item-label {
+.sh-section-num {
   font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--cream-faint);
-}
-.sh-about-item p {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  color: var(--cream-dim);
-  margin: 0;
-}
-.sh-about-item a {
-  color: var(--cream-dim);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-.sh-about-item a:hover {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
   color: var(--gold);
 }
-.sh-about-item em {
-  color: var(--cream-faint);
-  font-style: italic;
+.sh-section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 400;
+  line-height: 1.15;
+  flex: 1;
 }
+.sh-section-year {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--cream-faint);
+  letter-spacing: 0.05em;
+}
+
+.sh-section-body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.85;
+  color: var(--cream-dim);
+}
+.sh-section-body p {
+  margin: 0 0 18px;
+}
+.sh-section-body p:last-child {
+  margin-bottom: 0;
+}
+.sh-section-body strong {
+  color: var(--cream);
+  font-weight: 400;
+}
+
+/* ─── QUOTES ─── */
+.sh-section-quote {
+  margin: 32px 0 32px 24px;
+  padding: 0 0 0 24px;
+  border-left: 2px solid var(--gold);
+  font-family: var(--font-serif);
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--cream);
+}
+
+/* ─── DIVIDERS ─── */
+.sh-divider {
+  max-width: 720px;
+  margin: 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--gold) 30%,
+    var(--gold-soft) 50%,
+    var(--gold) 70%,
+    transparent 100%
+  );
+  opacity: 0.4;
+}
+
+/* ─── CLOSING ─── */
+.sh-about-closing {
+  text-align: center;
+  padding: 80px 24px 120px;
+}
+.sh-closing-line {
+  width: 48px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto 24px;
+  opacity: 0.5;
+}
+.sh-closing-text {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--cream-faint);
+}
+
+/* ─── MOBILE ─── */
 @media (max-width: 768px) {
-  .sh-about {
-    padding: 100px 24px 48px;
+  .sh-about-hero {
+    height: 55vh;
+    min-height: 380px;
   }
-  .sh-about-content {
-    grid-template-columns: 1fr;
+  .sh-about-intro {
+    padding: 56px 24px 24px;
+  }
+  .sh-about-section {
+    padding: 40px 24px;
+  }
+  .sh-section-quote {
+    margin: 24px 0 24px 12px;
+    padding-left: 16px;
+  }
+  .sh-section-header {
+    gap: 10px;
+    margin-bottom: 24px;
   }
 }
 </style>
