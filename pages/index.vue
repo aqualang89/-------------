@@ -130,23 +130,28 @@
           <div class="sh-contacts-list">
             <div class="sh-contact-item">
               <span class="sh-contact-label">Адрес</span>
-              <p class="sh-contact-value">Калининград <em>(уточним позже)</em></p>
+              <p class="sh-contact-value">г. Калининград, ул. Аксакова, 123<br>цокольный этаж, левый торец</p>
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Телефон</span>
-              <p class="sh-contact-value"><a href="tel:+70000000000">+7 (XXX) XXX-XX-XX</a></p>
+              <p class="sh-contact-value"><a href="tel:89527847031">8 (952) 784-70-31</a></p>
+              <p class="sh-contact-value"><a href="tel:89814623733">8 (981) 462-37-33</a></p>
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Email</span>
-              <p class="sh-contact-value"><a href="mailto:info@riparium.ru">info@riparium.ru</a></p>
+              <p class="sh-contact-value"><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
             </div>
             <div class="sh-contact-item">
-              <span class="sh-contact-label">Telegram</span>
-              <p class="sh-contact-value"><a href="https://t.me/riparium" target="_blank" rel="noopener">@riparium</a></p>
+              <span class="sh-contact-label">Соцсети</span>
+              <div class="contact-socials">
+                <a href="https://vk.com/scapershouse" target="_blank" rel="noopener" class="social-btn vk">VK</a>
+                <a href="https://goo.su/dQSq9m" target="_blank" rel="noopener" class="social-btn ig">Instagram</a>
+                <a href="https://goo.su/ayQXzz" target="_blank" rel="noopener" class="social-btn map">🧭 Карта</a>
+              </div>
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Часы работы</span>
-              <p class="sh-contact-value">Пн–Пт 10:00–19:00</p>
+              <p class="sh-contact-value">ежедневно 11:00–19:00</p>
             </div>
           </div>
         </div>
@@ -728,6 +733,31 @@ onMounted(async () => {
 .sh-contact-value em {
   color: var(--cream-faint);
   font-style: italic;
+}
+
+.contact-socials {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.contact-socials .social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--cream-dim);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.contact-socials .social-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(217, 180, 106, 0.08);
 }
 
 .sh-contact-form {

@@ -28,7 +28,7 @@ export default defineNuxtConfig({
         }
       ],
       link: [
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap' }
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&subset=cyrillic,latin&family=Inter:wght@300;400;500&subset=cyrillic,latin&family=JetBrains+Mono:wght@400;500&subset=cyrillic,latin&display=swap' }
       ]
     }
   },

@@ -20,9 +20,17 @@
       </div>
 
       <div class="app-footer-contacts">
-        <p>Калининград</p>
-        <p><a href="mailto:info@riparium.ru">info@riparium.ru</a></p>
-        <p><a href="tel:+70000000000">+7 (XXX) XXX-XX-XX</a></p>
+        <p>г. Калининград, ул. Аксакова, 123</p>
+        <p>цокольный этаж, левый торец</p>
+        <p>ежедневно 11:00–19:00</p>
+        <p><a href="tel:89527847031">8 (952) 784-70-31</a></p>
+        <p><a href="tel:89814623733">8 (981) 462-37-33</a></p>
+        <p><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
+        <div class="footer-socials">
+          <a href="https://vk.com/scapershouse" target="_blank" rel="noopener" class="social-btn vk" title="ВКонтакте">VK</a>
+          <a href="https://goo.su/dQSq9m" target="_blank" rel="noopener" class="social-btn ig" title="Instagram">IG</a>
+          <a href="https://goo.su/ayQXzz" target="_blank" rel="noopener" class="social-btn map" title="Как добраться">🧭</a>
+        </div>
       </div>
     </div>
 
@@ -124,6 +132,32 @@
 
 .app-footer-contacts a:hover {
   color: var(--gold);
+}
+
+.footer-socials {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.social-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  color: var(--cream-dim);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.social-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(217, 180, 106, 0.08);
 }
 
 .app-footer-bottom {
