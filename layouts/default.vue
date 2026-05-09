@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="layout-root">
     <nav class="sh-nav">
       <div class="sh-nav-inner">
         <div class="sh-nav-links">
@@ -21,7 +21,9 @@
     <NuxtLink v-if="$route.path !== '/'" to="/" class="sh-back" @click.native="sessionStorage.removeItem('introShown')">
       ← Назад
     </NuxtLink>
-    <slot />
+    <div class="layout-content">
+      <slot />
+    </div>
     <AppFooter />
   </div>
 </template>
@@ -77,7 +79,7 @@ useHead({
   gap: 28px;
   align-items: center;
   padding-top: 10px;
-  font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  font-family: var(--font-serif);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.22em;
@@ -152,7 +154,7 @@ useHead({
 .sh-mobile-link {
   color: rgba(241, 230, 200, 0.8);
   text-decoration: none;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 16px;
   font-weight: 400;
   padding: 12px 0;
@@ -172,7 +174,7 @@ useHead({
   top: 90px;
   left: 48px;
   z-index: 100;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -206,5 +208,14 @@ useHead({
     left: 20px;
     top: 90px;
   }
+}
+
+.layout-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.layout-content {
+  flex: 1 0 auto;
 }
 </style>

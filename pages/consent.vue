@@ -121,14 +121,14 @@ useHead({
   max-width: 800px;
   margin: 0 auto;
   color: #f1e6c8;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 300;
   font-size: 15px;
   line-height: 1.7;
 }
 
 .legal-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-weight: 400;
   font-size: clamp(32px, 4vw, 48px);
   line-height: 1.15;
@@ -138,7 +138,7 @@ useHead({
 }
 
 .legal-date {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   color: rgba(241, 230, 200, 0.5);
   margin-bottom: 48px;
@@ -149,7 +149,7 @@ useHead({
 }
 
 .legal-section h2 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-weight: 400;
   font-size: 24px;
   line-height: 1.3;

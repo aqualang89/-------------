@@ -559,7 +559,7 @@ onMounted(async () => {
 }
 
 .sh-hero-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-weight: 400;
   font-size: clamp(40px, 4.2vw, 76px);
   line-height: 1.08;
@@ -589,7 +589,7 @@ onMounted(async () => {
 .sh-hero-lede {
   max-width: 460px;
   margin: 0 auto 20px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 300;
   font-size: 15px;
   line-height: 1.6;
@@ -603,7 +603,7 @@ onMounted(async () => {
   border: 1px solid var(--cream);
   border-radius: 999px;
   color: var(--cream);
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-weight: 500;
   font-size: 13px;
   letter-spacing: 0.2em;
@@ -627,7 +627,7 @@ onMounted(async () => {
 }
 
 .sh-toc-title {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -648,7 +648,7 @@ onMounted(async () => {
   align-items: baseline;
   padding: 8px 0;
   border-bottom: 1px solid var(--rule);
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 14px;
   color: var(--cream-dim);
   transition: color 0.3s ease;
@@ -658,7 +658,7 @@ onMounted(async () => {
 .sh-toc-list li:hover { color: var(--cream); }
 
 .sh-toc-num {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--gold);
   font-weight: 500;
@@ -681,7 +681,7 @@ onMounted(async () => {
 }
 
 .sh-contacts-info h2 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 36px;
   margin-bottom: 32px;
   color: var(--cream);
@@ -700,7 +700,7 @@ onMounted(async () => {
 }
 
 .sh-contact-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -708,7 +708,7 @@ onMounted(async () => {
 }
 
 .sh-contact-value {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 300;
   font-size: 16px;
   color: var(--cream-dim);
@@ -741,7 +741,7 @@ onMounted(async () => {
 }
 
 .sh-contact-form h3 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 24px;
   margin-bottom: 8px;
   color: var(--cream);
@@ -759,7 +759,7 @@ onMounted(async () => {
   border: 1px solid var(--rule);
   border-radius: 8px;
   padding: 10px 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   color: var(--cream);
   outline: none;
@@ -786,7 +786,7 @@ onMounted(async () => {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   color: var(--cream-dim);
   line-height: 1.5;

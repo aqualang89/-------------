@@ -415,7 +415,7 @@
     font-size: 28px;
     margin-bottom: 8px;
     color: var(--cream);
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-serif);
   }
 
   .calc-page .subtitle {
@@ -439,7 +439,7 @@
     border: 1.5px solid rgba(217, 180, 106, 0.35);
     background: rgba(217, 180, 106, 0.08);
     color: var(--cream-dim);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -475,7 +475,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-family: 'Cormorant Garamond', serif;
+    font-family: var(--font-serif);
   }
 
   .calc-panel h2 .icon { font-size: 22px; }
@@ -505,7 +505,7 @@
     border: 1px solid var(--rule);
     border-radius: 8px;
     color: var(--cream);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s;
@@ -524,7 +524,7 @@
     border: none;
     border-radius: 50px;
     color: var(--ink-deep);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
@@ -597,7 +597,7 @@
     border: 1px solid var(--rule);
     border-radius: 6px;
     color: var(--cream);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     font-size: 13px;
     text-align: center;
     margin-left: auto;

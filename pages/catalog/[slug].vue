@@ -186,7 +186,7 @@ function scrollToContacts() {
   border-color: var(--gold);
 }
 .product-info h1 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 2rem;
   margin-bottom: 8px;
 }
@@ -209,7 +209,7 @@ function scrollToContacts() {
   margin-left: 12px;
 }
 .product-desc h3 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 1.1rem;
   margin-bottom: 8px;
   color: var(--cream);

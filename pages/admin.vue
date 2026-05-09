@@ -513,7 +513,7 @@ async function uploadPhoto(e, productId) {
 }
 .admin-wrap h1,
 .admin-wrap h2 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
 }
 .admin-login {
   max-width: 320px;

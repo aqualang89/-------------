@@ -242,7 +242,7 @@ onMounted(() => {
   color: var(--cream);
 }
 .catalog-header h1 {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 2.2rem;
   margin-bottom: 20px;
 }

@@ -55,7 +55,7 @@
 }
 
 .app-footer-logo {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--font-serif);
   font-size: 28px;
   font-weight: 400;
   color: var(--cream);
@@ -64,7 +64,7 @@
 }
 
 .app-footer-tagline {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   color: var(--cream-dim);
   letter-spacing: 0.1em;
@@ -78,7 +78,7 @@
 }
 
 .app-footer-nav a {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   color: var(--cream-dim);
   text-decoration: none;
@@ -96,7 +96,7 @@
 }
 
 .app-footer-legal a {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 13px;
   color: var(--cream-dim);
   text-decoration: none;
@@ -115,7 +115,7 @@
 
 .app-footer-contacts p,
 .app-footer-contacts a {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   color: var(--cream-dim);
   text-decoration: none;
@@ -135,7 +135,7 @@
 }
 
 .app-footer-bottom p {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 12px;
   color: var(--cream-faint);
   letter-spacing: 0.05em;
