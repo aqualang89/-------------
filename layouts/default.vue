@@ -288,11 +288,6 @@ useHead({
   .sh-mobile-link:hover {
     color: #f1e6c8;
   }
-  .sh-back {
-    position: static;
-    margin: 16px 20px 0;
-    display: inline-block;
-  }
 }
 
 .sh-mobile-quiz {
@@ -314,6 +309,14 @@ useHead({
 }
 .sh-back:hover {
   color: var(--gold);
+}
+
+@media (max-width: 768px) {
+  .sh-back {
+    position: static;
+    margin: 16px 20px 0;
+    display: inline-block;
+  }
 }
 
 /* ─── Layout ─── */
