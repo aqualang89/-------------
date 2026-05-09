@@ -168,9 +168,11 @@ body {
   font-weight: 600;
 }
 
-/* ОТСТУП ПОД МЕНЮ */
-.page-wrap {
-  padding-top: 56px;
+/* ОТСТУП ПОД МЕНЮ (только мобила — nav fixed) */
+@media (max-width: 768px) {
+  .page-wrap {
+    padding-top: 72px;
+  }
 }
 
 /* ОБЩИЙ КОНТЕЙНЕР (если используешь wrapper) */

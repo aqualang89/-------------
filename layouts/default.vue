@@ -57,11 +57,7 @@ useHead({
 
 <style>
 .sh-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+  position: relative;
   padding: 22px 48px;
   pointer-events: none;
 }
@@ -188,6 +184,11 @@ useHead({
 
 @media (max-width: 768px) {
   .sh-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     padding: 12px 20px;
     height: 72px;
   }
@@ -205,8 +206,9 @@ useHead({
     top: 72px;
   }
   .sh-back {
-    left: 20px;
-    top: 90px;
+    position: static;
+    margin: 16px 20px 0;
+    display: inline-block;
   }
 }
 

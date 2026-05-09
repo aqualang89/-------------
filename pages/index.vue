@@ -573,7 +573,12 @@ onMounted(async () => {
   color: var(--cream);
   text-align: center;
   margin: 0;
-  padding-top: 110px;
+  padding-top: 40px;
+}
+@media (max-width: 768px) {
+  .sh-hero-title {
+    padding-top: 110px;
+  }
 }
 
 .sh-hero-title em {
