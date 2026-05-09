@@ -824,7 +824,7 @@ onMounted(async () => {
 }
 .sh-horizontal-track {
   display: flex;
-  gap: 3vw;
+  gap: 8vw;
   padding: 0 5vw;
   will-change: transform;
 }
@@ -834,8 +834,13 @@ onMounted(async () => {
   max-width: 1200px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 48px;
+  gap: 24px;
   align-items: center;
+}
+@media (min-width: 769px) {
+  .sh-hcard-img {
+    order: -1;
+  }
 }
 .sh-hcard-text {
   display: flex;

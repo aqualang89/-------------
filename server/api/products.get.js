@@ -19,6 +19,23 @@ export default defineEventHandler(async (event) => {
   const limit = parseInt(query.limit) || 24
 
   const showUnavailable = query.showUnavailable === 'true'
+
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    return { products: [], total: 0, page, totalPages: 0, maxPrice: 200000 }
+  }
+
+  let maxDbPrice = 200000
+  try {
+    const { data: priceAgg } = await supabase
+      .from('products')
+      .select('price')
+      .order('price', { ascending: false })
+      .limit(1)
+    if (priceAgg?.[0]?.price) maxDbPrice = priceAgg[0].price
+  } catch (e) {
+    // fallback
+  }
+
   let dbQuery = supabase
     .from('products')
     .select('*, categories(name, slug, parent_id), product_photos(url, is_main)', { count: 'exact' })
@@ -66,6 +83,7 @@ export default defineEventHandler(async (event) => {
     products: data || [],
     total: count || 0,
     page,
-    totalPages: Math.ceil((count || 0) / limit)
+    totalPages: Math.ceil((count || 0) / limit),
+    maxPrice: maxDbPrice
   }
 })

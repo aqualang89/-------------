@@ -12,11 +12,11 @@
         <aside class="catalog-sidebar">
           <div class="sidebar-header">
             <h3>Категории</h3>
-            <button v-if="isMobile" class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
+            <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen">
               {{ sidebarOpen ? 'Скрыть' : 'Показать' }}
             </button>
           </div>
-          <div v-show="!isMobile || sidebarOpen" class="category-tree">
+          <div v-show="sidebarOpen" class="category-tree">
             <div
               class="cat-item"
               :class="{ active: category === '' }"
@@ -97,17 +97,16 @@
 </template>
 
 <script setup>
-const MAX_PRICE = 200000
-
 const searchInput = ref('')
 const category = ref('')
-const maxPriceInput = ref(MAX_PRICE)
+const maxPriceInput = ref(9999999)
 const page = ref(1)
-const sidebarOpen = ref(false)
+const sidebarOpen = ref(true)
 const isMobile = ref(false)
 
 const search = ref('')
-const maxPrice = ref(MAX_PRICE)
+const maxPrice = ref(9999999)
+const MAX_PRICE = ref(200000)
 
 const { data: categoryTree } = await useFetch('/api/categories')
 
@@ -168,13 +167,23 @@ const { data: productsData, pending } = await useFetch('/api/products', {
     const q = { page: page.value }
     if (search.value) q.search = search.value
     if (category.value) q.category = category.value
-    if (maxPrice.value < MAX_PRICE) q.maxPrice = maxPrice.value
+    if (maxPrice.value < MAX_PRICE.value) q.maxPrice = maxPrice.value
     return q
   })
 })
 
 const products = computed(() => productsData.value?.products || [])
 const totalPages = computed(() => productsData.value?.totalPages || 1)
+
+watch(productsData, (val) => {
+  if (val?.maxPrice && val.maxPrice !== MAX_PRICE.value) {
+    MAX_PRICE.value = val.maxPrice
+    if (maxPriceInput.value > val.maxPrice || maxPriceInput.value === 9999999) {
+      maxPriceInput.value = val.maxPrice
+      maxPrice.value = val.maxPrice
+    }
+  }
+}, { immediate: true })
 
 useHead({ title: 'Каталог — Студия аквариумного дизайна' })
 
@@ -210,8 +219,13 @@ function mainPhoto(p) {
 
 onMounted(() => {
   isMobile.value = window.innerWidth < 768
+  if (isMobile.value) sidebarOpen.value = false
   window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth < 768
+    const nowMobile = window.innerWidth < 768
+    if (nowMobile !== isMobile.value) {
+      isMobile.value = nowMobile
+      sidebarOpen.value = !nowMobile
+    }
   })
 })
 </script>
@@ -257,7 +271,7 @@ onMounted(() => {
   font-weight: 600;
 }
 .sidebar-toggle {
-  display: none;
+  display: inline-block;
   padding: 4px 10px;
   border-radius: 6px;
   border: none;
@@ -437,9 +451,7 @@ onMounted(() => {
   .catalog-sidebar {
     width: 100%;
   }
-  .sidebar-toggle {
-    display: inline-block;
-  }
+
   .category-tree {
     max-height: 300px;
   }

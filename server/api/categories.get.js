@@ -11,6 +11,10 @@ function buildTree(cats, parentId = null) {
 }
 
 export default defineEventHandler(async () => {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
+    return []
+  }
+
   const { data, error } = await supabase
     .from('categories')
     .select('*')
