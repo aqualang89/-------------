@@ -144,7 +144,7 @@
             <div class="sh-contact-item">
               <span class="sh-contact-label">Соцсети</span>
               <div class="contact-socials">
-                <a href="https://vk.com/scapershouse" target="_blank" rel="noopener" class="social-btn vk">VK</a>
+                <a href="https://vk.com/riparium_kld" target="_blank" rel="noopener" class="social-btn vk">VK</a>
                 <a href="https://goo.su/dQSq9m" target="_blank" rel="noopener" class="social-btn ig">Instagram</a>
                 <a href="https://t.me/riparium_kld" target="_blank" rel="noopener" class="social-btn tg">Telegram</a>
                 <a href="https://goo.su/ayQXzz" target="_blank" rel="noopener" class="social-btn map">🧭 Карта</a>

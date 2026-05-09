@@ -27,7 +27,7 @@
         <p><a href="tel:89814623733">8 (981) 462-37-33</a></p>
         <p><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
         <div class="footer-socials">
-          <a href="https://vk.com/scapershouse" target="_blank" rel="noopener" class="social-btn vk" title="ВКонтакте">VK</a>
+          <a href="https://vk.com/riparium_kld" target="_blank" rel="noopener" class="social-btn vk" title="ВКонтакте">VK</a>
           <a href="https://goo.su/dQSq9m" target="_blank" rel="noopener" class="social-btn ig" title="Instagram">IG</a>
           <a href="https://t.me/riparium_kld" target="_blank" rel="noopener" class="social-btn tg" title="Telegram">TG</a>
           <a href="https://goo.su/ayQXzz" target="_blank" rel="noopener" class="social-btn map" title="Как добраться">🧭</a>
