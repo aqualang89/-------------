@@ -134,7 +134,7 @@
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Телефон</span>
-              <p class="sh-contact-value"><a href="tel:89527847031" class="phone-primary">8 (952) 784-70-31</a></p>
+              <p class="sh-contact-value"><a href="tel:89527847031">8 (952) 784-70-31</a></p>
               <p class="sh-contact-value"><a href="tel:89814623733">8 (981) 462-37-33</a></p>
             </div>
             <div class="sh-contact-item">
@@ -729,9 +729,6 @@ onMounted(async () => {
 
 .sh-contact-value a:hover {
   color: var(--gold);
-}
-.sh-contact-value a.phone-primary {
-  color: #2196a8;
 }
 
 .sh-contact-value em {

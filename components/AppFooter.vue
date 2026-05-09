@@ -23,7 +23,7 @@
         <p>г. Калининград, ул. Аксакова, 123</p>
         <p>цокольный этаж, левый торец</p>
         <p>ежедневно 11:00–19:00</p>
-        <p><a href="tel:89527847031" class="phone-primary">8 (952) 784-70-31</a></p>
+        <p><a href="tel:89527847031">8 (952) 784-70-31</a></p>
         <p><a href="tel:89814623733">8 (981) 462-37-33</a></p>
         <p><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
         <div class="footer-socials">
@@ -133,9 +133,6 @@
 
 .app-footer-contacts a:hover {
   color: var(--gold);
-}
-.app-footer-contacts .phone-primary {
-  color: #2196a8;
 }
 
 .footer-socials {

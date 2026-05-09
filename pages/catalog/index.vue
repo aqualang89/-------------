@@ -271,8 +271,9 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 .sidebar-header h3 {
+  font-family: var(--font-serif);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 .sidebar-toggle {
   display: inline-block;
