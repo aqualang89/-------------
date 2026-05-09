@@ -23,12 +23,13 @@
         <p>г. Калининград, ул. Аксакова, 123</p>
         <p>цокольный этаж, левый торец</p>
         <p>ежедневно 11:00–19:00</p>
-        <p><a href="tel:89527847031">8 (952) 784-70-31</a></p>
+        <p><a href="tel:89527847031" class="phone-primary">8 (952) 784-70-31</a></p>
         <p><a href="tel:89814623733">8 (981) 462-37-33</a></p>
         <p><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
         <div class="footer-socials">
           <a href="https://vk.com/scapershouse" target="_blank" rel="noopener" class="social-btn vk" title="ВКонтакте">VK</a>
           <a href="https://goo.su/dQSq9m" target="_blank" rel="noopener" class="social-btn ig" title="Instagram">IG</a>
+          <a href="https://t.me/riparium_kld" target="_blank" rel="noopener" class="social-btn tg" title="Telegram">TG</a>
           <a href="https://goo.su/ayQXzz" target="_blank" rel="noopener" class="social-btn map" title="Как добраться">🧭</a>
         </div>
       </div>
@@ -132,6 +133,9 @@
 
 .app-footer-contacts a:hover {
   color: var(--gold);
+}
+.app-footer-contacts .phone-primary {
+  color: #2196a8;
 }
 
 .footer-socials {

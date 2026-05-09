@@ -134,7 +134,7 @@
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Телефон</span>
-              <p class="sh-contact-value"><a href="tel:89527847031">8 (952) 784-70-31</a></p>
+              <p class="sh-contact-value"><a href="tel:89527847031" class="phone-primary">8 (952) 784-70-31</a></p>
               <p class="sh-contact-value"><a href="tel:89814623733">8 (981) 462-37-33</a></p>
             </div>
             <div class="sh-contact-item">
@@ -146,6 +146,7 @@
               <div class="contact-socials">
                 <a href="https://vk.com/scapershouse" target="_blank" rel="noopener" class="social-btn vk">VK</a>
                 <a href="https://goo.su/dQSq9m" target="_blank" rel="noopener" class="social-btn ig">Instagram</a>
+                <a href="https://t.me/riparium_kld" target="_blank" rel="noopener" class="social-btn tg">Telegram</a>
                 <a href="https://goo.su/ayQXzz" target="_blank" rel="noopener" class="social-btn map">🧭 Карта</a>
               </div>
             </div>
@@ -728,6 +729,9 @@ onMounted(async () => {
 
 .sh-contact-value a:hover {
   color: var(--gold);
+}
+.sh-contact-value a.phone-primary {
+  color: #2196a8;
 }
 
 .sh-contact-value em {
