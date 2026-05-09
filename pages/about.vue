@@ -429,7 +429,7 @@ useHead({ title: 'О нас — История студии' })
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center;
+  background-position: center 25%;
   filter: brightness(0.45) saturate(0.85);
 }
 .sh-about-hero-overlay {
