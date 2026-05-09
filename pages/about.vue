@@ -1,6 +1,6 @@
 <template>
   <div class="sh-about">
-    <div class="sh-about-hero">
+    <div class="sh-about-hero" data-reveal-up>
       <span class="sh-about-label">О студии</span>
       <h1 class="sh-about-title">Рипарий</h1>
       <p class="sh-about-lead">
@@ -9,11 +9,11 @@
       </p>
     </div>
 
-    <div class="sh-about-content">
-      <div class="sh-about-img">
+    <div class="sh-about-content" data-reveal>
+      <div class="sh-about-img" data-reveal-left>
         <div class="sh-placeholder">Фото скоро</div>
       </div>
-      <div class="sh-about-text">
+      <div class="sh-about-text" data-reveal-right>
         <p>
           Каждый проект начинается с разговора. Мы узнаём, какое пространство доступно, 
           какой уход планируется, какие рыбы нравятся — и предлагаем решение, которое 
@@ -59,6 +59,7 @@
 </template>
 
 <script setup>
+useScrollReveal()
 useHead({ title: 'О нас — Студия аквариумного дизайна' })
 </script>
 

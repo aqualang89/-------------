@@ -2,10 +2,10 @@
   <div>
     <div class="page-wrap">
       <div class="calc-page">
-        <h1>Калькулятор аквариума</h1>
-        <p class="subtitle">Рассчитайте объём, подберите оборудование и рыбок</p>
+        <h1 data-reveal-up>Калькулятор аквариума</h1>
+        <p class="subtitle" data-reveal>Рассчитайте объём, подберите оборудование и рыбок</p>
 
-        <div class="calc-tabs">
+        <div class="calc-tabs" data-reveal>
           <button class="calc-tab active" data-tab="volume">💧 Объём</button>
           <button class="calc-tab" data-tab="substrate">🪨 Грунт</button>
           <button class="calc-tab" data-tab="heater">🌡️ Нагреватель</button>
@@ -656,6 +656,7 @@
 
 <script setup>
 import { onMounted } from 'vue'
+useScrollReveal()
 
 onMounted(() => {
   // ===== TABS =====

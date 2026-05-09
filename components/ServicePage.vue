@@ -1,15 +1,15 @@
 <template>
   <div class="sh-service">
-    <div class="sh-service-hero">
+    <div class="sh-service-hero" data-reveal-up>
       <div class="sh-service-num">{{ num }}</div>
       <h1 class="sh-service-title">{{ title }}</h1>
       <p class="sh-service-lead">{{ lead }}</p>
     </div>
-    <div class="sh-service-content">
-      <div class="sh-service-img">
+    <div class="sh-service-content" data-reveal>
+      <div class="sh-service-img" data-reveal-left>
         <div class="sh-placeholder">Фото скоро</div>
       </div>
-      <div class="sh-service-text">
+      <div class="sh-service-text" data-reveal-right>
         <slot />
       </div>
     </div>
@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+useScrollReveal()
 defineProps({
   num: { type: String, required: true },
   title: { type: String, required: true },

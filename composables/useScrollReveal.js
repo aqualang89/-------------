@@ -1,6 +1,14 @@
 export function useScrollReveal() {
   if (process.client) {
     onMounted(() => {
+      const selectors = [
+        '[data-reveal]',
+        '[data-reveal-left]',
+        '[data-reveal-right]',
+        '[data-reveal-up]',
+        '[data-reveal-child]'
+      ]
+
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -10,11 +18,13 @@ export function useScrollReveal() {
             }
           })
         },
-        { threshold: 0.12, rootMargin: '0px 0px -60px 0px' }
+        { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
       )
 
-      document.querySelectorAll('[data-reveal]').forEach((el) => {
-        observer.observe(el)
+      selectors.forEach((sel) => {
+        document.querySelectorAll(sel).forEach((el) => {
+          observer.observe(el)
+        })
       })
     })
   }

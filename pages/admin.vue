@@ -1,7 +1,7 @@
 <template>
   <div class="admin-wrap">
     <!-- Авторизация -->
-    <div v-if="!isAuth" class="admin-login">
+    <div v-if="!isAuth" class="admin-login" data-reveal>
       <h2>Вход в админку</h2>
       <input v-model="password" type="password" placeholder="Пароль" @keyup.enter="login">
       <button @click="login">Войти</button>
@@ -16,7 +16,7 @@
       </header>
 
       <!-- Загрузка Excel -->
-      <section class="admin-section">
+      <section class="admin-section" data-reveal>
         <h2>Загрузка из 1С (Excel)</h2>
         <div class="upload-row">
           <input type="file" accept=".xlsx,.xls,.csv" @change="handleFile">
@@ -125,6 +125,7 @@
 </template>
 
 <script setup>
+useScrollReveal()
 const password = ref('')
 const isAuth = ref(false)
 const loginError = ref('')

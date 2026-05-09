@@ -4,7 +4,7 @@
       <div class="sh-nav-inner">
         <div class="sh-nav-links">
           <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-nav-link">{{ link.label }}</NuxtLink>
-          <a href="#" class="sh-nav-link sh-nav-quiz" @click.prevent="openQuiz">Викторина</a>
+          <!-- <a href="#" class="sh-nav-link sh-nav-quiz" @click.prevent="openQuiz">Викторина</a> -->
         </div>
 
         <button class="sh-nav-burger" :class="{ open: menuOpen }" aria-label="Меню" @click="menuOpen = !menuOpen">
@@ -15,7 +15,7 @@
 
     <div class="sh-mobile-menu" :class="{ open: menuOpen }">
       <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-mobile-link" @click="menuOpen = false">{{ link.label }}</NuxtLink>
-      <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a>
+      <!-- <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a> -->
     </div>
 
     <NuxtLink v-if="$route.path !== '/'" to="/" class="sh-back" @click.native="sessionStorage.removeItem('introShown')">
@@ -39,18 +39,18 @@ const regularLinks = [
   { to: '/about', label: 'О нас' },
 ]
 
-function openQuiz() {
+/* function openQuiz() {
   menuOpen.value = false
   if (typeof restartQuiz === 'function' && typeof toggleQuiz === 'function') {
     restartQuiz()
     toggleQuiz(true)
   }
-}
+} */
 
 useHead({
   script: [
-    { src: '/js/chat.js', tagPosition: 'bodyClose' },
-    { src: '/js/quiz.js', tagPosition: 'bodyClose' }
+    { src: '/js/chat.js', tagPosition: 'bodyClose' }
+    /* { src: '/js/quiz.js', tagPosition: 'bodyClose' } */
   ]
 })
 </script>

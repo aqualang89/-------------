@@ -36,12 +36,12 @@
 
       <!-- Hero контент -->
       <section class="sh-hero">
-        <h1 class="sh-hero-title">
+        <h1 class="sh-hero-title" data-reveal-up>
           Подводные <em>пейзажи,</em><br />
           собранные вручную.
         </h1>
 
-        <div class="sh-hero-bottom">
+        <div class="sh-hero-bottom" data-reveal>
           <p class="sh-hero-lede">
             Дизайн, монтаж и обслуживание аквариумов с натуральной флорой. Каждая работа — отдельная экосистема, выстроенная под пространство и характер владельца.
           </p>
@@ -125,7 +125,7 @@
     <!-- КОНТАКТЫ -->
     <section id="контакты" class="sh-contacts">
       <div class="sh-contacts-inner">
-        <div class="sh-contacts-info">
+        <div class="sh-contacts-info" data-reveal>
           <h2>Контакты</h2>
           <div class="sh-contacts-list">
             <div class="sh-contact-item">
@@ -157,7 +157,7 @@
           </div>
         </div>
 
-        <form class="sh-contact-form" @submit.prevent="submitForm">
+        <form class="sh-contact-form" @submit.prevent="submitForm" data-reveal-right>
           <h3>Обратная связь</h3>
           <div class="sh-form-row">
             <input v-model="form.name" type="text" placeholder="Имя" required />
@@ -1012,18 +1012,6 @@ onMounted(async () => {
   .intro-ripples {
     display: none;
   }
-}
-
-/* Анимация разделителя */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-[data-reveal].revealed {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* TOC ссылки */

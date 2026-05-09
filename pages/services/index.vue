@@ -1,18 +1,18 @@
 <template>
   <div class="services-wrap">
-    <h1>Наши услуги</h1>
-    <div class="services-grid">
-      <div class="service-card">
+    <h1 data-reveal-up>Наши услуги</h1>
+    <div class="services-grid" data-reveal-stagger>
+      <div class="service-card" data-reveal-child>
         <h3>Дизайн‑проект</h3>
         <p>Индивидуальный проект под ваше пространство. Подбор растений, камней, оборудования.</p>
         <span class="service-price">от 5 000 ₽</span>
       </div>
-      <div class="service-card">
+      <div class="service-card" data-reveal-child>
         <h3>Монтаж и запуск</h3>
         <p>Полный монтаж «под ключ» с оборудованием. Установка, гидроцикл, запуск системы.</p>
         <span class="service-price">от 30 000 ₽</span>
       </div>
-      <div class="service-card">
+      <div class="service-card" data-reveal-child>
         <h3>Обслуживание</h3>
         <p>Чистка, подмена воды, контроль параметров. Регулярный уход за аквариумом.</p>
         <span class="service-price">от 3 000 ₽ в месяц</span>
@@ -23,6 +23,7 @@
 
 <script setup>
 useHead({ title: 'Услуги — Студия аквариумного дизайна' })
+useScrollReveal()
 </script>
 
 <style scoped>

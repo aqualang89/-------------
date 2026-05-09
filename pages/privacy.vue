@@ -1,10 +1,10 @@
 <template>
   <main class="legal-page">
     <div class="legal-container">
-      <h1 class="legal-title">Политика обработки персональных данных</h1>
-      <p class="legal-date">Дата последнего обновления: 7 мая 2026 г.</p>
+      <h1 class="legal-title" data-reveal-up>Политика обработки персональных данных</h1>
+      <p class="legal-date" data-reveal>Дата последнего обновления: 7 мая 2026 г.</p>
 
-      <section class="legal-section">
+      <section class="legal-section" data-reveal>
         <h2>1. Общие положения</h2>
         <p>
           Настоящая Политика обработки персональных данных (далее — «Политика») разработана
@@ -154,6 +154,7 @@
 </template>
 
 <script setup>
+useScrollReveal()
 useHead({
   title: 'Политика обработки персональных данных — Рипарий',
   meta: [
