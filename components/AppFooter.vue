@@ -36,7 +36,7 @@
     </div>
 
     <div class="app-footer-bottom">
-      <p>© 2025 Рипарий. Студия аквадизайна.</p>
+      <p>© 2016 Рипарий. Студия аквадизайна.</p>
     </div>
   </footer>
 </template>

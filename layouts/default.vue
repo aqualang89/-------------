@@ -76,22 +76,25 @@ useHead({
 </script>
 
 <style>
+/* ─── NAV: always fixed, transparent at top ─── */
 .sh-nav {
-  position: relative;
-  padding: 22px 48px;
-  pointer-events: none;
-  transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-              padding 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.sh-nav--compact {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 14px 48px;
+  padding: 22px 48px;
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+  transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sh-nav--compact {
   background: rgba(14, 26, 36, 0.92);
   backdrop-filter: blur(10px);
+  padding: 14px 48px;
 }
 .sh-nav-inner {
   max-width: 1440px;
@@ -243,11 +246,10 @@ useHead({
 /* Mobile menu */
 @media (max-width: 768px) {
   .sh-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
+    padding: 12px 20px;
+    height: 72px;
+  }
+  .sh-nav--compact {
     padding: 12px 20px;
     height: 72px;
   }
@@ -314,6 +316,7 @@ useHead({
   color: var(--gold);
 }
 
+/* ─── Layout ─── */
 .layout-root {
   display: flex;
   flex-direction: column;
@@ -321,5 +324,11 @@ useHead({
 }
 .layout-content {
   flex: 1 0 auto;
+  padding-top: 80px;
+}
+@media (max-width: 768px) {
+  .layout-content {
+    padding-top: 72px;
+  }
 }
 </style>
