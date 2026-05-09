@@ -80,7 +80,8 @@ useHead({
   position: relative;
   padding: 22px 48px;
   pointer-events: none;
-  transition: background 0.3s ease, padding 0.3s ease;
+  transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sh-nav--compact {
   position: fixed;
@@ -101,6 +102,8 @@ useHead({
   gap: 28px;
   pointer-events: auto;
 }
+
+/* ─── Desktop links ─── */
 .sh-nav-links {
   display: flex;
   gap: 28px;
@@ -111,7 +114,9 @@ useHead({
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sh-nav-link {
   color: rgba(241, 230, 200, 0.65);
@@ -135,7 +140,16 @@ useHead({
   background: #d9b46a;
 }
 
-/* Burger always visible but hidden by default on desktop */
+/* compact: hide links */
+.sh-nav--compact .sh-nav-links {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  filter: blur(4px);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* ─── Burger ─── */
 .sh-nav-burger {
   display: flex;
   flex-direction: column;
@@ -148,106 +162,85 @@ useHead({
   padding: 0;
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.9);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(0.8) rotate(-10deg);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
 }
 .sh-nav--compact .sh-nav-burger {
   opacity: 1;
   pointer-events: auto;
-  transform: scale(1);
+  transform: scale(1) rotate(0deg);
 }
 .sh-nav-burger span {
   display: block;
   height: 2px;
   background: #f1e6c8;
   border-radius: 2px;
-  transition: all 0.25s ease;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: center;
 }
 .sh-nav-burger.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
-.sh-nav-burger.open span:nth-child(2) { opacity: 0; }
+.sh-nav-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .sh-nav-burger.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
-.sh-nav--compact .sh-nav-links {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-6px);
-  position: absolute;
-}
-
+/* ─── Mobile menu (shared base) ─── */
 .sh-mobile-menu {
   display: none;
   position: fixed;
-  top: 90px;
-  left: 0;
-  right: 0;
   background: rgba(14, 26, 36, 0.98);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(241, 230, 200, 0.08);
   flex-direction: column;
   padding: 16px 24px 24px;
-  z-index: 999;
-  transform: translateY(-10px);
+  z-index: 1001;
   opacity: 0;
-  transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sh-mobile-menu.open {
+  display: flex;
   opacity: 1;
-  transform: translateY(0);
   pointer-events: all;
 }
-.sh-mobile-link {
-  color: rgba(241, 230, 200, 0.8);
-  text-decoration: none;
-  font-family: var(--font-sans);
-  font-size: 16px;
-  font-weight: 400;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(241, 230, 200, 0.07);
-  display: block;
-  transition: color 0.15s;
-}
-.sh-mobile-link:hover {
-  color: #f1e6c8;
-}
-.sh-mobile-quiz {
-  color: #d9b46a !important;
-}
 
-.sh-back {
-  position: fixed;
-  top: 90px;
-  left: 48px;
-  z-index: 100;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--cream-dim);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-.sh-back:hover {
-  color: var(--gold);
-}
-
-/* Desktop compact menu position */
+/* Desktop compact menu */
 @media (min-width: 769px) {
   .sh-nav--compact ~ .sh-mobile-menu {
-    top: 60px;
-    left: auto;
-    right: 48px;
+    top: 58px;
+    right: 36px;
     width: 220px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid rgba(241, 230, 200, 0.08);
-    transform: translateY(-6px) scale(0.98);
+    transform: translateY(-12px) scale(0.96);
+    filter: blur(2px);
+    transform-origin: top right;
   }
   .sh-nav--compact ~ .sh-mobile-menu.open {
     transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  .sh-mobile-link {
+    color: rgba(241, 230, 200, 0.8);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 400;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(241, 230, 200, 0.06);
+    display: block;
+    transition: color 0.2s ease, padding-left 0.2s ease;
+  }
+  .sh-mobile-link:hover {
+    color: #f1e6c8;
+    padding-left: 6px;
+  }
+  .sh-mobile-link:last-child {
+    border-bottom: none;
   }
 }
 
+/* Mobile menu */
 @media (max-width: 768px) {
   .sh-nav {
     position: fixed;
@@ -267,22 +260,58 @@ useHead({
   .sh-nav-burger {
     opacity: 1;
     pointer-events: auto;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
   .sh-mobile-menu {
-    display: flex;
     top: 72px;
     left: 0;
     right: 0;
-    width: auto;
-    border-radius: 0;
+    border-bottom: 1px solid rgba(241, 230, 200, 0.08);
     transform: translateY(-10px);
+  }
+  .sh-mobile-menu.open {
+    transform: translateY(0);
+  }
+  .sh-mobile-link {
+    color: rgba(241, 230, 200, 0.8);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(241, 230, 200, 0.07);
+    display: block;
+    transition: color 0.15s;
+  }
+  .sh-mobile-link:hover {
+    color: #f1e6c8;
   }
   .sh-back {
     position: static;
     margin: 16px 20px 0;
     display: inline-block;
   }
+}
+
+.sh-mobile-quiz {
+  color: #d9b46a !important;
+}
+
+.sh-back {
+  position: fixed;
+  top: 90px;
+  left: 48px;
+  z-index: 100;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.sh-back:hover {
+  color: var(--gold);
 }
 
 .layout-root {
