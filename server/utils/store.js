@@ -1,7 +1,6 @@
-import { createClient } from 'redis';
+import { Redis } from 'ioredis';
 
 let client;
-let connectPromise;
 let memoryClient;
 
 function getMemoryClient() {
@@ -10,12 +9,12 @@ function getMemoryClient() {
     memoryClient = {
       get: async (k) => store.get(k) || null,
       set: async (k, v, opts) => { store.set(k, String(v)); },
-      rPush: async (k, v) => {
+      rpush: async (k, v) => {
         const arr = JSON.parse(store.get(k) || '[]');
         arr.push(v);
         store.set(k, JSON.stringify(arr));
       },
-      lRange: async (k, start, end) => {
+      lrange: async (k, start, end) => {
         const arr = JSON.parse(store.get(k) || '[]');
         return end === -1 ? arr : arr.slice(start, end + 1);
       },
@@ -32,18 +31,17 @@ async function getRedis() {
   }
 
   if (!client) {
-    client = createClient({
-      url: process.env.REDIS_URL
+    client = new Redis(process.env.REDIS_URL, {
+      retryStrategy: () => null,
+      maxRetriesPerRequest: 1,
+      connectTimeout: 5000,
     });
 
     client.on('error', (err) => {
-      console.error('REDIS ERROR:', err);
+      console.error('REDIS ERROR:', err.message);
     });
-
-    connectPromise = client.connect();
   }
 
-  await connectPromise;
   return client;
 }
 
@@ -58,36 +56,32 @@ export async function getMode(sessionId) {
 
 export async function setMode(sessionId, mode) {
   const redis = await getRedis();
-  await redis.set(modeKey(sessionId), mode, {
-    EX: 60 * 60 * 24 * 7
-  });
+  await redis.set(modeKey(sessionId), mode, 'EX', 60 * 60 * 24 * 7);
 }
 
 export async function addHistory(sessionId, role, content) {
   const redis = await getRedis();
   const item = JSON.stringify({ role, content, ts: Date.now() });
-
-  await redis.rPush(historyKey(sessionId), item);
+  await redis.rpush(historyKey(sessionId), item);
   await redis.expire(historyKey(sessionId), 60 * 60 * 24 * 7);
 }
 
 export async function getHistory(sessionId) {
   const redis = await getRedis();
-  const items = await redis.lRange(historyKey(sessionId), 0, -1);
+  const items = await redis.lrange(historyKey(sessionId), 0, -1);
   return (items || []).map((x) => JSON.parse(x));
 }
 
 export async function queueManualReplyForSite(sessionId, content) {
   const redis = await getRedis();
   const item = JSON.stringify({ role: 'assistant', content, ts: Date.now() });
-
-  await redis.rPush(pendingKey(sessionId), item);
+  await redis.rpush(pendingKey(sessionId), item);
   await redis.expire(pendingKey(sessionId), 60 * 60 * 24 * 7);
 }
 
 export async function popManualReplies(sessionId) {
   const redis = await getRedis();
-  const items = await redis.lRange(pendingKey(sessionId), 0, -1);
+  const items = await redis.lrange(pendingKey(sessionId), 0, -1);
   await redis.del(pendingKey(sessionId));
   return (items || []).map((x) => JSON.parse(x));
 }
