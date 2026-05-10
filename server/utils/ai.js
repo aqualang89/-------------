@@ -44,7 +44,7 @@ export async function askOpenRouter (messages) {
     headers: {
       'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': process.env.SITE_URL || 'https://aquariumpage.vercel.app',
+      'HTTP-Referer': /^[\x00-\x7F]+$/.test(process.env.SITE_URL || '') ? process.env.SITE_URL : 'https://aquariumpage.vercel.app',
       'X-Title': "Scaper's House"
     },
     body: JSON.stringify({
