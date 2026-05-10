@@ -116,9 +116,7 @@ function offZoom() {
   zoomStyle.value = {}
 }
 
-function scrollToContacts() {
-  window.location.href = '/#контакты'
-}
+
 </script>
 
 <style scoped>
@@ -218,8 +216,51 @@ function scrollToContacts() {
   line-height: 1.6;
   color: var(--cream-dim);
 }
-.product-cta {
+.product-cart {
   margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.product-cart-in {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: rgba(217, 180, 106, 0.12);
+  border-radius: 10px;
+  color: var(--gold);
+}
+.product-cart-link {
+  color: var(--gold);
+  text-decoration: underline;
+  font-weight: 600;
+}
+.product-qty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.product-qty button {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  background: var(--ink-soft);
+  color: var(--cream);
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+.product-qty button:hover {
+  border-color: var(--gold);
+}
+.product-qty span {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.product-cta {
   padding: 16px 32px;
   border-radius: 10px;
   border: none;

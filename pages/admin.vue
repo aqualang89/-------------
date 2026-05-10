@@ -11,10 +11,23 @@
     <!-- Панель -->
     <div v-else>
       <header class="admin-header">
-        <h1>Админка каталога</h1>
+        <h1>Админка</h1>
         <button class="btn-logout" @click="logout">Выйти</button>
       </header>
 
+      <div class="admin-tabs">
+        <button
+          v-for="tab in tabs"
+          :key="tab.key"
+          :class="{ active: activeTab === tab.key }"
+          @click="activeTab = tab.key"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
+
+      <!-- Каталог -->
+      <template v-if="activeTab === 'catalog'">
       <!-- Загрузка Excel -->
       <section class="admin-section" data-reveal>
         <h2>Загрузка из 1С (Excel)</h2>
@@ -120,6 +133,118 @@
           <button :disabled="page >= totalPages" @click="page++; fetchProducts()">→</button>
         </div>
       </section>
+      </template>
+
+      <!-- Заказы -->
+      <template v-else>
+        <section class="admin-section">
+          <h2>Заказы</h2>
+
+          <div class="filters">
+            <select v-model="orderStatus" @change="fetchOrders">
+              <option value="">Все статусы</option>
+              <option value="new">Новый</option>
+              <option value="confirmed">Подтверждён</option>
+              <option value="shipped">Отправлен</option>
+              <option value="delivered">Доставлен</option>
+              <option value="cancelled">Отменён</option>
+            </select>
+          </div>
+
+          <div v-if="ordersLoading" class="product-loading">Загрузка...</div>
+
+          <div v-else-if="orders.length === 0" class="product-loading">Нет заказов</div>
+
+          <div v-else class="orders-table-wrap">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>№</th>
+                  <th>Дата</th>
+                  <th>Клиент</th>
+                  <th>Телефон</th>
+                  <th>Сумма</th>
+                  <th>Статус</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="o in orders" :key="o.id">
+                  <tr class="order-row" @click="toggleOrder(o.id)">
+                    <td>{{ o.id.slice(0, 8) }}</td>
+                    <td>{{ formatDate(o.created_at) }}</td>
+                    <td>{{ o.customer_name }}</td>
+                    <td>{{ o.customer_phone }}</td>
+                    <td>{{ o.total_amount.toLocaleString() }} ₽</td>
+                    <td>
+                      <span class="order-status" :class="'status-' + o.status">{{ statusLabel(o.status) }}</span>
+                    </td>
+                    <td>
+                      <span class="order-toggle">{{ expandedOrders.has(o.id) ? '▾' : '▸' }}</span>
+                    </td>
+                  </tr>
+                  <tr v-if="expandedOrders.has(o.id)" class="order-detail-row">
+                    <td colspan="7">
+                      <div class="order-detail">
+                        <div class="order-detail-grid">
+                          <div>
+                            <h4>Контакты</h4>
+                            <p><strong>Имя:</strong> {{ o.customer_name }}</p>
+                            <p><strong>Телефон:</strong> {{ o.customer_phone }}</p>
+                            <p v-if="o.customer_email"><strong>Email:</strong> {{ o.customer_email }}</p>
+                            <p v-if="o.customer_telegram"><strong>Telegram:</strong> @{{ o.customer_telegram }}</p>
+                          </div>
+                          <div>
+                            <h4>Доставка</h4>
+                            <p><strong>Способ:</strong> {{ deliveryLabel(o.delivery_type) }}</p>
+                            <p v-if="o.delivery_city"><strong>Город:</strong> {{ o.delivery_city }}</p>
+                            <p v-if="o.delivery_address"><strong>Адрес:</strong> {{ o.delivery_address }}</p>
+                          </div>
+                        </div>
+
+                        <h4>Состав заказа</h4>
+                        <div class="order-items">
+                          <div v-for="item in o.order_items" :key="item.id" class="order-item">
+                            <img v-if="item.product_photo" :src="item.product_photo" alt="">
+                            <div v-else class="order-item-noimg">—</div>
+                            <div class="order-item-info">
+                              <p>{{ item.product_name }}</p>
+                              <span v-if="item.product_article">{{ item.product_article }}</span>
+                            </div>
+                            <div class="order-item-qty">{{ item.qty }} шт</div>
+                            <div class="order-item-price">{{ (item.price * item.qty).toLocaleString() }} ₽</div>
+                          </div>
+                        </div>
+
+                        <div v-if="o.comment" class="order-comment">
+                          <strong>Комментарий:</strong> {{ o.comment }}
+                        </div>
+
+                        <div class="order-actions">
+                          <select v-model="o._newStatus" class="product-input">
+                            <option value="new">Новый</option>
+                            <option value="confirmed">Подтверждён</option>
+                            <option value="shipped">Отправлен</option>
+                            <option value="delivered">Доставлен</option>
+                            <option value="cancelled">Отменён</option>
+                          </select>
+                          <button @click="updateOrderStatus(o)">Обновить статус</button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <div v-if="orderTotalPages > 1" class="pagination">
+            <button :disabled="orderPage === 1" @click="orderPage--; fetchOrders()">←</button>
+            <span>{{ orderPage }} / {{ orderTotalPages }}</span>
+            <button :disabled="orderPage >= orderTotalPages" @click="orderPage++; fetchOrders()">→</button>
+          </div>
+        </section>
+      </template>
     </div>
   </div>
 </template>
@@ -140,6 +265,21 @@ const search = ref('')
 const filterCategory = ref('')
 const page = ref(1)
 const totalPages = ref(1)
+
+// Tabs
+const tabs = [
+  { key: 'catalog', label: 'Каталог' },
+  { key: 'orders', label: 'Заказы' }
+]
+const activeTab = ref('catalog')
+
+// Orders
+const orders = ref([])
+const ordersLoading = ref(false)
+const orderPage = ref(1)
+const orderTotalPages = ref(1)
+const orderStatus = ref('')
+const expandedOrders = ref(new Set())
 
 onMounted(() => {
   const saved = localStorage.getItem('admin_pwd')
@@ -503,6 +643,65 @@ async function uploadPhoto(e, productId) {
 
   fetchProducts()
 }
+
+/* ─── Orders ─── */
+async function fetchOrders () {
+  ordersLoading.value = true
+  const q = new URLSearchParams()
+  if (orderStatus.value) q.set('status', orderStatus.value)
+  q.set('page', orderPage.value)
+  q.set('limit', '20')
+
+  const res = await fetch(`/api/orders?${q}`, {
+    headers: { 'x-admin-password': password.value }
+  })
+  const data = await res.json()
+  orders.value = (data.orders || []).map(o => ({ ...o, _newStatus: o.status }))
+  orderTotalPages.value = data.totalPages || 1
+  ordersLoading.value = false
+}
+
+function toggleOrder (id) {
+  const next = new Set(expandedOrders.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  expandedOrders.value = next
+}
+
+function formatDate (iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
+function statusLabel (s) {
+  const map = { new: 'Новый', confirmed: 'Подтверждён', shipped: 'Отправлен', delivered: 'Доставлен', cancelled: 'Отменён' }
+  return map[s] || s
+}
+
+function deliveryLabel (d) {
+  const map = { pickup: 'Самовывоз', courier: 'Курьер', transport: 'ТК по РФ' }
+  return map[d] || d
+}
+
+async function updateOrderStatus (o) {
+  const res = await fetch('/api/orders/' + o.id, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-password': password.value
+    },
+    body: JSON.stringify({ status: o._newStatus })
+  })
+  if (res.ok) {
+    o.status = o._newStatus
+    alert('Статус обновлён')
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'orders') fetchOrders()
+})
 </script>
 
 <style scoped>
@@ -760,5 +959,181 @@ async function uploadPhoto(e, productId) {
 }
 .cat-name {
   flex: 1;
+}
+
+/* Tabs */
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.admin-tabs button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream-dim);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+.admin-tabs button.active {
+  background: var(--gold);
+  color: var(--ink-deep);
+  border-color: var(--gold);
+  font-weight: 600;
+}
+.admin-tabs button:not(.active):hover {
+  border-color: var(--gold);
+  color: var(--cream);
+}
+
+/* Orders table */
+.orders-table-wrap {
+  overflow-x: auto;
+}
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.orders-table th {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--cream-dim);
+  font-weight: 500;
+}
+.orders-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(241, 230, 200, 0.06);
+}
+.order-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.order-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.order-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.status-new { background: rgba(217, 180, 106, 0.15); color: #d9b46a; }
+.status-confirmed { background: rgba(74, 222, 128, 0.12); color: #4ade80; }
+.status-shipped { background: rgba(96, 165, 250, 0.12); color: #60a5fa; }
+.status-delivered { background: rgba(167, 139, 250, 0.12); color: #a78bfa; }
+.status-cancelled { background: rgba(255, 100, 100, 0.12); color: #ff8a8a; }
+.order-toggle {
+  color: var(--cream-dim);
+  font-size: 0.85rem;
+}
+
+/* Order detail */
+.order-detail-row td {
+  padding: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.order-detail {
+  padding: 20px;
+  background: rgba(14, 26, 36, 0.5);
+}
+.order-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+@media (max-width: 768px) {
+  .order-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.order-detail h4 {
+  font-family: var(--font-serif);
+  margin-bottom: 10px;
+  color: var(--gold);
+}
+.order-detail p {
+  margin: 4px 0;
+  color: var(--cream-dim);
+}
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ink-mid);
+  padding: 10px;
+  border-radius: 8px;
+}
+.order-item img,
+.order-item-noimg {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cream-dim);
+  font-size: 0.8rem;
+}
+.order-item-info {
+  flex: 1;
+}
+.order-item-info p {
+  margin: 0;
+  color: var(--cream);
+}
+.order-item-info span {
+  font-size: 0.85rem;
+  color: var(--cream-dim);
+}
+.order-item-qty {
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+}
+.order-item-price {
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+}
+.order-comment {
+  padding: 12px;
+  background: rgba(217, 180, 106, 0.06);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  color: var(--cream-dim);
+}
+.order-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.order-actions select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--rule);
+  background: var(--ink-mid);
+  color: var(--cream);
+}
+.order-actions button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--gold);
+  color: var(--ink-deep);
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>

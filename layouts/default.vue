@@ -15,6 +15,7 @@
 
     <div class="sh-mobile-menu" :class="{ open: menuOpen }">
       <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-mobile-link" @click="menuOpen = false">{{ link.label }}</NuxtLink>
+      <NuxtLink to="/cart" class="sh-mobile-link" @click="menuOpen = false">Корзина</NuxtLink>
       <!-- <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a> -->
     </div>
 
@@ -141,6 +142,10 @@ useHead({
   height: 6px;
   border-radius: 50%;
   background: #d9b46a;
+}
+
+.sh-nav-cart {
+  margin-right: 8px;
 }
 
 /* compact: hide links */
