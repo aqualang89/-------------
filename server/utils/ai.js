@@ -42,7 +42,7 @@ export async function askOpenRouter (messages) {
   const res = await fetch(OPENROUTER_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      'Authorization': `Bearer ${(process.env.OPENROUTER_API_KEY || '').trim()}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': /^[\x00-\x7F]+$/.test(process.env.SITE_URL || '') ? process.env.SITE_URL : 'https://aquariumpage.vercel.app',
       'X-Title': "Scaper's House"
