@@ -45,9 +45,22 @@
             <h3>Описание</h3>
             <p>{{ product.description }}</p>
           </div>
-          <button class="product-cta" @click="scrollToContacts">
-            Заказать консультацию
-          </button>
+          <div class="product-cart">
+            <div v-if="cartItem" class="product-cart-in">
+              <span>В корзине: <strong>{{ cartItem.qty }}</strong></span>
+              <NuxtLink to="/cart" class="product-cart-link">Перейти →</NuxtLink>
+            </div>
+            <template v-else>
+              <div class="product-qty">
+                <button @click="qty = Math.max(1, qty - 1)">−</button>
+                <span>{{ qty }}</span>
+                <button @click="qty++">+</button>
+              </div>
+              <button class="product-cta" @click="addToCart">
+                Добавить в корзину
+              </button>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -68,6 +81,22 @@ const currentIndex = ref(0)
 const zoomStyle = ref({})
 const mainImg = ref(null)
 const categoryTree = ref([])
+const qty = ref(1)
+
+const { add, find } = useCart()
+const cartItem = computed(() => product.value ? find(product.value.id) : null)
+
+function addToCart () {
+  if (!product.value) return
+  add({
+    id: product.value.id,
+    slug: product.value.slug,
+    name: product.value.name,
+    article: product.value.article,
+    price: product.value.price,
+    product_photos: product.value.product_photos
+  }, qty.value)
+}
 
 useHead(() => ({
   title: product.value ? `${product.value.name} — Каталог` : 'Товар'
