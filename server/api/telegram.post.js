@@ -3,6 +3,7 @@ import {
   queueManualReplyForSite,
   setMode
 } from '~/server/utils/store.js';
+import { askOpenRouter, findRelevantProducts } from '~/server/utils/ai.js';
 
 function parseReplyCommand(text = '') {
   const match = text.match(/^\/reply\s+([^\s]+)\s+([\s\S]+)/);
@@ -26,40 +27,35 @@ async function sendTelegram(chatId, text) {
   });
 }
 
-async function askAI(text) {
-  const response = await fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-      'Content-Type': 'application/json'
+async function askTelegramAI(text) {
+  const products = await findRelevantProducts(text)
+  const catalogContext = products.length
+    ? '\n\nДоступные товары из каталога:\n' +
+      products.map(p =>
+        `— ${p.name} (арт. ${p.article || 'нет'}) — ${Math.round(p.price).toLocaleString()} ₽`
+      ).join('\n')
+    : ''
+
+  const messages = [
+    {
+      role: 'system',
+      content: `Ты — консультант студии аквариумного дизайна Scaper's House (Калининград).
+Отвечай только по-русски. Пиши кратко, профессионально и по делу.
+Помогай по темам: запуск аквариума, фильтрация, свет, CO2, грунты, растения, обслуживание.
+Если данных мало, задай 1–3 уточняющих вопроса.
+Если клиент спрашивает про товары — рекомендуй только из списка ниже с ценой и артикулом.
+Не выдумывай товары, которых нет в списке.
+${catalogContext}`
     },
-    body: JSON.stringify({
-      model: 'sonar-pro',
-      messages: [
-        {
-          role: 'system',
-          content: `Ты — консультант студии аквариумного дизайна Scaper's House.
-Отвечай только по-русски.
-Пиши кратко, профессионально и по делу.
-Помогай по темам: запуск аквариума, фильтрация, свет, CO2, грунты, растения и обслуживание.
-Если данных мало, сначала задай 1–3 уточняющих вопроса.`
-        },
-        {
-          role: 'user',
-          content: text
-        }
-      ]
-    })
-  });
+    { role: 'user', content: text }
+  ]
 
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error('Perplexity error:', response.status, errText);
-    return 'Сейчас не могу ответить. Попробуйте чуть позже.';
+  try {
+    return await askOpenRouter(messages)
+  } catch (e) {
+    console.error('Telegram AI error:', e)
+    return 'Сейчас не могу ответить. Попробуйте чуть позже.'
   }
-
-  const data = await response.json();
-  return data?.choices?.[0]?.message?.content || 'Не удалось получить ответ.';
 }
 
 export default defineEventHandler(async (event) => {
@@ -120,7 +116,7 @@ export default defineEventHandler(async (event) => {
 
   const reply = text === '/start'
     ? 'Привет! Напишите вопрос по аквариуму.'
-    : await askAI(text);
+    : await askTelegramAI(text);
 
   await sendTelegram(chatId, reply);
 
