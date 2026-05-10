@@ -1,7 +1,7 @@
 import { supabase } from '~/server/utils/supabase'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL = 'anthropic/claude-sonnet-4-20250514'
+const MODEL = 'anthropic/claude-sonnet-4.6'
 
 const SYSTEM_PROMPT = `Ты — консультант и продавец студии аквариумного дизайна Scaper's House (Калининград, ул. Аксакова, 123).
 
