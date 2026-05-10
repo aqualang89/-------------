@@ -19,7 +19,7 @@ CREATE TABLE orders (
 CREATE TABLE order_items (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id uuid NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  product_id uuid REFERENCES products(id),
+  product_id INT REFERENCES products(id),
   product_name text NOT NULL,
   product_article text,
   product_photo text,
