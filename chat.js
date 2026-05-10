@@ -91,7 +91,7 @@ async function onChatSubmit(e) {
     console.error(err);
     const msgs = document.querySelectorAll('.ai-chat-msg.ai-chat-assistant');
     if (msgs.length) {
-      msgs[msgs.length - 1].textContent = 'Консультант сейчас недоступен. Напишите нам в Telegram @scapers_house — ответим лично.';
+      msgs[msgs.length - 1].textContent = 'Консультант сейчас недоступен. Напишите нам в Telegram @riparium_kld — ответим лично.';
     }
   }
 }
