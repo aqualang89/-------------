@@ -507,6 +507,18 @@ onMounted(async () => {
   z-index: 1;
 }
 
+.sh-interior::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  background: linear-gradient(to bottom, #1e2933 0%, rgba(30, 41, 51, 0.5) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
 .sh-stage::before {
   content: '';
   position: absolute;

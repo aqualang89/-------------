@@ -19,7 +19,7 @@
       <!-- <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a> -->
     </div>
 
-    <NuxtLink v-if="$route.path !== '/'" to="/" class="sh-back" @click.native="sessionStorage.removeItem('introShown')">
+    <NuxtLink v-if="$route.path !== '/'" :to="backTo" class="sh-back" @click.native="sessionStorage.removeItem('introShown')">
       ← Назад
     </NuxtLink>
     <div class="layout-content">
@@ -35,6 +35,11 @@ import { watch } from 'vue'
 const menuOpen = ref(false)
 const compact = ref(false)
 const route = useRoute()
+
+const backTo = computed(() => {
+  if (route.path.startsWith('/catalog/') && route.path !== '/catalog') return '/catalog'
+  return '/'
+})
 
 const regularLinks = [
   { to: '/', label: 'Главная' },
@@ -126,8 +131,6 @@ useHead({
   padding: 14px 48px;
 }
 .sh-nav-inner {
-  max-width: 1440px;
-  margin: 0 auto;
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
@@ -348,8 +351,13 @@ useHead({
 @media (max-width: 768px) {
   .sh-back {
     position: static;
-    margin: 16px 20px 0;
-    display: inline-block;
+    margin: 8px 12px 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 16px;
+    min-height: 44px;
+    font-size: 12px;
+    -webkit-tap-highlight-color: rgba(217, 180, 106, 0.15);
   }
 }
 
