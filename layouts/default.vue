@@ -30,8 +30,11 @@
 </template>
 
 <script setup>
+import { watch } from 'vue'
+
 const menuOpen = ref(false)
 const compact = ref(false)
+const route = useRoute()
 
 const regularLinks = [
   { to: '/', label: 'Главная' },
@@ -41,9 +44,18 @@ const regularLinks = [
   { to: '/about', label: 'О нас' },
 ]
 
+/* Close menu on route change */
+watch(() => route.path, () => {
+  menuOpen.value = false
+})
+
 /* Scroll-based compact nav (desktop only) */
 let scrollTick = false
 function onScroll () {
+  if (window.innerWidth < 768) {
+    compact.value = false
+    return
+  }
   if (!scrollTick) {
     requestAnimationFrame(() => {
       compact.value = window.scrollY > 80
@@ -53,11 +65,27 @@ function onScroll () {
   }
 }
 
+/* Resize handler with debounce */
+let resizeTimer = null
+function onResize () {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    if (window.innerWidth < 768) {
+      compact.value = false
+    } else {
+      compact.value = window.scrollY > 80
+    }
+  }, 100)
+}
+
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onResize)
 })
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', onResize)
+  clearTimeout(resizeTimer)
 })
 
 /* function openQuiz() {
@@ -83,7 +111,7 @@ useHead({
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 1002;
   padding: 22px 48px;
   pointer-events: none;
   background: transparent;

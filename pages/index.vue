@@ -196,6 +196,7 @@ function initHorizontalScroll() {
   const section = hSection.value
   const track = hTrack.value
   if (!section || !track) return
+  track.style.transform = ''
   let maxTranslate = track.scrollWidth - window.innerWidth
   function updateLayout() {
     maxTranslate = track.scrollWidth - window.innerWidth
