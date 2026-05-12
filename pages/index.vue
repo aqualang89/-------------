@@ -909,9 +909,12 @@ onMounted(async () => {
   position: sticky;
   top: 0;
   height: 100dvh;
-  overflow: hidden;
   display: flex;
   align-items: center;
+}
+.sh-horizontal-clipper {
+  width: 100%;
+  overflow: hidden;
 }
 .sh-horizontal-track {
   display: flex;
