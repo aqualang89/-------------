@@ -10,6 +10,9 @@ function buildTree(cats, parentId = null) {
     }))
 }
 
+const HIDDEN_CATEGORY_SLUGS = ['morskaya-akvariumistika']
+const HIDDEN_CATEGORY_NAME_PATTERNS = [/^морск/i]
+
 export default defineEventHandler(async () => {
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
     return []
@@ -24,5 +27,10 @@ export default defineEventHandler(async () => {
     throw createError({ statusCode: 500, message: error.message })
   }
 
-  return buildTree(data || [])
+  const tree = buildTree(data || [])
+  const visibleTree = tree.filter(node =>
+    !HIDDEN_CATEGORY_SLUGS.includes(node.slug) &&
+    !HIDDEN_CATEGORY_NAME_PATTERNS.some(p => p.test(node.name))
+  )
+  return visibleTree
 })

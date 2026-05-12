@@ -43,9 +43,25 @@ export default defineEventHandler(async (event) => {
     dbQuery = dbQuery.eq('is_available', true)
   }
 
+  const { data: allCats } = await supabase.from('categories').select('id, parent_id, name, slug')
+
+  // Скрываем категорию "Морская аквариумистика"
+  const hiddenRoots = (allCats || []).filter(c =>
+    c.slug === 'morskaya-akvariumistika' || /^морск/i.test(c.name)
+  )
+  const hiddenIds = new Set()
+  function addWithChildren(parentId) {
+    hiddenIds.add(parentId)
+    const children = (allCats || []).filter(c => c.parent_id === parentId)
+    for (const child of children) addWithChildren(child.id)
+  }
+  for (const r of hiddenRoots) addWithChildren(r.id)
+  if (hiddenIds.size) {
+    dbQuery = dbQuery.not('category_id', 'in', `(${Array.from(hiddenIds).join(',')})`)
+  }
+
   let categoryIds = null
   if (categorySlug) {
-    const { data: allCats } = await supabase.from('categories').select('id, parent_id, slug')
     const target = (allCats || []).find(c => c.slug === categorySlug)
     if (target) {
       categoryIds = getDescendantIds(allCats || [], target.id)

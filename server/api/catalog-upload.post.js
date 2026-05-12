@@ -199,6 +199,7 @@ async function processReference(rows) {
   const errors = []
   let created = 0
   let updated = 0
+  let skipped = 0
   let prevPath = []
   let lastHeader = null
 
@@ -238,6 +239,11 @@ async function processReference(rows) {
         path = prevPath
       }
 
+      if (path.some(p => /^морск/i.test(p))) {
+        skipped++
+        continue
+      }
+
       const categoryId = await ensureCategories(path)
       const slug = slugify(article)
       const productData = {
@@ -262,7 +268,7 @@ async function processReference(rows) {
     }
   }
 
-  return { processed: rows.length, created, updated, errors }
+  return { processed: rows.length, created, updated, errors, skipped }
 }
 
 // ─── Обработка выгрузки 1С 333.xlsx ───
@@ -319,6 +325,11 @@ async function process1C(rows) {
     const qty = parseFloat(String(row[8] || '0').replace(/\s/g, '').replace(',', '.')) || 0
 
     if (!name) continue
+
+    if (parent && /^морск/i.test(parent)) {
+      skipped++
+      continue
+    }
 
     if (parentSet.has(name) || name === 'Аквариумистика / Террариумистика') {
       skipped++

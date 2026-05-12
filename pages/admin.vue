@@ -57,9 +57,20 @@
       <!-- Фильтр товаров -->
       <section class="admin-section">
         <h2>Товары</h2>
-        <div class="filters">
-          <input v-model="search" placeholder="Поиск..." @input="fetchProducts">
-          <div class="admin-cat-tree">
+        <input
+          v-model="search"
+          placeholder="Поиск по названию или артикулу..."
+          class="search-input"
+          @input="fetchProducts"
+        >
+        <div class="admin-cats-wrap">
+          <div class="admin-cats-header">
+            <h3>Категории</h3>
+            <button class="sidebar-toggle" @click="adminCatsOpen = !adminCatsOpen">
+              {{ adminCatsOpen ? 'Скрыть' : 'Показать' }}
+            </button>
+          </div>
+          <div v-show="adminCatsOpen" class="admin-cat-tree">
             <div
               class="cat-item"
               :class="{ active: filterCategory === '' }"
@@ -265,6 +276,7 @@ const search = ref('')
 const filterCategory = ref('')
 const page = ref(1)
 const totalPages = ref(1)
+const adminCatsOpen = ref(true)
 
 // Tabs
 const tabs = [
