@@ -1,4 +1,5 @@
-// Chat-виджет: текст + фото + добавление в корзину через маркер [CART_ADD:артикул]
+// Chat-виджет v2 (2026-05-12): текст + фото + add-to-cart через [CART_ADD:артикул]
+console.log('[chat] init v2 cart+photo')
 
 const CART_STORAGE_KEY = 'sh_cart'
 const MAX_IMAGE_MB = 5
@@ -167,12 +168,16 @@ function addProductToLocalCart (product) {
 
 // Парсим маркеры [CART_ADD:артикул] из ответа, добавляем товары в корзину, удаляем маркеры из текста
 function processCartActions (reply, products) {
+  console.log('[chat] processCartActions: reply length', reply.length, 'products', (products || []).length)
+
   // Запоминаем все товары из текущего ответа в накопитель
   for (const p of (products || [])) {
     if (p && p.article) chatState.seenProducts.set(String(p.article).trim(), p)
   }
 
   const matches = reply.match(/\[CART_ADD:([^\]\s]+)\]/g) || []
+  console.log('[chat] CART_ADD matches:', matches)
+
   let addedCount = 0
   const missing = []
   for (const m of matches) {
@@ -182,10 +187,12 @@ function processCartActions (reply, products) {
       (products || []).find(p => String(p.article).trim() === article) ||
       chatState.seenProducts.get(article)
     if (product && product.id) {
-      if (addProductToLocalCart(product)) addedCount++
+      const ok = addProductToLocalCart(product)
+      console.log('[chat] add to cart:', article, '->', ok ? 'OK' : 'FAIL', product.name)
+      if (ok) addedCount++
     } else {
       missing.push(article)
-      console.warn('[CART_ADD] товар не найден в products и seenProducts:', article)
+      console.warn('[chat] товар не найден в products/seenProducts:', article, 'seen:', [...chatState.seenProducts.keys()])
     }
   }
   const cleanText = reply.replace(/\[CART_ADD:[^\]\s]+\]\s*\n?/g, '').trim()

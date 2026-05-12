@@ -107,9 +107,11 @@ onUnmounted(() => {
   }
 } */
 
+// Версия в URL форсит браузер перечитать chat.js когда мы его меняем.
+// Увеличивай число при каждом значимом изменении public/js/chat.js
 useHead({
   script: [
-    { src: '/js/chat.js', tagPosition: 'bodyClose' }
+    { src: '/js/chat.js?v=20260512-cart-photo', tagPosition: 'bodyClose' }
     /* { src: '/js/quiz.js', tagPosition: 'bodyClose' } */
   ]
 })
