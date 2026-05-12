@@ -17,7 +17,10 @@
 
     <div class="sh-mobile-menu" :class="{ open: menuOpen }">
       <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-mobile-link" @click="menuOpen = false">{{ link.label }}</NuxtLink>
-      <NuxtLink to="/cart" class="sh-mobile-link" @click="menuOpen = false">Корзина</NuxtLink>
+      <NuxtLink to="/cart" class="sh-mobile-link sh-mobile-link-cart" @click="menuOpen = false">
+        <span>Корзина</span>
+        <span v-if="cartCount > 0" class="sh-mobile-cart-badge">{{ cartCount }}</span>
+      </NuxtLink>
       <!-- <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a> -->
     </div>
 
@@ -37,6 +40,7 @@ import { watch } from 'vue'
 const menuOpen = ref(false)
 const compact = ref(false)
 const route = useRoute()
+const { totalCount: cartCount } = useCart()
 
 const backTo = computed(() => {
   if (route.path.startsWith('/catalog/') && route.path !== '/catalog') return '/catalog'
@@ -155,6 +159,34 @@ useHead({
   transform: translateY(-8px) scale(0.97);
   filter: blur(4px);
   pointer-events: none;
+}
+
+/* На мобиле иконку корзины скрываем — там бургер, корзина внутри меню с бейджем */
+@media (max-width: 768px) {
+  .sh-nav-cart-icon {
+    display: none;
+  }
+}
+
+/* Пункт «Корзина» в мобильном меню с цифрой количества */
+.sh-mobile-link-cart {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sh-mobile-cart-badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  background: #d9b46a;
+  color: #0e1a24;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ─── Desktop links ─── */

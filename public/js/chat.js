@@ -6,7 +6,8 @@ const MAX_IMAGE_MB = 5
 const chatState = {
   open: false,
   pendingImage: null,         // dataURL прикреплённого фото
-  pendingImageName: null
+  pendingImageName: null,
+  seenProducts: new Map()     // article → product (накапливаем все товары из ответов сессии)
 }
 
 const sessionId =
@@ -166,17 +167,29 @@ function addProductToLocalCart (product) {
 
 // Парсим маркеры [CART_ADD:артикул] из ответа, добавляем товары в корзину, удаляем маркеры из текста
 function processCartActions (reply, products) {
+  // Запоминаем все товары из текущего ответа в накопитель
+  for (const p of (products || [])) {
+    if (p && p.article) chatState.seenProducts.set(String(p.article).trim(), p)
+  }
+
   const matches = reply.match(/\[CART_ADD:([^\]\s]+)\]/g) || []
   let addedCount = 0
+  const missing = []
   for (const m of matches) {
     const article = m.replace(/\[CART_ADD:|\]/g, '').trim()
-    const product = (products || []).find(p => String(p.article).trim() === article)
-    if (product && addProductToLocalCart(product)) {
-      addedCount++
+    // Ищем сначала в текущих products, потом в накопителе сессии
+    const product =
+      (products || []).find(p => String(p.article).trim() === article) ||
+      chatState.seenProducts.get(article)
+    if (product && product.id) {
+      if (addProductToLocalCart(product)) addedCount++
+    } else {
+      missing.push(article)
+      console.warn('[CART_ADD] товар не найден в products и seenProducts:', article)
     }
   }
   const cleanText = reply.replace(/\[CART_ADD:[^\]\s]+\]\s*\n?/g, '').trim()
-  return { cleanText, addedCount }
+  return { cleanText, addedCount, missing }
 }
 
 async function onChatSubmit (e) {

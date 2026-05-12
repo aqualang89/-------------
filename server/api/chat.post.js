@@ -5,6 +5,42 @@ import {
 } from '~/server/utils/store.js'
 import { sendOwnerCard } from '~/server/utils/telegram.js'
 import { askOpenRouter, findRelevantProducts, buildUserMessage, SYSTEM_PROMPT } from '~/server/utils/ai.js'
+import { supabase } from '~/server/utils/supabase'
+
+// Парсим маркеры [CART_ADD:артикул] из ответа Claude и подтягиваем товары по article из БД
+// чтобы клиент гарантированно мог добавить в корзину (даже если их нет в текущем products)
+async function ensureCartProducts (reply, products) {
+  const matches = reply.match(/\[CART_ADD:([^\]\s]+)\]/g) || []
+  if (matches.length === 0) return products
+
+  const articlesInProducts = new Set(products.map(p => String(p.article).trim()))
+  const missing = []
+  for (const m of matches) {
+    const article = m.replace(/\[CART_ADD:|\]/g, '').trim()
+    if (article && !articlesInProducts.has(article)) {
+      missing.push(article)
+    }
+  }
+  if (missing.length === 0) return products
+
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, name, article, price, slug, is_available, product_photos(url, is_main, sort_order)')
+    .in('article', missing)
+  if (error || !data) return products
+
+  const extra = data.map(p => ({
+    id: p.id,
+    name: p.name,
+    article: p.article,
+    price: p.price,
+    slug: p.slug,
+    is_available: p.is_available,
+    photo: (p.product_photos || [])
+      .sort((a, b) => (b.is_main - a.is_main) || (a.sort_order - b.sort_order))[0]?.url || null
+  }))
+  return [...products, ...extra]
+}
 
 const HISTORY_LIMIT = 20
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
@@ -70,6 +106,9 @@ export default defineEventHandler(async (event) => {
     ]
 
     reply = await askOpenRouter(messages)
+
+    // Гарантируем что все товары упомянутые в [CART_ADD:артикул] есть в products
+    products = await ensureCartProducts(reply, products)
   } catch (aiErr) {
     console.error('AI fallback:', aiErr)
     responseMode = 'manual'
