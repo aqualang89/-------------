@@ -288,6 +288,7 @@ useHead({
   }
   .sh-nav-inner {
     justify-content: flex-end;
+    align-items: center;
   }
   .sh-nav-links {
     display: none;
