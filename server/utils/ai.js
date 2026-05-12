@@ -23,6 +23,17 @@ export const SYSTEM_PROMPT = `Ты — Рипарий, эксперт-консу
 — Освещении: PAR, спектр, время включения, мощность под объём и тип растений.
 — Оборудовании: фильтрация (оборот воды 3-5 объёмов/ч в среднем, для травника 4-6), CO2-системы, обогрев, скиммеры.
 
+ФОТО ОТ КЛИЕНТА
+
+Иногда клиент прикладывает фото — рыба, водоросль, аквариум, тест-полоска, проблема. Внимательно смотри:
+— Рыба: ищи симптомы (точки, налёт, изменение плавников, поведение). Называй вероятную болезнь и лечение.
+— Водоросли: опознавай по виду (нитчатка, чёрная борода, цианобактерии, ксенококус, диатомеи) — у каждой свой механизм и метод борьбы.
+— Аквариум целиком: оценивай композицию, проблемы (зеркало, перенаселение, плохой свет), советуй улучшения.
+— Тест-полоска: расшифровывай по шкалам (pH, NO2, NO3, KH, GH).
+— Растения: определяй вид если узнаёшь, говори о требованиях.
+
+Если фото некачественное или объект непонятен — честно скажи и попроси фото получше / уточняющие данные.
+
 КАК ВЕДЁШЬ ДИАЛОГ
 
 Распознай интент клиента и отвечай соответственно:
@@ -48,6 +59,29 @@ export const SYSTEM_PROMPT = `Ты — Рипарий, эксперт-консу
 — Если товара нет в этом списке — НЕ выдумывай артикулы, цены и названия. Никогда.
 — Если ничего подходящего нет — говори честно: «такого сейчас нет в наличии, могу подсказать критерии или похожее».
 — Не дублируй один товар в нескольких ответах подряд (если клиент не спрашивает заново).
+— Когда называешь товар клиенту — называй полное имя, артикул и цену. Ссылки в текст НЕ вставляй — клиент сможет добавить в корзину прямо из чата (см. блок «Добавление в корзину»).
+
+ДОБАВЛЕНИЕ В КОРЗИНУ (важно — это твоя суперсила)
+
+Если клиент явно хочет купить товар который ты только что предложил («первый возьму», «давай этот», «добавь в корзину», «беру», «закажи», называет артикул из твоего списка) — добавь в корзину так:
+
+В САМОЙ ПЕРВОЙ СТРОКЕ ответа поставь маркер:
+[CART_ADD:артикул]
+
+Без пробелов внутри скобок, артикул точно как в каталоге. Дальше — обычный ответ клиенту («Добавил [название] в корзину. Что-то ещё посмотрим?»).
+
+Пример:
+[CART_ADD:520-60]
+Добавил Chihiros W 60 в корзину. Хотите подобрать ещё подходящий фильтр или растения?
+
+Если клиент хочет добавить НЕСКОЛЬКО товаров за раз — несколько маркеров подряд:
+[CART_ADD:520-60]
+[CART_ADD:388-060]
+Добавил два светильника на сравнение. Дайте знать, какой больше понравится.
+
+Если клиент сомневается, спрашивает, уточняет — маркер НЕ ставь. Только когда ясно: хочет в корзину.
+
+Если артикула в каталоге нет (клиент назвал что-то от себя) — НЕ ставь маркер, не выдумывай артикул. Скажи что точного товара нет, предложи альтернативу.
 
 ОТВЕТСТВЕННОСТЬ
 
@@ -88,13 +122,13 @@ function cleanReply (raw) {
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/#{1,6}\s*/g, '')
-    .replace(/\[[\d,\s]+\]/g, '')
     .replace(/^\s*[-•]\s+/gm, '— ')
     .replace(/^\s*\d+\.\s+/gm, '')
     .replace(/[ \t]{2,}/g, ' ')
     .trim()
 }
 
+// Базовый вызов OpenRouter. messages может содержать multimodal content (массивы с image_url для vision)
 export async function askOpenRouter (messages) {
   const res = await fetch(OPENROUTER_URL, {
     method: 'POST',
@@ -123,7 +157,21 @@ export async function askOpenRouter (messages) {
   return cleanReply(raw)
 }
 
-// Генерация embedding через Google AI (gemini-embedding-001)
+// Хелпер: собрать user-message с возможным изображением (base64 data URL)
+// imageDataUrl ожидается в формате 'data:image/jpeg;base64,/9j/...' или undefined
+export function buildUserMessage (text, imageDataUrl) {
+  if (!imageDataUrl) {
+    return { role: 'user', content: text }
+  }
+  return {
+    role: 'user',
+    content: [
+      { type: 'text', text: text || 'Клиент прислал фото. Посмотри что на нём и дай экспертный совет.' },
+      { type: 'image_url', image_url: { url: imageDataUrl } }
+    ]
+  }
+}
+
 export async function embedText (text) {
   if (!GOOGLE_AI_API_KEY) {
     throw new Error('GOOGLE_AI_API_KEY не задан в env')
@@ -148,7 +196,6 @@ export async function embedText (text) {
   return values
 }
 
-// Vector search в Supabase pgvector — основной путь
 async function vectorSearchProducts (query) {
   try {
     const queryEmbedding = await embedText(query)
@@ -167,7 +214,6 @@ async function vectorSearchProducts (query) {
   }
 }
 
-// Keyword fallback — если embeddings не работают (нет ключа, БД не готова, упало)
 const STOP_WORDS = new Set([
   'какой', 'какая', 'какое', 'какие', 'как', 'что', 'где', 'когда',
   'почему', 'зачем', 'сколько',
@@ -211,7 +257,7 @@ async function keywordSearchProducts (query) {
 
   const { data, error } = await supabase
     .from('products')
-    .select('name, article, price, slug, is_available')
+    .select('id, name, article, price, slug, is_available, product_photos(url, is_main, sort_order)')
     .or(conditions.join(','))
     .eq('is_available', true)
     .limit(10)
@@ -220,14 +266,23 @@ async function keywordSearchProducts (query) {
     console.error('Keyword search error:', error)
     return []
   }
-  return data || []
+
+  // Нормализуем формат под match_products: вытаскиваем photo
+  return (data || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    article: p.article,
+    price: p.price,
+    slug: p.slug,
+    is_available: p.is_available,
+    photo: (p.product_photos || [])
+      .sort((a, b) => (b.is_main - a.is_main) || (a.sort_order - b.sort_order))[0]?.url || null
+  }))
 }
 
-// Hybrid search: vector first, keyword fallback
 export async function findRelevantProducts (query) {
   if (!query || query.length < 2) return []
 
-  // 1. Пробуем vector search через embeddings
   if (GOOGLE_AI_API_KEY) {
     const vectorResults = await vectorSearchProducts(query)
     if (vectorResults && vectorResults.length > 0) {
@@ -235,6 +290,5 @@ export async function findRelevantProducts (query) {
     }
   }
 
-  // 2. Fallback на keyword search
   return await keywordSearchProducts(query)
 }

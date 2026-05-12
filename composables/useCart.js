@@ -72,12 +72,15 @@ export function useCart () {
     return items.value.find(i => i.productId === productId)
   }
 
-  // sync between tabs
+  // sync between tabs + sync with vanilla chat.js (внутри одной вкладки)
   if (typeof window !== 'undefined') {
     window.addEventListener('storage', e => {
       if (e.key === STORAGE_KEY) {
         items.value = load()
       }
+    })
+    window.addEventListener('sh-cart-changed', () => {
+      items.value = load()
     })
   }
 

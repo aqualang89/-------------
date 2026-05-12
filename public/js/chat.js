@@ -1,98 +1,253 @@
+// Chat-виджет: текст + фото + добавление в корзину через маркер [CART_ADD:артикул]
+
+const CART_STORAGE_KEY = 'sh_cart'
+const MAX_IMAGE_MB = 5
+
 const chatState = {
   open: false,
-  history: []
-};
+  pendingImage: null,         // dataURL прикреплённого фото
+  pendingImageName: null
+}
 
 const sessionId =
   sessionStorage.getItem('riparium_chat_session') ||
-  (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
+  (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36))
+sessionStorage.setItem('riparium_chat_session', sessionId)
 
-sessionStorage.setItem('riparium_chat_session', sessionId);
+function createChatElements () {
+  const btn = document.createElement('button')
+  btn.id = 'ai-chat-toggle'
+  btn.textContent = 'Задать вопрос'
+  document.body.appendChild(btn)
 
-function createChatElements() {
-  const btn = document.createElement('button');
-  btn.id = 'ai-chat-toggle';
-  btn.textContent = 'Задать вопрос';
-  document.body.appendChild(btn);
-
-  const box = document.createElement('div');
-  box.id = 'ai-chat-box';
+  const box = document.createElement('div')
+  box.id = 'ai-chat-box'
   box.innerHTML = `
     <div class="ai-chat-header">
       <span>Консультант по аквариумам</span>
-      <button class="ai-chat-close">×</button>
+      <button class="ai-chat-close" type="button">×</button>
     </div>
     <div class="ai-chat-messages"></div>
+    <div class="ai-chat-preview" hidden>
+      <img class="ai-chat-preview-img" alt="превью" />
+      <span class="ai-chat-preview-name"></span>
+      <button class="ai-chat-preview-remove" type="button" title="убрать">×</button>
+    </div>
     <form class="ai-chat-form">
+      <button type="button" class="ai-chat-attach" title="прикрепить фото">📷</button>
+      <input type="file" accept="image/*" class="ai-chat-file" hidden />
       <input type="text" name="text" placeholder="Опишите задачу..." autocomplete="off" />
-      <button type="submit">▶</button>
+      <button type="submit" class="ai-chat-send">▶</button>
     </form>
-  `;
-  document.body.appendChild(box);
+  `
+  document.body.appendChild(box)
 
-  btn.addEventListener('click', () => toggleChat(true));
-  box.querySelector('.ai-chat-close').addEventListener('click', () => toggleChat(false));
-  box.querySelector('.ai-chat-form').addEventListener('submit', onChatSubmit);
+  btn.addEventListener('click', () => toggleChat(true))
+  box.querySelector('.ai-chat-close').addEventListener('click', () => toggleChat(false))
+  box.querySelector('.ai-chat-form').addEventListener('submit', onChatSubmit)
+
+  const fileInput = box.querySelector('.ai-chat-file')
+  box.querySelector('.ai-chat-attach').addEventListener('click', () => fileInput.click())
+  fileInput.addEventListener('change', onFilePicked)
+  box.querySelector('.ai-chat-preview-remove').addEventListener('click', clearPendingImage)
 }
 
-function toggleChat(open) {
-  chatState.open = open;
-  document.getElementById('ai-chat-box').classList.toggle('open', open);
+function toggleChat (open) {
+  chatState.open = open
+  document.getElementById('ai-chat-box').classList.toggle('open', open)
 }
 
-function addMessage(role, text) {
-  const wrap = document.querySelector('.ai-chat-messages');
-  const el = document.createElement('div');
-  el.className = `ai-chat-msg ai-chat-${role}`;
-  el.textContent = text;
-  wrap.appendChild(el);
-  wrap.scrollTop = wrap.scrollHeight;
+function addMessage (role, text, opts = {}) {
+  const wrap = document.querySelector('.ai-chat-messages')
+  const el = document.createElement('div')
+  el.className = `ai-chat-msg ai-chat-${role}`
+  if (opts.thumb) {
+    const img = document.createElement('img')
+    img.className = 'ai-chat-msg-thumb'
+    img.src = opts.thumb
+    img.alt = 'прикреплённое фото'
+    el.appendChild(img)
+  }
+  if (text) {
+    const p = document.createElement('div')
+    p.className = 'ai-chat-msg-text'
+    p.textContent = text
+    el.appendChild(p)
+  }
+  wrap.appendChild(el)
+  wrap.scrollTop = wrap.scrollHeight
+  return el
 }
 
-async function onChatSubmit(e) {
-  e.preventDefault();
-  const input = e.target.elements.text;
-  const text = input.value.trim();
-  if (!text) return;
+function addCartBadge (target, count) {
+  if (!target) return
+  const badge = document.createElement('div')
+  badge.className = 'ai-chat-cart-badge'
+  badge.textContent = count === 1 ? '🛒 добавлено в корзину' : `🛒 добавлено в корзину (${count})`
+  target.appendChild(badge)
+}
 
-  addMessage('user', text);
-  input.value = '';
-  addMessage('assistant', 'Думаю над ответом...');
+async function onFilePicked (e) {
+  const file = e.target.files && e.target.files[0]
+  e.target.value = ''  // позволит выбрать тот же файл повторно
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    alert('Можно прикреплять только изображения.')
+    return
+  }
+  if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+    alert(`Фото слишком большое (${(file.size / 1024 / 1024).toFixed(1)}MB). Максимум ${MAX_IMAGE_MB}MB.`)
+    return
+  }
+  try {
+    const dataUrl = await fileToDataUrl(file)
+    chatState.pendingImage = dataUrl
+    chatState.pendingImageName = file.name
+    showPreview(dataUrl, file.name)
+  } catch (err) {
+    console.error(err)
+    alert('Не удалось прочитать файл')
+  }
+}
+
+function fileToDataUrl (file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+function showPreview (dataUrl, name) {
+  const wrap = document.querySelector('.ai-chat-preview')
+  wrap.hidden = false
+  wrap.querySelector('.ai-chat-preview-img').src = dataUrl
+  wrap.querySelector('.ai-chat-preview-name').textContent = name
+}
+
+function clearPendingImage () {
+  chatState.pendingImage = null
+  chatState.pendingImageName = null
+  const wrap = document.querySelector('.ai-chat-preview')
+  wrap.hidden = true
+  wrap.querySelector('.ai-chat-preview-img').src = ''
+  wrap.querySelector('.ai-chat-preview-name').textContent = ''
+}
+
+// Добавление товара в localStorage в формате useCart
+function addProductToLocalCart (product) {
+  if (!product || !product.id) return false
+  let items = []
+  try {
+    items = JSON.parse(localStorage.getItem(CART_STORAGE_KEY)) || []
+  } catch {}
+  const existing = items.find(i => i.productId === product.id)
+  if (existing) {
+    existing.qty += 1
+  } else {
+    items.push({
+      productId: product.id,
+      slug: product.slug,
+      name: product.name,
+      article: product.article,
+      price: product.price,
+      photo: product.photo || '/img/no-photo.png',
+      qty: 1
+    })
+  }
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
+  // Триггерим оба события — storage (для других табов) и кастомное (для текущего таба, Vue useCart)
+  try {
+    window.dispatchEvent(new CustomEvent('sh-cart-changed'))
+  } catch {}
+  return true
+}
+
+// Парсим маркеры [CART_ADD:артикул] из ответа, добавляем товары в корзину, удаляем маркеры из текста
+function processCartActions (reply, products) {
+  const matches = reply.match(/\[CART_ADD:([^\]\s]+)\]/g) || []
+  let addedCount = 0
+  for (const m of matches) {
+    const article = m.replace(/\[CART_ADD:|\]/g, '').trim()
+    const product = (products || []).find(p => String(p.article).trim() === article)
+    if (product && addProductToLocalCart(product)) {
+      addedCount++
+    }
+  }
+  const cleanText = reply.replace(/\[CART_ADD:[^\]\s]+\]\s*\n?/g, '').trim()
+  return { cleanText, addedCount }
+}
+
+async function onChatSubmit (e) {
+  e.preventDefault()
+  const input = e.target.elements.text
+  const text = input.value.trim()
+  const image = chatState.pendingImage
+  const imageThumb = chatState.pendingImage
+
+  if (!text && !image) return
+
+  addMessage('user', text, { thumb: imageThumb || null })
+  input.value = ''
+  clearPendingImage()
+
+  const placeholder = addMessage('assistant', 'Думаю над ответом...')
 
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, text })
-    });
+      body: JSON.stringify({ sessionId, text, image })
+    })
 
-    const data = await res.json();
-    const reply = data.reply || 'Что-то пошло не так.';
-    const msgs = document.querySelectorAll('.ai-chat-msg.ai-chat-assistant');
-    msgs[msgs.length - 1].textContent = reply;
+    if (!res.ok) {
+      const errText = await res.text()
+      placeholder.querySelector('.ai-chat-msg-text').textContent =
+        `Ошибка: ${res.status}. ${errText.slice(0, 120)}`
+      return
+    }
+
+    const data = await res.json()
+    const reply = data.reply || 'Что-то пошло не так.'
+    const products = data.products || []
+
+    const { cleanText, addedCount } = processCartActions(reply, products)
+
+    // Заменяем placeholder содержимым ответа
+    placeholder.innerHTML = ''
+    const p = document.createElement('div')
+    p.className = 'ai-chat-msg-text'
+    p.textContent = cleanText || '...'
+    placeholder.appendChild(p)
+
+    if (addedCount > 0) {
+      addCartBadge(placeholder, addedCount)
+    }
+
+    const wrap = document.querySelector('.ai-chat-messages')
+    wrap.scrollTop = wrap.scrollHeight
   } catch (err) {
-    console.error(err);
-    const msgs = document.querySelectorAll('.ai-chat-msg.ai-chat-assistant');
-    msgs[msgs.length - 1].textContent = 'Ошибка соединения.';
+    console.error(err)
+    placeholder.querySelector('.ai-chat-msg-text').textContent = 'Ошибка соединения.'
   }
 }
 
-async function pollManualReplies() {
+async function pollManualReplies () {
   try {
     const res = await fetch('/api/chat-status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId })
-    });
-
-    const data = await res.json();
-    (data.pending || []).forEach(msg => addMessage('assistant', msg.content));
+    })
+    const data = await res.json()
+    ;(data.pending || []).forEach(msg => addMessage('assistant', msg.content))
   } catch (err) {
-    console.error(err);
+    console.error(err)
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  createChatElements();
-  setInterval(pollManualReplies, 4000);
-});
+  createChatElements()
+  setInterval(pollManualReplies, 4000)
+})

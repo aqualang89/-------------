@@ -4,42 +4,61 @@ import {
   getMode
 } from '~/server/utils/store.js'
 import { sendOwnerCard } from '~/server/utils/telegram.js'
-import { askOpenRouter, findRelevantProducts, SYSTEM_PROMPT } from '~/server/utils/ai.js'
+import { askOpenRouter, findRelevantProducts, buildUserMessage, SYSTEM_PROMPT } from '~/server/utils/ai.js'
 
 const HISTORY_LIMIT = 20
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const { sessionId, text } = body || {}
+  const { sessionId, text, image } = body || {}
 
-  if (!sessionId || !text || !text.trim()) {
-    throw createError({ statusCode: 400, statusMessage: 'sessionId and text are required' })
+  if (!sessionId || (!text?.trim() && !image)) {
+    throw createError({ statusCode: 400, statusMessage: 'sessionId и text (или image) обязательны' })
   }
 
-  const cleanText = text.trim()
+  const cleanText = (text || '').trim()
+  const hasImage = typeof image === 'string' && image.startsWith('data:image/')
+
+  if (hasImage) {
+    // примерный расчёт размера base64 (length * 0.75)
+    const approxBytes = image.length * 0.75
+    if (approxBytes > MAX_IMAGE_BYTES) {
+      throw createError({ statusCode: 413, statusMessage: 'Фото слишком большое (макс 5MB)' })
+    }
+  }
 
   const previousHistory = await getHistory(sessionId)
-  await addHistory(sessionId, 'user', cleanText)
+  // В историю кладём только текст (фото в Redis не храним)
+  const historyText = hasImage
+    ? (cleanText ? `${cleanText} [приложено фото]` : '[прислано фото]')
+    : cleanText
+  await addHistory(sessionId, 'user', historyText)
 
   const mode = await getMode(sessionId)
 
   if (mode === 'manual') {
-    await sendOwnerCard({ sessionId, userText: cleanText, aiReply: null, mode: 'manual' })
+    await sendOwnerCard({ sessionId, userText: historyText, aiReply: null, mode: 'manual' })
     return {
       reply: 'Сообщение передано владельцу. Он ответит здесь.',
-      mode: 'manual'
+      mode: 'manual',
+      products: []
     }
   }
 
   let reply
   let responseMode = 'ai'
+  let products = []
 
   try {
-    const products = await findRelevantProducts(cleanText)
+    // Поиск товаров делаем только по тексту (фото мы текстом не описываем)
+    const searchQuery = cleanText || ''
+    products = searchQuery ? await findRelevantProducts(searchQuery) : []
+
     const catalogBlock = products.length
-      ? 'Доступные товары из каталога (рекомендуй только эти):\n' +
+      ? 'Доступные товары из каталога (используй их в ответе с артикулами и ценами; ссылки в текст НЕ вставляй — клиент добавит в корзину через [CART_ADD:артикул]):\n' +
         products.map(p =>
-          `— ${p.name} (арт. ${p.article || 'нет'}) — ${Math.round(p.price).toLocaleString()} ₽ — https://рипарий.рф/catalog/${p.slug}`
+          `— ${p.name} (арт. ${p.article || 'нет'}) — ${Math.round(p.price).toLocaleString()} ₽`
         ).join('\n')
       : 'Каталог по этому запросу ничего не вернул — отвечай экспертно по сути, конкретные товары можешь не предлагать (или предложи общие критерии выбора).'
 
@@ -47,7 +66,7 @@ export default defineEventHandler(async (event) => {
       { role: 'system', content: SYSTEM_PROMPT },
       ...previousHistory.slice(-HISTORY_LIMIT).map(h => ({ role: h.role, content: h.content })),
       { role: 'system', content: catalogBlock },
-      { role: 'user', content: cleanText }
+      buildUserMessage(cleanText, hasImage ? image : null)
     ]
 
     reply = await askOpenRouter(messages)
@@ -58,7 +77,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await addHistory(sessionId, 'assistant', reply)
-  await sendOwnerCard({ sessionId, userText: cleanText, aiReply: responseMode === 'ai' ? reply : null, mode: responseMode })
+  await sendOwnerCard({ sessionId, userText: historyText, aiReply: responseMode === 'ai' ? reply : null, mode: responseMode })
 
-  return { reply, mode: responseMode }
+  return { reply, mode: responseMode, products }
 })

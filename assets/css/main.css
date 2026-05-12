@@ -521,6 +521,95 @@ input[type="range"] {
   background: #e8cf95;
 }
 
+/* Кнопка прикрепить фото — приглушённая, чтобы не конкурировала с send */
+.ai-chat-attach {
+  background: transparent !important;
+  color: rgba(241, 230, 200, 0.6) !important;
+  border: 1px solid var(--rule) !important;
+  font-size: 16px !important;
+  padding: 4px 8px !important;
+  flex-shrink: 0;
+}
+
+.ai-chat-attach:hover {
+  background: rgba(241, 230, 200, 0.06) !important;
+  color: #f1e6c8 !important;
+}
+
+/* Превью прикреплённого фото перед отправкой */
+.ai-chat-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(217, 180, 106, 0.08);
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+}
+
+.ai-chat-preview[hidden] {
+  display: none;
+}
+
+.ai-chat-preview-img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.ai-chat-preview-name {
+  flex: 1;
+  color: rgba(241, 230, 200, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-chat-preview-remove {
+  background: transparent;
+  border: none;
+  color: rgba(241, 230, 200, 0.6);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.ai-chat-preview-remove:hover {
+  color: #f1e6c8;
+}
+
+/* Превью фото внутри сообщения пользователя */
+.ai-chat-msg-thumb {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.ai-chat-msg-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Бейдж «товар добавлен в корзину» под ответом бота */
+.ai-chat-cart-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 9px;
+  background: rgba(217, 180, 106, 0.15);
+  color: #d9b46a;
+  border: 1px solid rgba(217, 180, 106, 0.35);
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
 /* INTRO OVERLAY */
 /* Критические стили (position, background, display) в inline <style> head — см. nuxt.config.js */
 #intro-overlay {
