@@ -33,6 +33,7 @@ body {
   background: #1e2933;
   color: var(--cream);
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 /* HERO */
