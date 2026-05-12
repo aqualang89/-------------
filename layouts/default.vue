@@ -143,6 +143,18 @@ useHead({
 .sh-nav-cart-icon {
   padding-top: 6px;
   flex-shrink: 0;
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* compact (скролл > 80px на десктопе): корзина прячется вместе со ссылками,
+   остаётся только бургер */
+.sh-nav--compact .sh-nav-cart-icon {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  filter: blur(4px);
+  pointer-events: none;
 }
 
 /* ─── Desktop links ─── */
