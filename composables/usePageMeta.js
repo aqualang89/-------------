@@ -17,7 +17,7 @@ export function usePageMeta({ title, description, ogImage = '/og-image.jpg' }) {
       { name: 'theme-color', content: '#1e2933' }
     ],
     link: [
-      { rel: 'canonical', href: () => `https://riparium.ru${useRoute().path}` }
+      { rel: 'canonical', href: () => `https://рипарий.рф${useRoute().path}` }
     ],
     htmlAttrs: {
       lang: 'ru'

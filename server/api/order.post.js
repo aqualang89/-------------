@@ -126,7 +126,7 @@ ${comment ? '\n💬 ' + comment : ''}
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'orders@riparium.ru',
+          from: 'orders@рипарий.рф',
           to: process.env.ADMIN_EMAIL,
           reply_to: customer_email || undefined,
           subject: `Новый заказ #${order.id.slice(0, 8)} — ${total_amount.toLocaleString()} ₽`,

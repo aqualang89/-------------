@@ -3,6 +3,6 @@ export default defineEventHandler((event) => {
   return `User-agent: *
 Allow: /
 Disallow: /admin
-Sitemap: https://riparium.ru/sitemap.xml
+Sitemap: https://рипарий.рф/sitemap.xml
 `
 })
