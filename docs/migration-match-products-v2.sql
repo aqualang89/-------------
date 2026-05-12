@@ -1,10 +1,14 @@
 -- ============================================================
 -- Обновление match_products: возвращает id, slug, photo (для useCart)
 -- Запустить в Supabase SQL Editor.
--- Безопасно — CREATE OR REPLACE не теряет данных.
+-- DROP + CREATE — старая функция удаляется, создаётся новая с тем же именем.
+-- Embedding-данные в products НЕ затрагиваются — функция отдельная от данных.
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION match_products(
+DROP FUNCTION IF EXISTS match_products(vector, int);
+DROP FUNCTION IF EXISTS match_products(vector, integer);
+
+CREATE FUNCTION match_products(
   query_embedding vector(768),
   match_count int DEFAULT 10
 )
