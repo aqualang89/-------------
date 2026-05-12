@@ -1,4 +1,4 @@
-import { cloudinary } from '~/server/utils/cloudinary'
+import { v2 as cloudinary } from 'cloudinary'
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -6,17 +6,29 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'Неверный пароль' })
   }
 
-  // Проверяем что Cloudinary env vars настроены — иначе бессмысленно идти дальше
+  // Читаем env с trim — частая ошибка копи-пасты в Vercel UI: пробел/перенос строки.
+  // Конфигурируем Cloudinary каждый раз внутри handler — на случай если модуль закешировал старые env.
+  const cloudName = (process.env.CLOUDINARY_CLOUD_NAME || '').trim()
+  const apiKey = (process.env.CLOUDINARY_API_KEY || '').trim()
+  const apiSecret = (process.env.CLOUDINARY_API_SECRET || '').trim()
+
   const missing = []
-  if (!process.env.CLOUDINARY_CLOUD_NAME) missing.push('CLOUDINARY_CLOUD_NAME')
-  if (!process.env.CLOUDINARY_API_KEY) missing.push('CLOUDINARY_API_KEY')
-  if (!process.env.CLOUDINARY_API_SECRET) missing.push('CLOUDINARY_API_SECRET')
+  if (!cloudName) missing.push('CLOUDINARY_CLOUD_NAME')
+  if (!apiKey) missing.push('CLOUDINARY_API_KEY')
+  if (!apiSecret) missing.push('CLOUDINARY_API_SECRET')
   if (missing.length) {
     throw createError({
       statusCode: 500,
-      statusMessage: 'Cloudinary не настроен на Vercel: отсутствуют ENV: ' + missing.join(', ')
+      statusMessage: 'Cloudinary ENV пустые после trim (возможно пробел/перенос): ' + missing.join(', ')
     })
   }
+
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    secure: true
+  })
 
   const formData = await readMultipartFormData(event)
   if (!formData) {
