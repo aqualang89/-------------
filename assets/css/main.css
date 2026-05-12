@@ -27,8 +27,6 @@
 /* ТЕЛО СТРАНИЦЫ */
 html {
   overflow-x: hidden;
-  overscroll-behavior-x: none;
-  touch-action: pan-y;
 }
 #__nuxt {
   overflow-x: hidden;
