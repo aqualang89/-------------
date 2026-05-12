@@ -6,6 +6,8 @@ import {
 import { sendOwnerCard } from '~/server/utils/telegram.js'
 import { askOpenRouter, findRelevantProducts, SYSTEM_PROMPT } from '~/server/utils/ai.js'
 
+const HISTORY_LIMIT = 20
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { sessionId, text } = body || {}
@@ -33,26 +35,19 @@ export default defineEventHandler(async (event) => {
   let responseMode = 'ai'
 
   try {
-    // 1. Ищем релевантные товары из каталога
     const products = await findRelevantProducts(cleanText)
-    const catalogContext = products.length
-      ? '\n\nДоступные товары из каталога (рекомендуй только эти):\n' +
+    const catalogBlock = products.length
+      ? 'Доступные товары из каталога (рекомендуй только эти):\n' +
         products.map(p =>
           `— ${p.name} (арт. ${p.article || 'нет'}) — ${Math.round(p.price).toLocaleString()} ₽ — https://рипарий.рф/catalog/${p.slug}`
         ).join('\n')
-      : ''
+      : 'Каталог по этому запросу ничего не вернул — отвечай экспертно по сути, конкретные товары можешь не предлагать (или предложи общие критерии выбора).'
 
-    // 2. Формируем messages для OpenRouter
     const messages = [
-      {
-        role: 'system',
-        content: SYSTEM_PROMPT + catalogContext
-      },
-      ...previousHistory.slice(-8).map(h => ({ role: h.role, content: h.content })),
-      {
-        role: 'user',
-        content: cleanText
-      }
+      { role: 'system', content: SYSTEM_PROMPT },
+      ...previousHistory.slice(-HISTORY_LIMIT).map(h => ({ role: h.role, content: h.content })),
+      { role: 'system', content: catalogBlock },
+      { role: 'user', content: cleanText }
     ]
 
     reply = await askOpenRouter(messages)
