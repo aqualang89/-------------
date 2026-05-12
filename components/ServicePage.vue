@@ -54,6 +54,16 @@ defineProps({
   justify-content: center;
   text-align: center;
   overflow: hidden;
+  /* Hero «залезает» под padding навбара, чтобы не было видимой линии между
+     фоном страницы и картинкой. Возмещаем padding-top чтобы текст не уехал. */
+  margin-top: -80px;
+  padding-top: 80px;
+}
+@media (max-width: 768px) {
+  .sh-service-hero {
+    margin-top: -72px;
+    padding-top: 72px;
+  }
 }
 .sh-service-hero-bg {
   position: absolute;
@@ -62,18 +72,20 @@ defineProps({
   background-position: center 25%;
   filter: brightness(0.45) saturate(0.85);
 }
-/* Верхний градиент — плавный переход от тёмного фона страницы к фото hero */
+/* Верхний градиент — плавный переход от тёмного фона страницы к фото hero.
+   Покрывает зону под навбаром (80px) + плавный fade ещё ~200px вниз. */
 .sh-service-hero::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 180px;
+  height: 280px;
   background: linear-gradient(
     to bottom,
     var(--ink-deep) 0%,
-    rgba(14, 26, 36, 0.5) 50%,
+    var(--ink-deep) 28%,
+    rgba(14, 26, 36, 0.6) 60%,
     transparent 100%
   );
   z-index: 2;
