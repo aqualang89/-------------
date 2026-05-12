@@ -1,5 +1,5 @@
 export default defineEventHandler((event) => {
-  const base = 'https://рипарий.рф'
+  const base = 'https://xn--80aibap4adb0d.xn--p1ai'
   const now = new Date().toISOString().split('T')[0]
 
   const pages = [
