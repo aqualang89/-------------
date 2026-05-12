@@ -25,11 +25,13 @@
 }
 
 /* ТЕЛО СТРАНИЦЫ */
+/* overflow-x: clip (не hidden!) — не создаёт scroll-context, не ломает position: sticky
+   у горизонтальной галереи на главной. См. STATE 2026-05-12 "html overflow-x clip". */
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 #__nuxt {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 body {
   overflow-wrap: break-word;

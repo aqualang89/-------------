@@ -7,6 +7,8 @@
           <!-- <a href="#" class="sh-nav-link sh-nav-quiz" @click.prevent="openQuiz">Викторина</a> -->
         </div>
 
+        <CartIcon class="sh-nav-cart-icon" />
+
         <button class="sh-nav-burger" :class="{ open: menuOpen }" aria-label="Меню" @click="menuOpen = !menuOpen">
           <span></span><span></span><span></span>
         </button>
@@ -136,6 +138,11 @@ useHead({
   align-items: flex-start;
   gap: 28px;
   pointer-events: auto;
+}
+
+.sh-nav-cart-icon {
+  padding-top: 6px;
+  flex-shrink: 0;
 }
 
 /* ─── Desktop links ─── */
