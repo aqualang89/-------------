@@ -895,63 +895,83 @@ onMounted(async () => {
 .sh-horizontal-sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   align-items: center;
 }
 .sh-horizontal-track {
   display: flex;
-  gap: 8vw;
-  padding: 0 5vw;
+  gap: 24px;
+  padding: 0 14vw;
   will-change: transform;
 }
 .sh-hcard {
   flex-shrink: 0;
-  width: 85vw;
-  max-width: 1200px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: center;
-}
-@media (min-width: 769px) {
-  .sh-hcard-img {
-    order: -1;
-  }
-}
-.sh-hcard-text {
+  width: 78vw;
+  max-width: 380px;
+  height: 88dvh;
+  min-height: 540px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(241, 230, 200, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0;
+}
+.sh-hcard-img {
+  width: 100%;
+  flex: 0 0 58%;
+  position: relative;
+  overflow: hidden;
+}
+.sh-hcard-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.sh-hcard:hover .sh-hcard-img img {
+  transform: scale(1.07);
+}
+.sh-hcard-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 24px 24px;
+  justify-content: flex-start;
 }
 .sh-hcard-num {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--gold);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.25em;
 }
 .sh-hcard-title {
   font-family: var(--font-serif);
-  font-size: clamp(32px, 4vw, 52px);
+  font-size: clamp(24px, 4.5vw, 34px);
   font-weight: 400;
   color: var(--cream);
-  line-height: 1.1;
+  line-height: 1.15;
   margin: 0;
 }
 .sh-hcard-desc {
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 300;
-  line-height: 1.7;
+  line-height: 1.55;
   color: var(--cream-dim);
-  max-width: 400px;
+  max-width: 100%;
   margin: 0;
 }
 .sh-hcard-link {
   display: inline-block;
-  margin-top: 8px;
+  margin-top: auto;
   font-family: var(--font-serif);
   font-size: 14px;
   font-weight: 500;
@@ -964,26 +984,43 @@ onMounted(async () => {
 .sh-hcard-link:hover {
   color: var(--cream);
 }
-.sh-hcard-img {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+@media (min-width: 768px) {
+  .sh-horizontal-track {
+    gap: 32px;
+    padding: 0 10vw;
+  }
+  .sh-hcard {
+    width: 54vw;
+    max-width: 500px;
+    height: 88dvh;
+    min-height: 620px;
+  }
+  .sh-hcard-title {
+    font-size: clamp(30px, 4vw, 40px);
+  }
 }
-.sh-hcard-img {
-  overflow: hidden;
-  border-radius: 4px;
-}
-.sh-hcard-img img {
-  width: 100%;
-  max-width: 480px;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  border-radius: 4px;
-  display: block;
-  transition: transform 0.5s ease;
-}
-.sh-hcard:hover .sh-hcard-img img {
-  transform: scale(1.7);
+
+@media (min-width: 1024px) {
+  .sh-horizontal-track {
+    gap: 48px;
+    padding: 0 5vw;
+  }
+  .sh-hcard {
+    width: 38vw;
+    max-width: 560px;
+    height: 88vh;
+    min-height: 680px;
+  }
+  .sh-hcard-text {
+    padding: 24px 32px 32px;
+  }
+  .sh-hcard-title {
+    font-size: clamp(34px, 3vw, 44px);
+  }
+  .sh-hcard-img {
+    flex: 0 0 60%;
+  }
 }
 
 /* CSS-ripples на интро (мобила) */
@@ -1154,14 +1191,7 @@ onMounted(async () => {
     padding: 0 20px;
     order: 4;
   }
-  .sh-hcard {
-    width: 85vw;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .sh-hcard-img img {
-    max-width: 100%;
-  }
+  /* .sh-hcard теперь mobile-first, старые override удалены */
   .sh-divider {
     padding: 48px 20px;
     gap: 12px;
