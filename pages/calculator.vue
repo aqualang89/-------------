@@ -434,20 +434,21 @@
   }
 
   .calc-tab {
-    padding: 10px 22px;
-    border-radius: 50px;
-    border: 1.5px solid rgba(217, 180, 106, 0.35);
-    background: rgba(217, 180, 106, 0.08);
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(217, 180, 106, 0.3);
+    background: rgba(217, 180, 106, 0.04);
     color: var(--cream-dim);
     font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.25s ease;
   }
 
   .calc-tab:hover, .calc-tab.active {
-    background: rgba(217, 180, 106, 0.2);
+    background: rgba(217, 180, 106, 0.14);
     border-color: var(--gold);
     color: var(--cream);
   }

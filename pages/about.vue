@@ -432,6 +432,23 @@ useHead({ title: 'О нас — История студии' })
   background-position: center 25%;
   filter: brightness(0.45) saturate(0.85);
 }
+/* Верхний градиент — плавный переход от тёмного фона страницы к фото hero */
+.sh-about-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  background: linear-gradient(
+    to bottom,
+    var(--ink-deep) 0%,
+    rgba(14, 26, 36, 0.5) 50%,
+    transparent 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
 .sh-about-hero-overlay {
   position: absolute;
   inset: 0;
@@ -444,7 +461,7 @@ useHead({ title: 'О нас — История студии' })
 }
 .sh-about-hero-inner {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   padding: 0 24px;
   max-width: 720px;
 }

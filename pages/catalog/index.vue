@@ -51,8 +51,19 @@
         <div class="catalog-main">
           <div class="catalog-toolbar">
             <div class="price-filter">
-              <label>Макс. цена: <strong>{{ maxPriceInput.toLocaleString() }} ₽</strong></label>
-              <input v-model.number="maxPriceInput" type="range" min="0" :max="MAX_PRICE" step="1000">
+              <span class="price-filter-label">Цена</span>
+              <div class="price-filter-fields">
+                <label class="price-input-wrap">
+                  <span>от</span>
+                  <input v-model.number="minPriceInput" type="number" min="0" :max="MAX_PRICE" step="100" placeholder="0" />
+                  <span class="price-unit">₽</span>
+                </label>
+                <label class="price-input-wrap">
+                  <span>до</span>
+                  <input v-model.number="maxPriceInput" type="number" min="0" :max="MAX_PRICE" step="100" :placeholder="MAX_PRICE.toString()" />
+                  <span class="price-unit">₽</span>
+                </label>
+              </div>
             </div>
             <p v-if="category" class="active-cat">
               {{ activeCategoryName }}
@@ -99,12 +110,14 @@
 <script setup>
 const searchInput = ref('')
 const category = ref('')
+const minPriceInput = ref(0)
 const maxPriceInput = ref(9999999)
 const page = ref(1)
 const sidebarOpen = ref(true)
 const isMobile = ref(false)
 
 const search = ref('')
+const minPrice = ref(0)
 const maxPrice = ref(9999999)
 const MAX_PRICE = ref(200000)
 
@@ -167,6 +180,7 @@ const { data: productsData, pending } = await useFetch('/api/products', {
     const q = { page: page.value }
     if (search.value) q.search = search.value
     if (category.value) q.category = category.value
+    if (minPrice.value > 0) q.minPrice = minPrice.value
     if (maxPrice.value < MAX_PRICE.value) q.maxPrice = maxPrice.value
     return q
   })
@@ -194,9 +208,14 @@ watch(searchInput, (val) => {
 })
 
 let priceTimer
-watch(maxPriceInput, (val) => {
+watch([minPriceInput, maxPriceInput], ([minVal, maxVal]) => {
   clearTimeout(priceTimer)
-  priceTimer = setTimeout(() => { maxPrice.value = val; page.value = 1; scrollToTop() }, 150)
+  priceTimer = setTimeout(() => {
+    minPrice.value = Number(minVal) || 0
+    maxPrice.value = Number(maxVal) || 9999999
+    page.value = 1
+    scrollToTop()
+  }, 300)
 })
 
 function scrollToTop() {
@@ -347,16 +366,56 @@ onMounted(() => {
 .price-filter {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  min-width: 200px;
+  gap: 8px;
 }
-.price-filter label {
-  font-size: 0.9rem;
+.price-filter-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--cream-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.price-filter-fields {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.price-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(241, 230, 200, 0.12);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
   color: var(--cream-dim);
 }
-.price-filter input[type="range"] {
-  width: 100%;
-  cursor: pointer;
+.price-input-wrap:focus-within {
+  border-color: var(--gold);
+}
+.price-input-wrap > span {
+  color: var(--cream-faint);
+  font-size: 12px;
+}
+.price-input-wrap .price-unit {
+  color: var(--cream-faint);
+}
+.price-input-wrap input {
+  width: 80px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--cream);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  text-align: right;
+  -moz-appearance: textfield;
+}
+.price-input-wrap input::-webkit-outer-spin-button,
+.price-input-wrap input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 .active-cat {
   display: flex;

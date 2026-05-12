@@ -134,8 +134,7 @@
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Телефон</span>
-              <p class="sh-contact-value"><a href="tel:89527847031">8 (952) 784-70-31</a></p>
-              <p class="sh-contact-value"><a href="tel:89814623733">8 (981) 462-37-33</a></p>
+              <p class="sh-contact-value"><a href="tel:+79913825695">+7 (991) 382-56-95</a></p>
             </div>
             <div class="sh-contact-item">
               <span class="sh-contact-label">Email</span>
@@ -924,8 +923,8 @@ onMounted(async () => {
 }
 .sh-hcard {
   flex-shrink: 0;
-  width: 78vw;
-  max-width: 380px;
+  width: 85vw;
+  max-width: 420px;
   height: 88dvh;
   min-height: 540px;
   position: relative;
@@ -1034,8 +1033,8 @@ onMounted(async () => {
     padding: 0 5vw;
   }
   .sh-hcard {
-    width: 38vw;
-    max-width: 560px;
+    width: 42vw;
+    max-width: 620px;
     height: 88vh;
     min-height: 680px;
   }
@@ -1044,6 +1043,36 @@ onMounted(async () => {
   }
   .sh-hcard-title {
     font-size: clamp(36px, 3.2vw, 48px);
+  }
+}
+
+/* Широкие мониторы (1440+): карточки крупнее, чтобы не выглядели мелкими */
+@media (min-width: 1440px) {
+  .sh-horizontal-track {
+    gap: 56px;
+  }
+  .sh-hcard {
+    width: 38vw;
+    max-width: 720px;
+    min-height: 720px;
+  }
+  .sh-hcard-title {
+    font-size: clamp(40px, 2.8vw, 54px);
+  }
+  .sh-hcard-text {
+    padding: 36px 40px 40px;
+  }
+}
+
+/* 27"+ мониторы (1920+): ещё крупнее, чтобы карточки заполняли поле */
+@media (min-width: 1920px) {
+  .sh-hcard {
+    width: 32vw;
+    max-width: 820px;
+    min-height: 780px;
+  }
+  .sh-hcard-title {
+    font-size: clamp(44px, 2.5vw, 60px);
   }
 }
 

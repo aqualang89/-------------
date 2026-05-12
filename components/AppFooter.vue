@@ -23,8 +23,7 @@
         <p>г. Калининград, ул. Аксакова, 123</p>
         <p>цокольный этаж, левый торец</p>
         <p>ежедневно 11:00–19:00</p>
-        <p><a href="tel:89527847031">8 (952) 784-70-31</a></p>
-        <p><a href="tel:89814623733">8 (981) 462-37-33</a></p>
+        <p><a href="tel:+79913825695">+7 (991) 382-56-95</a></p>
         <p><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
         <div class="footer-socials">
           <a href="https://vk.com/riparium_kld" target="_blank" rel="noopener" class="social-btn vk" title="ВКонтакте">VK</a>

@@ -624,27 +624,67 @@ function mainPhoto(p) {
   return photo?.url
 }
 
+async function readErrorText(res) {
+  try {
+    const j = await res.clone().json()
+    return j?.statusMessage || j?.message || JSON.stringify(j).slice(0, 200)
+  } catch {
+    try {
+      const t = await res.clone().text()
+      return t?.slice(0, 200) || ''
+    } catch {
+      return ''
+    }
+  }
+}
+
 async function uploadPhoto(e, productId) {
   const f = e.target.files[0]
   if (!f) return
 
-  const form = new FormData()
-  form.append('file', f)
-
-  const res = await fetch('/api/upload-image', {
-    method: 'POST',
-    headers: { 'x-admin-password': password.value },
-    body: form
-  })
-
-  if (!res.ok) {
-    alert('Ошибка загрузки фото')
+  // Pre-check размера (Vercel serverless лимит 4.5MB)
+  const sizeMB = f.size / 1024 / 1024
+  if (sizeMB > 4) {
+    alert(`Файл слишком большой: ${sizeMB.toFixed(1)}MB. Vercel лимит ~4MB. Сожмите фото.`)
+    e.target.value = ''
     return
   }
 
-  const { url } = await res.json()
+  const form = new FormData()
+  form.append('file', f)
 
-  await fetch('/api/product-photos', {
+  let res
+  try {
+    res = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'x-admin-password': password.value },
+      body: form
+    })
+  } catch (netErr) {
+    alert('Сетевая ошибка: ' + netErr.message)
+    return
+  }
+
+  if (!res.ok) {
+    const errText = await readErrorText(res)
+    alert(`Ошибка загрузки фото (HTTP ${res.status})\n${errText}`)
+    return
+  }
+
+  let url
+  try {
+    const json = await res.json()
+    url = json.url
+    if (!url) {
+      alert('Сервер не вернул URL фото. Ответ: ' + JSON.stringify(json).slice(0, 200))
+      return
+    }
+  } catch (parseErr) {
+    alert('Не удалось распарсить ответ сервера: ' + parseErr.message)
+    return
+  }
+
+  const saveRes = await fetch('/api/product-photos', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -652,6 +692,12 @@ async function uploadPhoto(e, productId) {
     },
     body: JSON.stringify({ product_id: productId, url, is_main: true })
   })
+
+  if (!saveRes.ok) {
+    const errText = await readErrorText(saveRes)
+    alert(`Не удалось сохранить фото в БД (HTTP ${saveRes.status})\n${errText}`)
+    return
+  }
 
   fetchProducts()
 }
