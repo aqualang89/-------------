@@ -71,7 +71,7 @@
             <NuxtLink to="/services/nature" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/nature.jpg" alt="Nature Aquarium" loading="lazy" />
+            <img src="/img/services/nature.jpg" alt="Nature Aquarium" loading="eager" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -82,7 +82,7 @@
             <NuxtLink to="/services/iwagumi" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/iwagumi.jpg" alt="Iwagumi" loading="lazy" />
+            <img src="/img/services/iwagumi.jpg" alt="Iwagumi" loading="eager" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -93,7 +93,7 @@
             <NuxtLink to="/services/dutch" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/dutch.jpg" alt="Голландский аквариум" loading="lazy" />
+            <img src="/img/services/dutch.jpg" alt="Голландский аквариум" loading="eager" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -104,7 +104,7 @@
             <NuxtLink to="/services/biotope" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/biotope.jpg" alt="Биотоп" loading="lazy" />
+            <img src="/img/services/biotope.jpg" alt="Биотоп" loading="eager" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -115,7 +115,7 @@
             <NuxtLink to="/services/paludarium" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/paludarium.jpg" alt="Палюдариум" loading="lazy" />
+            <img src="/img/services/paludarium.jpg" alt="Палюдариум" loading="eager" />
           </div>
         </div>
       </div>
@@ -190,6 +190,8 @@ const hTrack = ref(null)
 let hScrollRaf = null
 let hScrollHandler = null
 let hResizeHandler = null
+let hResizeObserver = null
+let hImgLoadHandlers = []
 
 function initHorizontalScroll() {
   const section = hSection.value
@@ -208,7 +210,8 @@ function initHorizontalScroll() {
     const scrolled = Math.max(0, -rect.top)
     if (maxTranslate <= 0) return
     const progress = Math.min(1, scrolled / maxTranslate)
-    track.style.transform = `translateX(${-progress * maxTranslate}px)`
+    // translate3d — форсит GPU-композитинг, плавнее на мобиле
+    track.style.transform = `translate3d(${-progress * maxTranslate}px, 0, 0)`
   }
   function onScroll() {
     if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
@@ -218,6 +221,23 @@ function initHorizontalScroll() {
   hResizeHandler = updateLayout
   window.addEventListener('scroll', hScrollHandler, { passive: true })
   window.addEventListener('resize', hResizeHandler)
+
+  // ResizeObserver — пересчитываем секцию когда track реально меняет ширину
+  // (картинки догрузились, шрифты применились, и т.д.)
+  if (typeof ResizeObserver !== 'undefined') {
+    hResizeObserver = new ResizeObserver(() => updateLayout())
+    hResizeObserver.observe(track)
+  }
+
+  // Также слушаем load каждой картинки — на случай если ResizeObserver не сработает
+  const imgs = track.querySelectorAll('img')
+  imgs.forEach(img => {
+    if (img.complete) return
+    const handler = () => updateLayout()
+    img.addEventListener('load', handler, { once: true })
+    hImgLoadHandlers.push({ img, handler })
+  })
+
   updateLayout()
 }
 
@@ -225,6 +245,12 @@ function cleanupHorizontalScroll() {
   if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
   if (hScrollHandler) window.removeEventListener('scroll', hScrollHandler, { passive: true })
   if (hResizeHandler) window.removeEventListener('resize', hResizeHandler)
+  if (hResizeObserver) {
+    hResizeObserver.disconnect()
+    hResizeObserver = null
+  }
+  hImgLoadHandlers.forEach(({ img, handler }) => img.removeEventListener('load', handler))
+  hImgLoadHandlers = []
   hScrollRaf = null
   hScrollHandler = null
   hResizeHandler = null
