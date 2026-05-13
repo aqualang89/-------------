@@ -170,9 +170,8 @@
   padding-top: 20px;
   border-top: 1px solid var(--rule);
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
   align-items: center;
+  position: relative;
   gap: 12px;
 }
 
@@ -184,39 +183,48 @@
   margin: 0;
 }
 
+/* Desktop: brand центрируется абсолютно. Mobile (≤600px): слева в строку с copyright */
 .app-footer-poweredby {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  align-items: baseline;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 10px;
   text-decoration: none;
-  color: var(--cream-faint);
+  color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   transition: color 0.3s ease;
 }
 .app-footer-poweredby:hover {
-  color: var(--gold);
+  color: rgba(91, 217, 192, 0.7);
 }
 .app-footer-poweredby-brand {
   font-family: var(--font-serif);
-  font-size: 13px;
+  font-size: 16px;
   font-style: italic;
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--cream-dim);
-  transition: color 0.3s ease;
+  color: #5BD9C0;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 .app-footer-poweredby:hover .app-footer-poweredby-brand {
-  color: var(--gold);
+  color: #7EE8D2;
 }
 
 @media (max-width: 600px) {
   .app-footer-bottom {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start;
+  }
+  .app-footer-poweredby {
+    position: static;
+    transform: none;
+    order: -1;
   }
 }
 

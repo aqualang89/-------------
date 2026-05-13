@@ -107,9 +107,29 @@
               <img v-if="mainPhoto(p)" :src="mainPhoto(p)" alt="">
               <div v-else class="no-photo">Нет фото</div>
               <label class="upload-photo-btn">
-                <input type="file" accept="image/*" @change="e => uploadPhoto(e, p.id)">
-                📷
+                <input type="file" accept="image/*" multiple @change="e => uploadPhotos(e, p.id)">
+                📷+
               </label>
+            </div>
+
+            <!-- Мини-галерея всех фото товара с управлением -->
+            <div v-if="(p.product_photos || []).length > 0" class="product-photos">
+              <div
+                v-for="ph in p.product_photos"
+                :key="ph.id"
+                class="product-photo-item"
+                :class="{ 'is-main': ph.is_main }"
+                :title="ph.is_main ? 'Главное фото' : 'Сделать главным'"
+              >
+                <img :src="ph.url" :alt="''" @click="setMainPhoto(p, ph.id)">
+                <button
+                  type="button"
+                  class="product-photo-delete"
+                  @click="deletePhoto(p, ph.id)"
+                  title="Удалить"
+                >×</button>
+                <span v-if="ph.is_main" class="product-photo-star">★</span>
+              </div>
             </div>
             <input v-model="p.name" class="product-input">
             <input v-model.number="p.price" type="number" class="product-input">
@@ -638,6 +658,102 @@ async function readErrorText(res) {
   }
 }
 
+async function uploadPhotos(e, productId) {
+  const files = Array.from(e.target.files || [])
+  e.target.value = ''
+  if (files.length === 0) return
+
+  for (const f of files) {
+    await uploadSinglePhoto(f, productId, files.length === 1)
+  }
+  await fetchProducts()
+}
+
+async function deletePhoto(product, photoId) {
+  if (!confirm('Удалить это фото?')) return
+  const res = await fetch(`/api/product-photos/${photoId}`, {
+    method: 'DELETE',
+    headers: { 'x-admin-password': password.value }
+  })
+  if (!res.ok) {
+    const errText = await readErrorText(res)
+    alert(`Ошибка удаления фото (HTTP ${res.status})\n${errText}`)
+    return
+  }
+  await fetchProducts()
+}
+
+async function setMainPhoto(product, photoId) {
+  const res = await fetch(`/api/product-photos/${photoId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-password': password.value
+    },
+    body: JSON.stringify({ is_main: true })
+  })
+  if (!res.ok) {
+    const errText = await readErrorText(res)
+    alert(`Не удалось сделать главным (HTTP ${res.status})\n${errText}`)
+    return
+  }
+  await fetchProducts()
+}
+
+async function uploadSinglePhoto(f, productId, isFirst) {
+  const sizeMB = f.size / 1024 / 1024
+  if (sizeMB > 4) {
+    alert(`Файл "${f.name}" слишком большой: ${sizeMB.toFixed(1)}MB. Vercel лимит ~4MB.`)
+    return
+  }
+
+  const form = new FormData()
+  form.append('file', f)
+
+  let res
+  try {
+    res = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'x-admin-password': password.value },
+      body: form
+    })
+  } catch (netErr) {
+    alert('Сетевая ошибка: ' + netErr.message)
+    return
+  }
+
+  if (!res.ok) {
+    const errText = await readErrorText(res)
+    alert(`Ошибка загрузки фото "${f.name}" (HTTP ${res.status})\n${errText}`)
+    return
+  }
+
+  let url
+  try {
+    const json = await res.json()
+    url = json.url
+    if (!url) {
+      alert('Сервер не вернул URL фото')
+      return
+    }
+  } catch (parseErr) {
+    alert('Не удалось распарсить ответ сервера: ' + parseErr.message)
+    return
+  }
+
+  // is_main только если это первое и единственное загружаемое фото
+  // (если несколько — все is_main=false, юзер потом руками выберет главное)
+  await fetch('/api/product-photos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-admin-password': password.value
+    },
+    body: JSON.stringify({ product_id: productId, url, is_main: isFirst })
+  })
+}
+
+// Старая uploadPhoto оставлена как обёртка для совместимости (на случай если её ещё где-то вызывают)
 async function uploadPhoto(e, productId) {
   const f = e.target.files[0]
   if (!f) return
@@ -884,6 +1000,67 @@ watch(activeTab, (tab) => {
 }
 .upload-photo-btn input {
   display: none;
+}
+
+/* Мини-галерея фото товара в админ-карточке */
+.product-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0;
+}
+.product-photo-item {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  background: var(--ink-mid, #152535);
+}
+.product-photo-item.is-main {
+  border-color: #d9b46a;
+}
+.product-photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.product-photo-item img:hover {
+  transform: scale(1.06);
+}
+.product-photo-delete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 80, 80, 0.9);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.product-photo-delete:hover {
+  background: #ff5050;
+}
+.product-photo-star {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  font-size: 11px;
+  color: #d9b46a;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
 }
 .product-input {
   padding: 8px;
