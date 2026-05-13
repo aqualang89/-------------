@@ -29,7 +29,23 @@ export default defineNuxtConfig({
         }
       ],
       link: [
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap&subset=cyrillic,latin' },
+        // Google Fonts грузится async чтобы не блокировать рендеринг.
+        // Если у юзера РФ-провайдер блокирует Google — сайт всё равно отрендерится с системными шрифтами.
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' },
+        {
+          rel: 'preload',
+          as: 'style',
+          href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap&subset=cyrillic,latin',
+          onload: "this.onload=null;this.rel='stylesheet'"
+        },
+        // Fallback для отключённого JS
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap&subset=cyrillic,latin',
+          media: 'print',
+          onload: "this.media='all'"
+        },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16x16.png' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },
