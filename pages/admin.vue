@@ -670,6 +670,10 @@ async function uploadPhotos(e, productId) {
 }
 
 async function deletePhoto(product, photoId) {
+  if (!photoId) {
+    alert('id фото не определён. Возможно нужно обновить страницу.')
+    return
+  }
   if (!confirm('Удалить это фото?')) return
   const res = await fetch(`/api/product-photos/${photoId}`, {
     method: 'DELETE',
@@ -684,6 +688,10 @@ async function deletePhoto(product, photoId) {
 }
 
 async function setMainPhoto(product, photoId) {
+  if (!photoId) {
+    alert('id фото не определён. Обновите страницу.')
+    return
+  }
   const res = await fetch(`/api/product-photos/${photoId}`, {
     method: 'PATCH',
     headers: {
