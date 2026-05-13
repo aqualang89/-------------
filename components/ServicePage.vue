@@ -70,7 +70,7 @@ defineProps({
   inset: 0;
   background-size: cover;
   background-position: center 25%;
-  filter: brightness(0.45) saturate(0.85);
+  filter: brightness(0.85) saturate(0.95);
 }
 /* Верхний градиент — плавный переход от тёмного фона страницы к фото hero.
    Покрывает зону под навбаром (80px) + плавный fade ещё ~200px вниз. */
@@ -96,8 +96,8 @@ defineProps({
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(14, 26, 36, 0.3) 0%,
-    rgba(14, 26, 36, 0.65) 60%,
+    rgba(14, 26, 36, 0.15) 0%,
+    rgba(14, 26, 36, 0.4) 60%,
     var(--ink-deep) 100%
   );
 }

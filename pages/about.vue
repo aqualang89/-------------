@@ -439,7 +439,7 @@ useHead({ title: 'О нас — История студии' })
   inset: 0;
   background-size: cover;
   background-position: center 25%;
-  filter: brightness(0.45) saturate(0.85);
+  filter: brightness(0.85) saturate(0.95);
 }
 /* Верхний градиент — покрывает зону под навбаром + плавный fade */
 .sh-about-hero::before {
@@ -464,8 +464,8 @@ useHead({ title: 'О нас — История студии' })
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(14, 26, 36, 0.3) 0%,
-    rgba(14, 26, 36, 0.65) 60%,
+    rgba(14, 26, 36, 0.15) 0%,
+    rgba(14, 26, 36, 0.4) 60%,
     var(--ink-deep) 100%
   );
 }

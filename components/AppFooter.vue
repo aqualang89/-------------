@@ -36,6 +36,10 @@
 
     <div class="app-footer-bottom">
       <p>© 2016 Рипарий. Студия аквадизайна.</p>
+      <a href="https://aqualang.pro" target="_blank" rel="noopener" class="app-footer-poweredby">
+        <span>Powered by</span>
+        <span class="app-footer-poweredby-brand">Aqualang.pro</span>
+      </a>
     </div>
   </footer>
 </template>
@@ -165,7 +169,11 @@
   margin: 40px auto 0;
   padding-top: 20px;
   border-top: 1px solid var(--rule);
-  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .app-footer-bottom p {
@@ -173,6 +181,43 @@
   font-size: 12px;
   color: var(--cream-faint);
   letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.app-footer-poweredby {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-decoration: none;
+  color: var(--cream-faint);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+.app-footer-poweredby:hover {
+  color: var(--gold);
+}
+.app-footer-poweredby-brand {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cream-dim);
+  transition: color 0.3s ease;
+}
+.app-footer-poweredby:hover .app-footer-poweredby-brand {
+  color: var(--gold);
+}
+
+@media (max-width: 600px) {
+  .app-footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
 }
 
 @media (max-width: 900px) {

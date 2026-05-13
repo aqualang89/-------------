@@ -15,13 +15,14 @@
 
       <div class="product-main">
         <div class="product-gallery">
-          <div class="main-photo" @mousemove="onZoom" @mouseleave="offZoom">
+          <div class="main-photo" @mousemove="onZoom" @mouseleave="offZoom" @click="openLightbox">
             <img
               ref="mainImg"
               :src="currentPhoto || '/img/no-photo.png'"
               :alt="product.name"
               :style="zoomStyle"
             >
+            <button v-if="currentPhoto" type="button" class="zoom-hint" aria-label="Увеличить">🔍</button>
           </div>
           <div v-if="photos.length > 1" class="thumbs">
             <img
@@ -69,6 +70,21 @@
       <h2>Товар не найден</h2>
       <NuxtLink to="/catalog">← В каталог</NuxtLink>
     </div>
+
+    <!-- Lightbox для просмотра фото — тап вне фото или × закрывает, на мобиле pinch-zoom работает нативно -->
+    <div v-if="lightboxOpen" class="lightbox" @click.self="closeLightbox">
+      <button type="button" class="lightbox-close" @click="closeLightbox" aria-label="Закрыть">×</button>
+      <img :src="currentPhoto" :alt="product?.name" class="lightbox-img" />
+      <div v-if="photos.length > 1" class="lightbox-thumbs" @click.stop>
+        <img
+          v-for="(ph, i) in photos"
+          :key="ph.id"
+          :src="ph.url"
+          :class="{ active: currentIndex === i }"
+          @click="currentIndex = i"
+        >
+      </div>
+    </div>
   </div>
 </template>
 
@@ -82,6 +98,19 @@ const zoomStyle = ref({})
 const mainImg = ref(null)
 const categoryTree = ref([])
 const qty = ref(1)
+const lightboxOpen = ref(false)
+
+function openLightbox () {
+  if (!currentPhoto.value) return
+  lightboxOpen.value = true
+  document.body.style.overflow = 'hidden'
+}
+function closeLightbox () {
+  lightboxOpen.value = false
+  document.body.style.overflow = ''
+}
+
+onUnmounted(() => { document.body.style.overflow = '' })
 
 const { add, find } = useCart()
 const cartItem = computed(() => product.value ? find(product.value.id) : null)
@@ -186,13 +215,114 @@ function offZoom() {
   background: var(--ink-mid);
   border-radius: 12px;
   overflow: hidden;
-  cursor: crosshair;
+  cursor: zoom-in;
 }
 .main-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.1s;
+}
+/* Подсказка-кнопка в углу — особенно полезна на мобиле где hover нет */
+.zoom-hint {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 26, 36, 0.7);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(241, 230, 200, 0.2);
+  border-radius: 50%;
+  color: var(--cream);
+  font-size: 16px;
+  cursor: pointer;
+  pointer-events: none;
+  z-index: 2;
+  transition: background 0.2s, transform 0.2s;
+}
+.main-photo:hover .zoom-hint {
+  background: rgba(217, 180, 106, 0.85);
+  color: var(--ink-deep);
+  transform: scale(1.05);
+}
+
+/* Lightbox — модалка с фото на весь экран, нативный pinch-zoom работает */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: lightboxIn 0.2s ease;
+}
+@keyframes lightboxIn {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+.lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  touch-action: pinch-zoom;
+}
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  line-height: 1;
+  z-index: 10000;
+}
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.lightbox-thumbs {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  max-width: 90vw;
+  overflow-x: auto;
+}
+.lightbox-thumbs img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.6;
+  border: 2px solid transparent;
+  transition: 0.2s;
+  flex-shrink: 0;
+}
+.lightbox-thumbs img.active, .lightbox-thumbs img:hover {
+  opacity: 1;
+  border-color: var(--gold);
 }
 .thumbs {
   display: flex;
