@@ -2,7 +2,9 @@ import { v2 as cloudinary } from 'cloudinary'
 import { fileTypeFromBuffer } from 'file-type'
 import sharp from 'sharp'
 
-const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+// AVIF/HEIC — современные iPhone/Android часто шлют под именем .jpg.
+// Принимаем, но дальше перекодируем в JPEG для совместимости.
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic', 'image/heif'])
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -70,9 +72,10 @@ export default defineEventHandler(async (event) => {
   let cleanBuf
   try {
     const pipeline = sharp(inputBuf).rotate()
-    if (sniffed.mime === 'image/jpeg') cleanBuf = await pipeline.jpeg({ quality: 88 }).toBuffer()
-    else if (sniffed.mime === 'image/png') cleanBuf = await pipeline.png().toBuffer()
-    else cleanBuf = await pipeline.webp({ quality: 88 }).toBuffer()
+    if (sniffed.mime === 'image/png') cleanBuf = await pipeline.png().toBuffer()
+    else if (sniffed.mime === 'image/webp') cleanBuf = await pipeline.webp({ quality: 88 }).toBuffer()
+    // jpeg + avif/heic/heif → jpeg (универсальная совместимость для Cloudinary и старых браузеров)
+    else cleanBuf = await pipeline.jpeg({ quality: 88 }).toBuffer()
   } catch (err) {
     console.error('Sharp processing error:', err)
     throw createError({ statusCode: 400, statusMessage: 'Не удалось обработать изображение (повреждённый файл?)' })
