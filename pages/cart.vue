@@ -96,6 +96,11 @@
             <textarea v-model="form.comment" rows="2" placeholder="Удобное время доставки, пожелания..."></textarea>
           </div>
 
+          <label class="form-consent">
+            <input v-model="form.consent" type="checkbox" required />
+            <span>Я согласен на <NuxtLink to="/consent">обработку персональных данных</NuxtLink> и принимаю <NuxtLink to="/privacy">политику конфиденциальности</NuxtLink></span>
+          </label>
+
           <p v-if="error" class="form-error">{{ error }}</p>
 
           <button
@@ -157,7 +162,8 @@ const form = reactive({
   delivery_type: 'pickup',
   delivery_city: 'Калининград',
   delivery_address: '',
-  comment: ''
+  comment: '',
+  consent: false
 })
 
 function validate () {
@@ -165,6 +171,7 @@ function validate () {
   if (!form.phone.trim()) return 'Укажите телефон'
   if (!form.delivery_city.trim()) return 'Укажите город'
   if (!form.delivery_address.trim()) return 'Укажите адрес'
+  if (!form.consent) return 'Необходимо согласие на обработку персональных данных'
   return ''
 }
 
@@ -186,6 +193,7 @@ async function submitOrder () {
         delivery_city: form.delivery_city.trim(),
         delivery_address: form.delivery_address.trim(),
         comment: form.comment.trim() || null,
+        consent: form.consent,
         items: items.value.map(i => ({
           productId: i.productId,
           name: i.name,
@@ -441,6 +449,31 @@ async function submitOrder () {
   color: #ff8a8a;
   margin-bottom: 12px;
   font-size: 0.95rem;
+}
+.form-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0 12px;
+  font-size: 0.9rem;
+  color: var(--cream-dim);
+  line-height: 1.5;
+  cursor: pointer;
+}
+.form-consent input {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--gold);
+  flex-shrink: 0;
+}
+.form-consent a {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.form-consent a:hover {
+  opacity: 0.8;
 }
 .btn-submit {
   width: 100%;

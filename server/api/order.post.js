@@ -11,11 +11,16 @@ export default defineEventHandler(async (event) => {
     delivery_address,
     delivery_city,
     comment,
+    consent,
     items
   } = body || {}
 
   if (!customer_name || !customer_phone || !delivery_type || !items?.length) {
     throw createError({ statusCode: 400, statusMessage: 'Missing required fields' })
+  }
+
+  if (consent !== true) {
+    throw createError({ statusCode: 400, statusMessage: 'Необходимо согласие на обработку персональных данных' })
   }
 
   const total_amount = items.reduce((s, i) => s + (i.price * i.qty), 0)
