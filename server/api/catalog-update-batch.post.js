@@ -1,4 +1,18 @@
+import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
+import { validateBody } from '~/server/utils/validate.js'
+
+const itemSchema = z.object({
+  name: z.string().min(1).max(300),
+  article: z.string().max(100).optional(),
+  slug: z.string().max(200).optional(),
+  price: z.number().nonnegative().max(10_000_000),
+  qty: z.number().nonnegative().max(1_000_000)
+})
+
+const schema = z.object({
+  items: z.array(itemSchema).max(5000).default([])
+})
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -6,21 +20,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, message: 'Неверный пароль' })
   }
 
-  const body = await readBody(event)
-  const items = body.items || []
+  const { items } = await validateBody(event, schema)
 
   if (!items.length) {
     return { updated: 0, created: 0, errors: [] }
   }
 
-  // Загружаем все товары из Supabase в память (один запрос)
   const { data: allProducts } = await supabase.from('products').select('id, name, article')
   const productByName = {}
   for (const p of allProducts || []) {
     productByName[p.name] = p
   }
 
-  // Категория "НОВИНКИ"
   const novinkiSlug = 'novinki'
   let novinkiId = null
   const { data: novCat } = await supabase.from('categories').select('id').eq('slug', novinkiSlug).maybeSingle()
@@ -56,7 +67,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Batch update через Promise.all (30 штук параллельно)
   let updated = 0
   const UBATCH = 30
   for (let i = 0; i < updates.length; i += UBATCH) {
@@ -69,7 +79,6 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Batch insert
   let created = 0
   const IBATCH = 30
   for (let i = 0; i < inserts.length; i += IBATCH) {

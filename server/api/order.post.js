@@ -1,9 +1,34 @@
 import crypto from 'node:crypto'
+import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
 import { getIdempotency, setIdempotency } from '~/server/utils/store.js'
+import { validateBody } from '~/server/utils/validate.js'
+
+const itemSchema = z.object({
+  productId: z.number().int().positive(),
+  qty: z.number().int().positive().max(10_000),
+  // name/price/photo с клиента в любом случае игнорируются (берём из БД),
+  // но даём принимать чтобы не ломать существующий клиент.
+  name: z.string().max(500).optional(),
+  price: z.number().nonnegative().optional(),
+  photo: z.string().max(1000).optional()
+})
+
+const schema = z.object({
+  customer_name: z.string().min(1).max(100),
+  customer_phone: z.string().min(1).max(30),
+  customer_email: z.string().email().max(200).optional().nullable().or(z.literal('')),
+  customer_telegram: z.string().max(100).optional().nullable().or(z.literal('')),
+  delivery_type: z.enum(['pickup', 'courier', 'transport']),
+  delivery_address: z.string().max(500).optional().nullable().or(z.literal('')),
+  delivery_city: z.string().max(100).optional().nullable().or(z.literal('')),
+  comment: z.string().max(2000).optional().nullable().or(z.literal('')),
+  consent: z.literal(true, { errorMap: () => ({ message: 'Необходимо согласие на обработку персональных данных' }) }),
+  items: z.array(itemSchema).min(1).max(200)
+})
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const parsed = await validateBody(event, schema)
   const {
     customer_name,
     customer_phone,
@@ -13,25 +38,13 @@ export default defineEventHandler(async (event) => {
     delivery_address,
     delivery_city,
     comment,
-    consent,
     items
-  } = body || {}
-
-  if (!customer_name || !customer_phone || !delivery_type || !items?.length) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing required fields' })
-  }
-
-  if (consent !== true) {
-    throw createError({ statusCode: 400, statusMessage: 'Необходимо согласие на обработку персональных данных' })
-  }
+  } = parsed
 
   // ===== ЦЕНЫ ИЗ БД (защита от подмены через DevTools) =====
   // Клиент шлёт price/name в body, но мы их игнорируем — берём из products таблицы.
   // Иначе пользователь через DevTools мог бы поставить price=1 и купить за рубль.
-  const productIds = items.map(i => i.productId).filter(id => Number.isInteger(id))
-  if (productIds.length !== items.length) {
-    throw createError({ statusCode: 400, statusMessage: 'Все товары должны иметь корректный productId' })
-  }
+  const productIds = items.map(i => i.productId)
 
   const { data: dbProducts, error: dbErr } = await supabase
     .from('products')

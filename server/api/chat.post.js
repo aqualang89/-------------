@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import {
   addHistory,
   getHistory,
@@ -9,6 +10,7 @@ import { sendOwnerCard } from '~/server/utils/telegram.js'
 import { askOpenRouter, findRelevantProducts, buildUserMessage, SYSTEM_PROMPT } from '~/server/utils/ai.js'
 import { supabase } from '~/server/utils/supabase'
 import { createLogger } from '~/server/utils/logger.js'
+import { validateBody } from '~/server/utils/validate.js'
 
 // Дневной лимит расхода на AI-чат в USD. Защита от DOS на деньги OpenRouter.
 // Claude Sonnet 4.6: ~$3/M input + $15/M output. 1500 max_tokens out × $15/M ≈ $0.022 за ответ + input.
@@ -17,6 +19,19 @@ const AI_DAILY_USD_CAP = parseFloat(process.env.AI_DAILY_USD_CAP || '5')
 // Консервативная оценка стоимости одного вызова (input + output). На самом деле OpenRouter
 // возвращает точную usage — но мы не хотим парсить response до проверки cap. Зарезервируем худший случай.
 const EST_COST_PER_CALL = 0.025
+
+const HISTORY_LIMIT = 20
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
+// base64 раздувает ~33% сверх raw. Лимит длины строки — чтобы и не парсить гигабайт впустую.
+const MAX_IMAGE_DATA_URL_LEN = Math.ceil(MAX_IMAGE_BYTES * 4 / 3) + 100
+
+const schema = z.object({
+  sessionId: z.string().min(1).max(100),
+  text: z.string().max(4000).optional(),
+  image: z.string().max(MAX_IMAGE_DATA_URL_LEN).regex(/^data:image\//).optional()
+}).refine(v => (v.text && v.text.trim()) || v.image, {
+  message: 'text или image обязательны'
+})
 
 // Парсим маркеры [CART_ADD:артикул] из ответа Claude и подтягиваем товары по article из БД
 // чтобы клиент гарантированно мог добавить в корзину (даже если их нет в текущем products)
@@ -53,17 +68,9 @@ async function ensureCartProducts (reply, products) {
   return [...products, ...extra]
 }
 
-const HISTORY_LIMIT = 20
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
-
 export default defineEventHandler(async (event) => {
   const log = createLogger(event, 'chat')
-  const body = await readBody(event)
-  const { sessionId, text, image } = body || {}
-
-  if (!sessionId || (!text?.trim() && !image)) {
-    throw createError({ statusCode: 400, statusMessage: 'sessionId и text (или image) обязательны' })
-  }
+  const { sessionId, text, image } = await validateBody(event, schema)
 
   // Cost cap — не даём атакующему сжечь баланс OpenRouter.
   try {

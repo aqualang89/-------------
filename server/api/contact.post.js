@@ -1,10 +1,15 @@
-export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-  const { name, phone, email, message } = body || {}
+import { z } from 'zod'
+import { validateBody } from '~/server/utils/validate.js'
 
-  if (!name || !phone || !email || !message) {
-    throw createError({ statusCode: 400, statusMessage: 'All fields are required' })
-  }
+const schema = z.object({
+  name: z.string().min(1).max(100),
+  phone: z.string().min(1).max(30),
+  email: z.string().email().max(200),
+  message: z.string().min(1).max(2000)
+})
+
+export default defineEventHandler(async (event) => {
+  const { name, phone, email, message } = await validateBody(event, schema)
 
   const text = `
 📩 Новая заявка с сайта Рипарий

@@ -1,4 +1,12 @@
+import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
+import { validateBody } from '~/server/utils/validate.js'
+
+const schema = z.object({
+  product_id: z.number().int().positive(),
+  url: z.string().url().max(1000),
+  is_main: z.boolean().optional().default(false)
+})
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -6,7 +14,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, message: 'Неверный пароль' })
   }
 
-  const body = await readBody(event)
+  const body = await validateBody(event, schema)
 
   const { error } = await supabase
     .from('product_photos')

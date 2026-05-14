@@ -1,4 +1,10 @@
+import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
+import { validateBody } from '~/server/utils/validate.js'
+
+const schema = z.object({
+  status: z.enum(['new', 'processing', 'shipped', 'completed', 'cancelled'])
+})
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -11,12 +17,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Order ID required' })
   }
 
-  const body = await readBody(event)
-  const { status } = body || {}
-
-  if (!status) {
-    throw createError({ statusCode: 400, statusMessage: 'Status required' })
-  }
+  const { status } = await validateBody(event, schema)
 
   const { error } = await supabase
     .from('orders')

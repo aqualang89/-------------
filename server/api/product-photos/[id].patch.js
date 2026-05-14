@@ -1,4 +1,13 @@
+import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
+import { validateBody } from '~/server/utils/validate.js'
+
+const schema = z.object({
+  is_main: z.boolean().optional(),
+  sort_order: z.number().int().min(0).max(10_000).optional()
+}).refine(v => v.is_main !== undefined || v.sort_order !== undefined, {
+  message: 'is_main или sort_order обязательны'
+})
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -11,7 +20,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Некорректный id' })
   }
 
-  const body = await readBody(event)
+  const body = await validateBody(event, schema)
 
   // Если ставим is_main: true — сначала снимаем флаг с остальных фото товара
   if (body.is_main === true) {
@@ -32,10 +41,6 @@ export default defineEventHandler(async (event) => {
   const updates = {}
   if (typeof body.is_main === 'boolean') updates.is_main = body.is_main
   if (typeof body.sort_order === 'number') updates.sort_order = body.sort_order
-
-  if (Object.keys(updates).length === 0) {
-    return { ok: true, noop: true }
-  }
 
   const { error } = await supabase
     .from('product_photos')

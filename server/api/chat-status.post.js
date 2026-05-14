@@ -1,15 +1,16 @@
-import { getMode, popManualReplies } from '~/server/utils/store.js';
+import { z } from 'zod'
+import { getMode, popManualReplies } from '~/server/utils/store.js'
+import { validateBody } from '~/server/utils/validate.js'
+
+const schema = z.object({
+  sessionId: z.string().min(1).max(100)
+})
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
-  const { sessionId } = body || {};
+  const { sessionId } = await validateBody(event, schema)
 
-  if (!sessionId) {
-    throw createError({ statusCode: 400, statusMessage: 'sessionId is required' });
-  }
+  const mode = await getMode(sessionId)
+  const pending = await popManualReplies(sessionId)
 
-  const mode = await getMode(sessionId);
-  const pending = await popManualReplies(sessionId);
-
-  return { mode, pending };
-});
+  return { mode, pending }
+})
