@@ -25,10 +25,17 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
 // base64 раздувает ~33% сверх raw. Лимит длины строки — чтобы и не парсить гигабайт впустую.
 const MAX_IMAGE_DATA_URL_LEN = Math.ceil(MAX_IMAGE_BYTES * 4 / 3) + 100
 
+// Клиент шлёт image: null когда фото не приложено — приводим null/"" к undefined,
+// иначе z.string() падает на типе.
+const nullEmptyToUndef = (v) => (v === null || v === '' ? undefined : v)
+
 const schema = z.object({
   sessionId: z.string().min(1).max(100),
-  text: z.string().max(4000).optional(),
-  image: z.string().max(MAX_IMAGE_DATA_URL_LEN).regex(/^data:image\//).optional()
+  text: z.preprocess(nullEmptyToUndef, z.string().max(4000).optional()),
+  image: z.preprocess(
+    nullEmptyToUndef,
+    z.string().max(MAX_IMAGE_DATA_URL_LEN).regex(/^data:image\//).optional()
+  )
 }).refine(v => (v.text && v.text.trim()) || v.image, {
   message: 'text или image обязательны'
 })
