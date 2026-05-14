@@ -69,16 +69,26 @@ export default defineEventHandler(async (event) => {
   // sharp .rotate() применит EXIF Orientation и затем выкинет весь EXIF —
   // снимает геолокацию, серийник камеры и прочую утечку метаданных.
   // Перекодируем в исходный формат, чтобы не менять расширение/url-структуру.
+  // sharp на Vercel в prebuilt без libheif → не читает AVIF/HEIC.
+  // Для этих форматов отдаём оригинал в Cloudinary (он сам перекодирует и снимет metadata).
+  // Для jpeg/png/webp — стандартный pipeline через sharp с EXIF strip.
+  const sharpFormats = new Set(['image/jpeg', 'image/png', 'image/webp'])
   let cleanBuf
-  try {
-    const pipeline = sharp(inputBuf).rotate()
-    if (sniffed.mime === 'image/png') cleanBuf = await pipeline.png().toBuffer()
-    else if (sniffed.mime === 'image/webp') cleanBuf = await pipeline.webp({ quality: 88 }).toBuffer()
-    // jpeg + avif/heic/heif → jpeg (универсальная совместимость для Cloudinary и старых браузеров)
-    else cleanBuf = await pipeline.jpeg({ quality: 88 }).toBuffer()
-  } catch (err) {
-    console.error('Sharp processing error:', err)
-    throw createError({ statusCode: 400, statusMessage: 'Не удалось обработать изображение (повреждённый файл?)' })
+  let resourceType = 'image'
+  if (sharpFormats.has(sniffed.mime)) {
+    try {
+      const pipeline = sharp(inputBuf).rotate()
+      if (sniffed.mime === 'image/png') cleanBuf = await pipeline.png().toBuffer()
+      else if (sniffed.mime === 'image/webp') cleanBuf = await pipeline.webp({ quality: 88 }).toBuffer()
+      else cleanBuf = await pipeline.jpeg({ quality: 88 }).toBuffer()
+    } catch (err) {
+      console.error('Sharp processing error:', err)
+      throw createError({ statusCode: 400, statusMessage: 'Не удалось обработать изображение (повреждённый файл?)' })
+    }
+  } else {
+    // AVIF/HEIC/HEIF — оригинал в Cloudinary. Cloudinary при выдаче снимет metadata
+    // (он делает strip по умолчанию для image-ресурсов) и сможет отдавать как JPEG/WebP.
+    cleanBuf = inputBuf
   }
 
   try {
