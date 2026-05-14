@@ -92,7 +92,8 @@ export default defineEventHandler(async (event) => {
     .range(from, to)
 
   if (error) {
-    throw createError({ statusCode: 500, message: error.message })
+    console.error('[products.get] Query failed:', error)
+    throw createError({ statusCode: 500, message: 'Не удалось загрузить товары' })
   }
 
   return {

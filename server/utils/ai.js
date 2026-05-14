@@ -136,9 +136,11 @@ function cleanReply (raw) {
 }
 
 // Базовый вызов OpenRouter. messages может содержать multimodal content (массивы с image_url для vision)
-export async function askOpenRouter (messages) {
+// signal — AbortSignal, обычно `event.node.req.signal` чтобы прерывать когда клиент уходит
+export async function askOpenRouter (messages, { signal } = {}) {
   const res = await fetch(OPENROUTER_URL, {
     method: 'POST',
+    signal,
     headers: {
       'Authorization': `Bearer ${(process.env.OPENROUTER_API_KEY || '').trim()}`,
       'Content-Type': 'application/json',

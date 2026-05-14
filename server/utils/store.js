@@ -102,3 +102,29 @@ export async function setIdempotency(key, value, ttlSeconds = 300) {
   const redis = await getRedis();
   await redis.set(idempotencyKey(key), String(value), 'EX', ttlSeconds);
 }
+
+// ===== AI COST CAP =====
+// Защита от DOS на деньги OpenRouter. Считаем cumulative cost по дням.
+// Если за день превышен AI_DAILY_USD_CAP — отказ.
+// В Vercel serverless без Redis работать НЕ будет (memory per-instance).
+function todayUtc() {
+  return new Date().toISOString().slice(0, 10);
+}
+const aiCostKey = (date) => `ai:cost:${date}`;
+
+export async function getDailyAiCost() {
+  const redis = await getRedis();
+  const raw = await redis.get(aiCostKey(todayUtc()));
+  return raw ? parseFloat(raw) : 0;
+}
+
+export async function addAiCost(usd) {
+  const redis = await getRedis();
+  const key = aiCostKey(todayUtc());
+  // INCRBYFLOAT через get/set — не атомарно, но для нашей нагрузки норм.
+  // Для high-concurrency можно перейти на native INCRBYFLOAT (ioredis поддерживает).
+  const current = parseFloat((await redis.get(key)) || '0');
+  const next = current + usd;
+  await redis.set(key, String(next), 'EX', 60 * 60 * 26); // 26 часов TTL
+  return next;
+}

@@ -1,6 +1,8 @@
 import { supabase } from '~/server/utils/supabase'
+import { createLogger } from '~/server/utils/logger.js'
 
 export default defineEventHandler(async (event) => {
+  const log = createLogger(event, 'product-patch')
   const password = getHeader(event, 'x-admin-password')
   if (password !== process.env.ADMIN_PASSWORD) {
     throw createError({ statusCode: 403, message: 'Неверный пароль' })
@@ -20,7 +22,8 @@ export default defineEventHandler(async (event) => {
     .eq('id', id)
 
   if (error) {
-    throw createError({ statusCode: 500, message: error.message })
+    log.error('Update failed:', error)
+    throw createError({ statusCode: 500, message: `Не удалось обновить товар (ref: ${log.requestId})` })
   }
 
   return { ok: true }

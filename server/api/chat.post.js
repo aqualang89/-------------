@@ -1,11 +1,22 @@
 import {
   addHistory,
   getHistory,
-  getMode
+  getMode,
+  getDailyAiCost,
+  addAiCost
 } from '~/server/utils/store.js'
 import { sendOwnerCard } from '~/server/utils/telegram.js'
 import { askOpenRouter, findRelevantProducts, buildUserMessage, SYSTEM_PROMPT } from '~/server/utils/ai.js'
 import { supabase } from '~/server/utils/supabase'
+import { createLogger } from '~/server/utils/logger.js'
+
+// Дневной лимит расхода на AI-чат в USD. Защита от DOS на деньги OpenRouter.
+// Claude Sonnet 4.6: ~$3/M input + $15/M output. 1500 max_tokens out × $15/M ≈ $0.022 за ответ + input.
+// $5/день ≈ ~150 ответов в день = норм для одного магазина.
+const AI_DAILY_USD_CAP = parseFloat(process.env.AI_DAILY_USD_CAP || '5')
+// Консервативная оценка стоимости одного вызова (input + output). На самом деле OpenRouter
+// возвращает точную usage — но мы не хотим парсить response до проверки cap. Зарезервируем худший случай.
+const EST_COST_PER_CALL = 0.025
 
 // Парсим маркеры [CART_ADD:артикул] из ответа Claude и подтягиваем товары по article из БД
 // чтобы клиент гарантированно мог добавить в корзину (даже если их нет в текущем products)
@@ -46,11 +57,27 @@ const HISTORY_LIMIT = 20
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
 
 export default defineEventHandler(async (event) => {
+  const log = createLogger(event, 'chat')
   const body = await readBody(event)
   const { sessionId, text, image } = body || {}
 
   if (!sessionId || (!text?.trim() && !image)) {
     throw createError({ statusCode: 400, statusMessage: 'sessionId и text (или image) обязательны' })
+  }
+
+  // Cost cap — не даём атакующему сжечь баланс OpenRouter.
+  try {
+    const spentToday = await getDailyAiCost()
+    if (spentToday + EST_COST_PER_CALL > AI_DAILY_USD_CAP) {
+      log.warn(`Cost cap reached: $${spentToday.toFixed(3)} of $${AI_DAILY_USD_CAP}`)
+      throw createError({
+        statusCode: 429,
+        statusMessage: 'Чат сейчас перегружен. Напишите нам в Telegram @riparium_kld — ответим там.'
+      })
+    }
+  } catch (e) {
+    if (e.statusCode === 429) throw e
+    log.error('Cost cap check failed (continuing):', e.message)
   }
 
   const cleanText = (text || '').trim()
@@ -105,12 +132,16 @@ export default defineEventHandler(async (event) => {
       buildUserMessage(cleanText, hasImage ? image : null)
     ]
 
-    reply = await askOpenRouter(messages)
+    // signal — если клиент закрыл вкладку, прерываем upstream и не платим за стрим
+    reply = await askOpenRouter(messages, { signal: event.node.req.signal })
+
+    // Записываем оценочный cost (точный приходит в usage, но это упростит логику)
+    addAiCost(EST_COST_PER_CALL).catch(e => log.error('addAiCost failed (non-fatal):', e.message))
 
     // Гарантируем что все товары упомянутые в [CART_ADD:артикул] есть в products
     products = await ensureCartProducts(reply, products)
   } catch (aiErr) {
-    console.error('AI fallback:', aiErr)
+    log.error('AI fallback:', aiErr.message || aiErr)
     responseMode = 'manual'
     reply = 'Консультант сейчас недоступен. Ваш вопрос передан специалисту — он ответит в ближайшее время. Также можете написать нам в Telegram @riparium_kld.'
   }
