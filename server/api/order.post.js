@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
 import { getIdempotency, setIdempotency } from '~/server/utils/store.js'
 import { validateBody } from '~/server/utils/validate.js'
+import { escapeHtml } from '~/server/utils/escape.js'
 
 const itemSchema = z.object({
   productId: z.number().int().positive(),
@@ -193,21 +194,23 @@ ${comment ? '\n💬 ' + comment : ''}
 
   // 4. Email notification via Resend
   if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
+    // Все user-input в email — через escapeHtml, защита от XSS в почтовом клиенте.
+    // Имена товаров берём из БД (уже trusted), но на всякий случай тоже эскейпим.
     const emailHtml = `
-      <h2>Новый заказ #${order.id.slice(0, 8)}</h2>
+      <h2>Новый заказ #${escapeHtml(order.id.slice(0, 8))}</h2>
       <p><strong>Сумма:</strong> ${total_amount.toLocaleString()} ₽</p>
-      <p><strong>Клиент:</strong> ${customer_name}</p>
-      <p><strong>Телефон:</strong> ${customer_phone}</p>
-      ${customer_email ? `<p><strong>Email:</strong> ${customer_email}</p>` : ''}
-      ${customer_telegram ? `<p><strong>Telegram:</strong> @${customer_telegram}</p>` : ''}
-      <p><strong>Доставка:</strong> ${deliveryLabels[delivery_type] || delivery_type}</p>
-      ${delivery_city ? `<p><strong>Город:</strong> ${delivery_city}</p>` : ''}
-      ${delivery_address ? `<p><strong>Адрес:</strong> ${delivery_address}</p>` : ''}
+      <p><strong>Клиент:</strong> ${escapeHtml(customer_name)}</p>
+      <p><strong>Телефон:</strong> ${escapeHtml(customer_phone)}</p>
+      ${customer_email ? `<p><strong>Email:</strong> ${escapeHtml(customer_email)}</p>` : ''}
+      ${customer_telegram ? `<p><strong>Telegram:</strong> @${escapeHtml(customer_telegram)}</p>` : ''}
+      <p><strong>Доставка:</strong> ${escapeHtml(deliveryLabels[delivery_type] || delivery_type)}</p>
+      ${delivery_city ? `<p><strong>Город:</strong> ${escapeHtml(delivery_city)}</p>` : ''}
+      ${delivery_address ? `<p><strong>Адрес:</strong> ${escapeHtml(delivery_address)}</p>` : ''}
       <h3>Состав:</h3>
       <ul>
-        ${safeItems.map(i => `<li>${i.name} × ${i.qty} — ${i.total.toLocaleString()} ₽</li>`).join('')}
+        ${safeItems.map(i => `<li>${escapeHtml(i.name)} × ${i.qty} — ${i.total.toLocaleString()} ₽</li>`).join('')}
       </ul>
-      ${comment ? `<p><strong>Комментарий:</strong> ${comment}</p>` : ''}
+      ${comment ? `<p><strong>Комментарий:</strong> ${escapeHtml(comment)}</p>` : ''}
     `
 
     try {

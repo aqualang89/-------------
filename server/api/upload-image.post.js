@@ -1,4 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary'
+import { fileTypeFromBuffer } from 'file-type'
+import sharp from 'sharp'
+
+const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 export default defineEventHandler(async (event) => {
   const password = getHeader(event, 'x-admin-password')
@@ -48,14 +52,40 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // MIME sniffing по магическим байтам — content-type из multipart не доверяем.
+  // SVG/HTML отсекаются здесь же: у них нет бинарного magic-header картинки,
+  // file-type вернёт что-то не-image или undefined.
+  const inputBuf = Buffer.from(file.data)
+  const sniffed = await fileTypeFromBuffer(inputBuf)
+  if (!sniffed || !ALLOWED_MIME.has(sniffed.mime)) {
+    throw createError({
+      statusCode: 415,
+      statusMessage: `Только JPEG/PNG/WebP. Определён тип: ${sniffed?.mime || 'неизвестно'}`
+    })
+  }
+
+  // sharp .rotate() применит EXIF Orientation и затем выкинет весь EXIF —
+  // снимает геолокацию, серийник камеры и прочую утечку метаданных.
+  // Перекодируем в исходный формат, чтобы не менять расширение/url-структуру.
+  let cleanBuf
+  try {
+    const pipeline = sharp(inputBuf).rotate()
+    if (sniffed.mime === 'image/jpeg') cleanBuf = await pipeline.jpeg({ quality: 88 }).toBuffer()
+    else if (sniffed.mime === 'image/png') cleanBuf = await pipeline.png().toBuffer()
+    else cleanBuf = await pipeline.webp({ quality: 88 }).toBuffer()
+  } catch (err) {
+    console.error('Sharp processing error:', err)
+    throw createError({ statusCode: 400, statusMessage: 'Не удалось обработать изображение (повреждённый файл?)' })
+  }
+
   try {
     const { PassThrough } = await import('stream')
     const result = await new Promise((resolve, reject) => {
       const bufferStream = new PassThrough()
-      bufferStream.end(Buffer.from(file.data))
+      bufferStream.end(cleanBuf)
 
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: 'aqua-catalog', resource_type: 'auto' },
+        { folder: 'aqua-catalog', resource_type: 'image' },
         (err, res) => {
           if (err) reject(err)
           else resolve(res)
@@ -67,12 +97,11 @@ export default defineEventHandler(async (event) => {
     return { url: result.secure_url, publicId: result.public_id }
   } catch (err) {
     console.error('Cloudinary upload error:', err)
-    // Cloudinary error часто имеет err.message + err.http_code
     const cloudinaryMsg = err?.message || err?.error?.message || String(err).slice(0, 200)
     const httpCode = err?.http_code ? ` (Cloudinary HTTP ${err.http_code})` : ''
     throw createError({
       statusCode: 500,
-      statusMessage: `Cloudinary upload failed${httpCode}: ${cloudinaryMsg}. Размер файла: ${sizeMB}MB.`
+      statusMessage: `Cloudinary upload failed${httpCode}: ${cloudinaryMsg}. Размер: ${sizeMB}MB.`
     })
   }
 })

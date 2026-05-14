@@ -13,12 +13,14 @@
     "@vercel/kv": "^3.0.0",
     "cloudinary": "^2.10.0",
     "exceljs": "^4.4.0",
+    "file-type": "^22.0.1",
     "https-proxy-agent": "^9.0.0",
     "ioredis": "^5.6.1",
     "node-fetch": "^2.7.0",
     "nuxt": "3.16.0",
     "pdf-parse": "^1.1.1",
     "pg": "^8.20.0",
+    "sharp": "^0.34.5",
     "undici": "^8.2.0",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0",
@@ -27,7 +29,6 @@
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.13.0",
-    "jimp": "^1.6.1",
-    "sharp": "^0.34.5"
+    "jimp": "^1.6.1"
   }
 }
