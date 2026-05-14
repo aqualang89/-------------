@@ -60,11 +60,15 @@ ${catalogContext}`
 }
 
 export default defineEventHandler(async (event) => {
-  if (process.env.TELEGRAM_SECRET) {
-    const secret = getHeader(event, 'x-telegram-bot-api-secret-token');
-    if (secret !== process.env.TELEGRAM_SECRET) {
-      throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
-    }
+  // TELEGRAM_SECRET обязателен — иначе webhook открыт всем.
+  // Установить secret в Telegram: bot.setWebHook(url, { secret_token: TELEGRAM_SECRET })
+  if (!process.env.TELEGRAM_SECRET) {
+    console.error('TELEGRAM_SECRET не задан в env — webhook отклонён');
+    throw createError({ statusCode: 500, statusMessage: 'Server misconfigured' });
+  }
+  const secret = getHeader(event, 'x-telegram-bot-api-secret-token');
+  if (secret !== process.env.TELEGRAM_SECRET) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' });
   }
 
   const body = await readBody(event);
