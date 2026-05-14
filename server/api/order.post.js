@@ -179,20 +179,9 @@ ${itemsText}
 ${comment ? '\n💬 ' + comment : ''}
   `.trim()
 
-  try {
-    await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: process.env.OWNER_CHAT_ID || process.env.TELEGRAM_CHAT_ID,
-        text: telegramText
-      })
-    })
-  } catch (err) {
-    console.error('Telegram notify error:', err)
-  }
-
-  // 4. Email notification via Resend
+  // Email пробуем отправить ДО Telegram — если Resend ответил ошибкой,
+  // добавим её в TG-уведомление чтобы Макс сразу видел причину.
+  let emailStatus = null
   if (process.env.RESEND_API_KEY && process.env.ADMIN_EMAIL) {
     // Все user-input в email — через escapeHtml, защита от XSS в почтовом клиенте.
     // Имена товаров берём из БД (уже trusted), но на всякий случай тоже эскейпим.
@@ -213,24 +202,56 @@ ${comment ? '\n💬 ' + comment : ''}
       ${comment ? `<p><strong>Комментарий:</strong> ${escapeHtml(comment)}</p>` : ''}
     `
 
+    // Resend не любит кириллицу в from-домене — нужен ASCII (либо punycode подтверждённого
+    // домена, либо стандартный sandbox onboarding@resend.dev). Берём из env, дефолт sandbox.
+    const fromEmail = process.env.RESEND_FROM || 'onboarding@resend.dev'
+
     try {
-      await fetch('https://api.resend.com/emails', {
+      const r = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'orders@рипарий.рф',
+          from: fromEmail,
           to: process.env.ADMIN_EMAIL,
           reply_to: customer_email || undefined,
           subject: `Новый заказ #${order.id.slice(0, 8)} — ${total_amount.toLocaleString()} ₽`,
           html: emailHtml
         })
       })
+      if (!r.ok) {
+        const errText = await r.text().catch(() => '')
+        emailStatus = `Resend ${r.status}: ${errText.slice(0, 200)}`
+        console.error('Email notify Resend error:', emailStatus)
+      } else {
+        emailStatus = 'sent'
+      }
     } catch (err) {
-      console.error('Email notify error:', err)
+      emailStatus = `Resend fetch error: ${err.message || err}`
+      console.error('Email notify error:', emailStatus)
     }
+  } else {
+    emailStatus = 'env missing (RESEND_API_KEY или ADMIN_EMAIL не задан)'
+  }
+
+  // Telegram уведомление — после email, чтобы можно было дописать статус email-а.
+  const tgText = emailStatus === 'sent' || emailStatus === null
+    ? telegramText
+    : `${telegramText}\n\n⚠️ Email не отправлен: ${emailStatus}`
+
+  try {
+    await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: process.env.OWNER_CHAT_ID || process.env.TELEGRAM_CHAT_ID,
+        text: tgText
+      })
+    })
+  } catch (err) {
+    console.error('Telegram notify error:', err)
   }
 
   return { ok: true, orderId: order.id }
