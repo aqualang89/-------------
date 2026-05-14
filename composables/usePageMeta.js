@@ -17,7 +17,8 @@ export function usePageMeta({ title, description, ogImage = '/og-image.jpg' }) {
       { name: 'theme-color', content: '#1e2933' }
     ],
     link: [
-      { rel: 'canonical', href: () => `https://рипарий.рф${useRoute().path}` }
+      // canonical на ASCII-punycode + www (primary в Vercel) — без редиректа, краулерам прямой URL.
+      { rel: 'canonical', href: () => `https://www.xn--80apbe1aed.xn--p1ai${useRoute().path}` }
     ],
     htmlAttrs: {
       lang: 'ru'
