@@ -85,3 +85,20 @@ export async function popManualReplies(sessionId) {
   await redis.del(pendingKey(sessionId));
   return (items || []).map((x) => JSON.parse(x));
 }
+
+// ===== IDEMPOTENCY =====
+// Используется в /api/order чтобы один и тот же заказ при retry/double-click
+// не создавался дважды. В Vercel serverless БЕЗ Redis (REDIS_URL не задан) защита
+// работать НЕ будет — каждый instance имеет свою memory Map. Подключить Vercel KV
+// или Upstash Redis для production-уровня.
+const idempotencyKey = (key) => `idempotency:${key}`;
+
+export async function getIdempotency(key) {
+  const redis = await getRedis();
+  return await redis.get(idempotencyKey(key));
+}
+
+export async function setIdempotency(key, value, ttlSeconds = 300) {
+  const redis = await getRedis();
+  await redis.set(idempotencyKey(key), String(value), 'EX', ttlSeconds);
+}

@@ -1,4 +1,6 @@
+import crypto from 'node:crypto'
 import { supabase } from '~/server/utils/supabase'
+import { getIdempotency, setIdempotency } from '~/server/utils/store.js'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -23,7 +25,72 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Необходимо согласие на обработку персональных данных' })
   }
 
-  const total_amount = items.reduce((s, i) => s + (i.price * i.qty), 0)
+  // ===== ЦЕНЫ ИЗ БД (защита от подмены через DevTools) =====
+  // Клиент шлёт price/name в body, но мы их игнорируем — берём из products таблицы.
+  // Иначе пользователь через DevTools мог бы поставить price=1 и купить за рубль.
+  const productIds = items.map(i => i.productId).filter(id => Number.isInteger(id))
+  if (productIds.length !== items.length) {
+    throw createError({ statusCode: 400, statusMessage: 'Все товары должны иметь корректный productId' })
+  }
+
+  const { data: dbProducts, error: dbErr } = await supabase
+    .from('products')
+    .select('id, name, article, price, is_available')
+    .in('id', productIds)
+
+  if (dbErr) {
+    console.error('Product price fetch error:', dbErr)
+    throw createError({ statusCode: 500, statusMessage: 'Failed to verify products' })
+  }
+
+  const dbMap = new Map((dbProducts || []).map(p => [p.id, p]))
+
+  // safeItems — items с серверными ценами/именами, qty с клиента (нормализовано)
+  const safeItems = items.map(i => {
+    const p = dbMap.get(i.productId)
+    if (!p) {
+      throw createError({ statusCode: 400, statusMessage: `Товар "${i.name || i.productId}" не найден в каталоге` })
+    }
+    if (p.is_available === false) {
+      throw createError({ statusCode: 409, statusMessage: `Товар "${p.name}" сейчас недоступен` })
+    }
+    const qty = Math.max(1, Math.floor(Number(i.qty) || 1))
+    const price = Number(p.price) || 0
+    return {
+      productId: p.id,
+      name: p.name,
+      article: p.article || null,
+      photo: i.photo || null,
+      qty,
+      price,
+      total: price * qty
+    }
+  })
+
+  const total_amount = safeItems.reduce((s, i) => s + i.total, 0)
+
+  // ===== IDEMPOTENCY =====
+  // Защита от двойных заказов при double-click / refresh / network retry.
+  // Хэш = phone + sorted productId:qty + total. Если за 5 мин такой же заказ был —
+  // возвращаем существующий orderId, новый не создаём.
+  const idempotencyHash = crypto
+    .createHash('sha256')
+    .update(JSON.stringify({
+      phone: String(customer_phone).trim(),
+      items: safeItems.map(i => `${i.productId}:${i.qty}`).sort(),
+      total: total_amount
+    }))
+    .digest('hex')
+    .slice(0, 32)
+
+  try {
+    const existingOrderId = await getIdempotency(idempotencyHash)
+    if (existingOrderId) {
+      return { ok: true, orderId: existingOrderId, duplicate: true }
+    }
+  } catch (e) {
+    console.error('Idempotency check failed (continuing):', e.message)
+  }
 
   // 1. Create order
   const { data: order, error: orderError } = await supabase
@@ -47,16 +114,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Failed to create order' })
   }
 
-  // 2. Create order items
-  const orderItems = items.map(i => ({
+  // 2. Create order items (используем safeItems с серверными ценами)
+  const orderItems = safeItems.map(i => ({
     order_id: order.id,
-    product_id: i.productId || null,
+    product_id: i.productId,
     product_name: i.name,
-    product_article: i.article || null,
-    product_photo: i.photo || null,
+    product_article: i.article,
+    product_photo: i.photo,
     qty: i.qty,
     price: i.price,
-    total: i.price * i.qty
+    total: i.total
   }))
 
   const { error: itemsError } = await supabase
@@ -68,6 +135,13 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'Failed to create order items' })
   }
 
+  // Сохраняем idempotency-маркер ПОСЛЕ успешного insert. Если упадём раньше — клиент может ретрайнуть.
+  try {
+    await setIdempotency(idempotencyHash, order.id, 300)
+  } catch (e) {
+    console.error('Idempotency save failed (non-fatal):', e.message)
+  }
+
   // 3. Telegram notification
   const deliveryLabels = {
     pickup: 'Самовывоз (Калининград)',
@@ -75,7 +149,7 @@ export default defineEventHandler(async (event) => {
     transport: 'Транспортная компания по РФ'
   }
 
-  const itemsText = items.map(i => `• ${i.name} × ${i.qty} — ${(i.price * i.qty).toLocaleString()} ₽`).join('\n')
+  const itemsText = safeItems.map(i => `• ${i.name} × ${i.qty} — ${i.total.toLocaleString()} ₽`).join('\n')
 
   const telegramText = `
 🛒 Новый заказ #${order.id.slice(0, 8)}
@@ -118,7 +192,7 @@ ${comment ? '\n💬 ' + comment : ''}
       ${delivery_address ? `<p><strong>Адрес:</strong> ${delivery_address}</p>` : ''}
       <h3>Состав:</h3>
       <ul>
-        ${items.map(i => `<li>${i.name} × ${i.qty} — ${(i.price * i.qty).toLocaleString()} ₽</li>`).join('')}
+        ${safeItems.map(i => `<li>${i.name} × ${i.qty} — ${i.total.toLocaleString()} ₽</li>`).join('')}
       </ul>
       ${comment ? `<p><strong>Комментарий:</strong> ${comment}</p>` : ''}
     `
