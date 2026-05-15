@@ -25,19 +25,29 @@
     <section class="sh-about-section" data-reveal>
       <header class="sh-section-header">
         <span class="sh-section-num">01</span>
-        <h2 class="sh-section-title">Зарождение</h2>
+        <h2 class="sh-section-title">Не новый старт</h2>
         <span class="sh-section-year">2016</span>
       </header>
       <div class="sh-section-body">
-        <h3 class="sh-section-subtitle">1. Не новый старт. Просто наконец мы стали собой.</h3>
         <p>
           «Рипарий» создан не сегодня, он появился в теперь уже далёком 2016-м. Просто назывался и выглядел тогда иначе. Именно в 2016 году из ничем не примечательной болтовни друзей о планах на жизнь и поисках способов заработка и возникла та самая идея — создать аквариумный магазин или хоть некое его подобие. Сейчас понимаю, как же по-детски наивно это выглядело со стороны. Мне 26, живу с девушкой в родительском доме, едва устроился на стабильную работу, которая сулила хоть сколько-нибудь достойную жизнь, и нет буквально ничего своего. Казалось бы, стоит сосредоточиться, копить на жильё, думать о серьёзных вещах, а не лепетать о каких-то вабикусах.
         </p>
         <p>
           Отчасти я так и планировал. Я рассматривал вариант по прошествии как раз лет 10–12 уйти с той самой работы и открыть небольшой магазинчик, посвящённый моему хобби. Но эти планы нарушил мой друг детства, предложив заниматься этим прямо сейчас. Пусть параллельно с основной работой, но не через 10 лет, не через год, а прямо сейчас.
         </p>
+      </div>
+    </section>
 
-        <h3 class="sh-section-subtitle">2. Пусть будет Planta</h3>
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 02 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">02</span>
+        <h2 class="sh-section-title">Пусть будет Planta</h2>
+        <span class="sh-section-year">2016</span>
+      </header>
+      <div class="sh-section-body">
         <p>
           Сейчас, так сейчас. Значит, уже сегодня мы приступим к созданию аквариумной корпорации планетарных масштабов! С чего начать? Нужно название. Пусть будет Planta. Мы же про растения. Теперь нам нужен капитал для старта. Нужен так нужен, скидываемся втроём... по 10 тысяч рублей — итого у нас 30. Сейчас перечитываю это и улыбаюсь — уже не дети, но откуда было столько наивности и веры в то, что из этого что-то получится?
         </p>
@@ -56,8 +66,19 @@
         <p>
           Интерес моих компаньонов к делу со временем поугас, и винить их в этом не имею права — просто ожидания разошлись с реальностью. Через некоторое время наш коллектив покинула девушка моего друга, ещё спустя возможно полгода и сам друг решил отказаться от участия в «проекте». Остался я и моя вторая половинка.
         </p>
+      </div>
+    </section>
 
-        <h3 class="sh-section-subtitle">3. Хобби</h3>
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 03 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">03</span>
+        <h2 class="sh-section-title">Хобби</h2>
+        <span class="sh-section-year">2016 – 2018</span>
+      </header>
+      <div class="sh-section-body">
         <p>
           Planta превратилась в некое хобби. Мне было интересно наблюдать за тем, как она развивается. Как наполняется группа ВК, как там появляются первые комментарии и люди начинают интересоваться нами. Так продолжалось ещё какое-то время — полгода или год.
         </p>
@@ -72,15 +93,14 @@
 
     <div class="sh-divider" data-reveal></div>
 
-    <!-- SECTION 02 -->
+    <!-- SECTION 04 -->
     <section class="sh-about-section" data-reveal>
       <header class="sh-section-header">
-        <span class="sh-section-num">02</span>
+        <span class="sh-section-num">04</span>
         <h2 class="sh-section-title">Кот да Винчи</h2>
-        <span class="sh-section-year">2018 – 2021</span>
+        <span class="sh-section-year">2018</span>
       </header>
       <div class="sh-section-body">
-        <h3 class="sh-section-subtitle">4. Кот да Винчи</h3>
         <p>
           Дальше были кредиты на покупку, оформления, регистрация ИП, открытие счетов, касса, эквайринг, приведение магазина к уже нашим стандартам и всё то, что не замечаешь в магазине, пока сам не окунёшься в это. Здесь романтикой уже не пахнет. Теперь ты должен вести бухгалтерию, платить налоги, аренду и зарплату продавцу. И всё это независимо от продаж. Никому не важно, есть у тебя прибыль или нет.
         </p>
@@ -93,8 +113,19 @@
         <p>
           Со временем за ним подтянулись и другие. И вот мы уже занимаемся мелким (ну прям нано), но всё же оптом. Параллельно продолжаем расширять ассортимент, вливая всё больше денег и сил в наш маленький магазинчик. Кажется, нас ждёт безоблачное будущее, в котором мы владеем чудным зоомагазином, постоянно совершенствуемся и развиваемся.
         </p>
+      </div>
+    </section>
 
-        <h3 class="sh-section-subtitle">5. Встреча с реальностью</h3>
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 05 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">05</span>
+        <h2 class="sh-section-title">Встреча с реальностью</h2>
+        <span class="sh-section-year">2019 – 2021</span>
+      </header>
+      <div class="sh-section-body">
         <p>
           Но открывается крупный зоосетевик, начинает демпинговать, продавая товары в розницу дешевле, чем нам их отпускают поставщики. Продажи медленно скатываются. Где-то между этими событиями наш магазин в одну из тёплых летних ночей обворовывают. Отжали дверь, своровали телефон и какую-то мелочь. Тот случай, когда радуешься, что брать с тебя особо нечего.
         </p>
@@ -115,15 +146,14 @@
 
     <div class="sh-divider" data-reveal></div>
 
-    <!-- SECTION 03 -->
+    <!-- SECTION 06 -->
     <section class="sh-about-section" data-reveal>
       <header class="sh-section-header">
-        <span class="sh-section-num">03</span>
+        <span class="sh-section-num">06</span>
         <h2 class="sh-section-title">Новый дом</h2>
-        <span class="sh-section-year">2021 – 2023</span>
+        <span class="sh-section-year">2021</span>
       </header>
       <div class="sh-section-body">
-        <h3 class="sh-section-subtitle">6. Новый дом</h3>
         <p>
           Новый магазин располагался относительно недалеко от старого, выигрывал в площади и цене, а также наличием отдельного санузла. Но бо&#x301;льшую площадь нужно было чем-то заставить. Стеллажи, товары, столы и прочее. Мы снова добавили своих денег и в течение месяца наполнили магазин. На переезд было запланировано два дня.
         </p>
@@ -153,15 +183,14 @@
 
     <div class="sh-divider" data-reveal></div>
 
-    <!-- SECTION 04 -->
+    <!-- SECTION 07 -->
     <section class="sh-about-section" data-reveal>
       <header class="sh-section-header">
-        <span class="sh-section-num">04</span>
-        <h2 class="sh-section-title">Испытание</h2>
+        <span class="sh-section-num">07</span>
+        <h2 class="sh-section-title">Настоящая студия</h2>
         <span class="sh-section-year">2023</span>
       </header>
       <div class="sh-section-body">
-        <h3 class="sh-section-subtitle">7. Настоящая студия</h3>
         <p>
           За всё описываемое до этого момента время мы пережили несколько переездов. Трижды мы меняли место жительства и один раз перевозили магазин.
         </p>
@@ -185,15 +214,14 @@
 
     <div class="sh-divider" data-reveal></div>
 
-    <!-- SECTION 05 -->
+    <!-- SECTION 08 -->
     <section class="sh-about-section" data-reveal>
       <header class="sh-section-header">
-        <span class="sh-section-num">05</span>
-        <h2 class="sh-section-title">Рипарий</h2>
-        <span class="sh-section-year">2023 – н.в.</span>
+        <span class="sh-section-num">08</span>
+        <h2 class="sh-section-title">Привет, Scaper's House</h2>
+        <span class="sh-section-year">2023 – 2025</span>
       </header>
       <div class="sh-section-body">
-        <h3 class="sh-section-subtitle">8. Привет, Scaper's House</h3>
         <p>
           Scaper's House давалось не всем — как в произношении, так и в понимании. Но несмотря на это, удавалось услышать и очень лестные отзывы относительно такого выбора. Так или иначе, с декабря 2023 года наше дело носило именно это имя. Шло время, мы продолжали расширять ассортимент, осваивать новые направления и техники. Со временем обставили выставочный зал. Там появились пресноводные и морские аквариумы, палюдариумы. Мы стали брать заказы на запуски как у клиентов на дому, так и у нас в студии с последующей стабилизацией и перевозкой системы к заказчику. К нам стали чаще обращаться за обслуживанием. Люди, как и мы сами, стали понемногу привыкать к новому имени.
         </p>
@@ -206,8 +234,19 @@
         <p>
           Быть может, я описал эти дни слишком коротко и скомканно, но поверьте, для нас это был настоящий апокалипсис. Но так или иначе, мы снова отряхнулись, встали и пошли дальше.
         </p>
+      </div>
+    </section>
 
-        <h3 class="sh-section-subtitle">9. Scaper's House, прощай</h3>
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 09 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">09</span>
+        <h2 class="sh-section-title">Scaper's House, прощай</h2>
+        <span class="sh-section-year">2026</span>
+      </header>
+      <div class="sh-section-body">
         <p>
           И вот грянул 2026-й, а вместе с ним и новый закон об англоязычных вывесках. Если вы не в курсе, то вкратце — англоязычные названия стали практически вне закона, за редким исключением.
         </p>
@@ -220,8 +259,19 @@
         <p>
           Я когда-то встречал такое слово, но совсем забыл его. Я знал, что есть такое понятие, но не мог нигде его найти. И вот по счастливой случайности при помощи моего друга мне удалось его откопать — Рипарий. Производное от рипариум — зона на стыке трёх стихий. Там, где встречается вода, земля и воздух — самая богатая с точки зрения биологического разнообразия. И это как раз то направление в нашем хобби, которое может объединить в себе все прочие. С этого момента (и надеюсь навсегда) наша студия именуется Рипарий.
         </p>
+      </div>
+    </section>
 
-        <h3 class="sh-section-subtitle">10. Спасибо</h3>
+    <div class="sh-divider" data-reveal></div>
+
+    <!-- SECTION 10 -->
+    <section class="sh-about-section" data-reveal>
+      <header class="sh-section-header">
+        <span class="sh-section-num">10</span>
+        <h2 class="sh-section-title">Спасибо</h2>
+        <span class="sh-section-year">н.в.</span>
+      </header>
+      <div class="sh-section-body">
         <p>
           Но не так важно само название. Будь то Planta, Кот да Винчи, Scaper's House или Рипарий — важно то, что стоит за ним. Наша студия является результатом многолетней работы. Но не одного человека и не двух, а гораздо большего количества близких мне людей. Все эти годы за моей спиной стояли люди, которые подталкивали меня к действиям и были готовы в любой момент прийти на помощь. У каждого в этой истории была своя роль.
         </p>
@@ -412,30 +462,6 @@ useHead({ title: 'О нас — История студии' })
   font-weight: 400;
 }
 
-/* ─── SUBTITLES ─── */
-.sh-section-subtitle {
-  font-family: var(--font-serif);
-  font-size: clamp(20px, 2.8vw, 26px);
-  font-weight: 400;
-  color: var(--cream);
-  margin: 40px 0 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--rule);
-}
-
-/* ─── QUOTES ─── */
-.sh-section-quote {
-  margin: 32px 0 32px 24px;
-  padding: 0 0 0 24px;
-  border-left: 2px solid var(--gold);
-  font-family: var(--font-serif);
-  font-size: clamp(18px, 2.2vw, 22px);
-  font-weight: 300;
-  font-style: italic;
-  line-height: 1.55;
-  color: var(--cream);
-}
-
 /* ─── DIVIDERS ─── */
 .sh-divider {
   max-width: 720px;
@@ -483,16 +509,9 @@ useHead({ title: 'О нас — История студии' })
   .sh-about-section {
     padding: 40px 24px;
   }
-  .sh-section-quote {
-    margin: 24px 0 24px 12px;
-    padding-left: 16px;
-  }
   .sh-section-header {
     gap: 10px;
     margin-bottom: 24px;
-  }
-  .sh-section-subtitle {
-    margin: 32px 0 16px;
   }
 }
 </style>
