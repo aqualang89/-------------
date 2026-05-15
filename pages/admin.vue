@@ -642,7 +642,14 @@ async function deleteProduct(id) {
     method: 'DELETE',
     headers: { 'x-admin-password': password.value }
   })
-  if (res.ok) fetchProducts()
+  if (res.ok) {
+    await fetchProducts()
+    return
+  }
+  // Раньше при ошибке UI молча игнорил — Дмитрий жал OK и думал что не работает.
+  // Теперь показываем причину явно.
+  const errText = await readErrorText(res)
+  alert(`Не удалось удалить товар (HTTP ${res.status}).\n\n${errText}\n\nЧастая причина: товар был в заказах. Решение — миграция Supabase ON DELETE SET NULL (см. docs/migration-product-delete-fk.sql).`)
 }
 
 function mainPhoto(p) {
