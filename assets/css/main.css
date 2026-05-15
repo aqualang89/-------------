@@ -621,6 +621,14 @@ input[type="range"] {
   touch-action: none;
 }
 
+/* Снимаем дефолтную голубую подсветку тапа на Android Chrome (на iOS уже прозрачная).
+   Без этого пользователь видит полупрозрачный синий блок при касании по интро. */
+#intro-overlay,
+#intro-overlay * {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
 #water-container {
   position: absolute;
   inset: 0;
