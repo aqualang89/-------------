@@ -26,7 +26,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">01</span>
         <h2 class="sh-section-title">Не новый старт</h2>
-        <span class="sh-section-year">2016</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -45,7 +45,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">02</span>
         <h2 class="sh-section-title">Пусть будет Planta</h2>
-        <span class="sh-section-year">2016</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -76,7 +76,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">03</span>
         <h2 class="sh-section-title">Хобби</h2>
-        <span class="sh-section-year">2016 – 2018</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -98,7 +98,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">04</span>
         <h2 class="sh-section-title">Кот да Винчи</h2>
-        <span class="sh-section-year">2018</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -123,7 +123,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">05</span>
         <h2 class="sh-section-title">Встреча с реальностью</h2>
-        <span class="sh-section-year">2019 – 2021</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -151,7 +151,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">06</span>
         <h2 class="sh-section-title">Новый дом</h2>
-        <span class="sh-section-year">2021</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -188,7 +188,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">07</span>
         <h2 class="sh-section-title">Настоящая студия</h2>
-        <span class="sh-section-year">2023</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -219,7 +219,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">08</span>
         <h2 class="sh-section-title">Привет, Scaper's House</h2>
-        <span class="sh-section-year">2023 – 2025</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -244,7 +244,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">09</span>
         <h2 class="sh-section-title">Scaper's House, прощай</h2>
-        <span class="sh-section-year">2026</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -269,7 +269,7 @@
       <header class="sh-section-header">
         <span class="sh-section-num">10</span>
         <h2 class="sh-section-title">Спасибо</h2>
-        <span class="sh-section-year">н.в.</span>
+
       </header>
       <div class="sh-section-body">
         <p>
@@ -438,11 +438,6 @@ useHead({ title: 'О нас — История студии' })
   flex: 1;
 }
 .sh-section-year {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--cream-faint);
-  letter-spacing: 0.05em;
-}
 
 .sh-section-body {
   font-family: var(--font-sans);
