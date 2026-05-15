@@ -16,7 +16,7 @@
     <div v-else-if="step === 'cart'" class="cart-body">
       <div class="cart-list">
         <div v-for="item in items" :key="item.productId" class="cart-item">
-          <img :src="item.photo" :alt="item.name" class="cart-item-img">
+          <img :src="cldImage(item.photo, { w: 200 })" :alt="item.name" class="cart-item-img" loading="lazy" decoding="async">
           <div class="cart-item-info">
             <NuxtLink :to="`/catalog/${item.slug}`" class="cart-item-name">{{ item.name }}</NuxtLink>
             <p v-if="item.article" class="cart-item-article">Артикул: {{ item.article }}</p>
@@ -117,7 +117,7 @@
           <h3>Ваш заказ</h3>
           <div class="checkout-items">
             <div v-for="item in items" :key="item.productId" class="checkout-item">
-              <img :src="item.photo" :alt="item.name">
+              <img :src="cldImage(item.photo, { w: 150 })" :alt="item.name" loading="lazy" decoding="async">
               <div class="checkout-item-info">
                 <p>{{ item.name }}</p>
                 <span>{{ item.qty }} × {{ item.price.toLocaleString() }} ₽</span>

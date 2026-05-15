@@ -81,7 +81,7 @@
               class="product-card"
             >
               <div class="card-img-wrap">
-                <img v-if="mainPhoto(p)" :src="mainPhoto(p)" :alt="p.name">
+                <img v-if="mainPhoto(p)" :src="cldImage(mainPhoto(p), { w: 400 })" :alt="p.name" loading="lazy" decoding="async">
                 <div v-else class="card-no-photo">Нет фото</div>
               </div>
               <h3 class="card-title">{{ p.name }}</h3>

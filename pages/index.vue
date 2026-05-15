@@ -82,7 +82,7 @@
             <NuxtLink to="/services/iwagumi" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/iwagumi.jpg" alt="Iwagumi" loading="eager" />
+            <img src="/img/services/iwagumi.jpg" alt="Iwagumi" loading="lazy" decoding="async" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -93,7 +93,7 @@
             <NuxtLink to="/services/dutch" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/dutch.jpg" alt="Голландский аквариум" loading="eager" />
+            <img src="/img/services/dutch.jpg" alt="Голландский аквариум" loading="lazy" decoding="async" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -104,7 +104,7 @@
             <NuxtLink to="/services/biotope" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/biotope.jpg" alt="Биотоп" loading="eager" />
+            <img src="/img/services/biotope.jpg" alt="Биотоп" loading="lazy" decoding="async" />
           </div>
         </div>
         <div class="sh-hcard">
@@ -115,7 +115,7 @@
             <NuxtLink to="/services/paludarium" class="sh-hcard-link">Подробнее →</NuxtLink>
           </div>
           <div class="sh-hcard-img">
-            <img src="/img/services/paludarium.jpg" alt="Палюдариум" loading="eager" />
+            <img src="/img/services/paludarium.jpg" alt="Палюдариум" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>

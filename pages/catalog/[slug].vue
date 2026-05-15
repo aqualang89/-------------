@@ -18,9 +18,11 @@
           <div class="main-photo" @mousemove="onZoom" @mouseleave="offZoom" @click="openLightbox">
             <img
               ref="mainImg"
-              :src="currentPhoto || '/img/no-photo.png'"
+              :src="currentPhoto ? cldImage(currentPhoto, { w: 800 }) : '/img/no-photo.png'"
               :alt="product.name"
               :style="zoomStyle"
+              fetchpriority="high"
+              decoding="async"
             >
             <button v-if="currentPhoto" type="button" class="zoom-hint" aria-label="Увеличить">🔍</button>
           </div>
@@ -28,8 +30,11 @@
             <img
               v-for="(ph, i) in photos"
               :key="ph.id"
-              :src="ph.url"
+              :src="cldImage(ph.url, { w: 144 })"
+              :alt="product.name"
               :class="{ active: currentIndex === i }"
+              loading="lazy"
+              decoding="async"
               @click="currentIndex = i"
             >
           </div>
@@ -74,13 +79,16 @@
     <!-- Lightbox для просмотра фото — тап вне фото или × закрывает, на мобиле pinch-zoom работает нативно -->
     <div v-if="lightboxOpen" class="lightbox" @click.self="closeLightbox">
       <button type="button" class="lightbox-close" @click="closeLightbox" aria-label="Закрыть">×</button>
-      <img :src="currentPhoto" :alt="product?.name" class="lightbox-img" />
+      <img :src="cldImage(currentPhoto, { w: 1600 })" :alt="product?.name" class="lightbox-img" decoding="async" />
       <div v-if="photos.length > 1" class="lightbox-thumbs" @click.stop>
         <img
           v-for="(ph, i) in photos"
           :key="ph.id"
-          :src="ph.url"
+          :src="cldImage(ph.url, { w: 120 })"
+          :alt="product?.name"
           :class="{ active: currentIndex === i }"
+          loading="lazy"
+          decoding="async"
           @click="currentIndex = i"
         >
       </div>
