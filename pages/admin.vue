@@ -282,6 +282,12 @@
 
 <script setup>
 useScrollReveal()
+
+usePageMeta({
+  title: 'Админ-панель',
+  description: 'Управление каталогом',
+  noindex: true
+})
 const password = ref('')
 const isAuth = ref(false)
 const loginError = ref('')

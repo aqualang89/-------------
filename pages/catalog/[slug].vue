@@ -91,14 +91,26 @@
 <script setup>
 const route = useRoute()
 const slug = route.params.slug
-const product = ref(null)
-const pending = ref(true)
+
+// SSR-загрузка: товар и дерево категорий тянутся НА СЕРВЕРЕ, попадают в HTML.
+// Это даёт Googlebot'у полный контент страницы с первого запроса (раньше onMounted
+// делал fetch только на клиенте, поэтому SSR-рендер отдавал пустую "Загрузка...").
+const { data: product, error: productError } = await useFetch(`/api/products/${slug}`, {
+  key: `product-${slug}`
+})
+const { data: categoryTree } = await useFetch('/api/categories', { key: 'categories' })
+
+// Если товар не найден — отдаём настоящий 404 (важно для SEO: не индексировать).
+if (productError.value || !product.value) {
+  throw createError({ statusCode: 404, statusMessage: 'Товар не найден' })
+}
+
 const currentIndex = ref(0)
 const zoomStyle = ref({})
 const mainImg = ref(null)
-const categoryTree = ref([])
 const qty = ref(1)
 const lightboxOpen = ref(false)
+const pending = computed(() => false) // оставлено для совместимости с template
 
 function openLightbox () {
   if (!currentPhoto.value) return
@@ -110,7 +122,9 @@ function closeLightbox () {
   document.body.style.overflow = ''
 }
 
-onUnmounted(() => { document.body.style.overflow = '' })
+onUnmounted(() => {
+  if (typeof document !== 'undefined') document.body.style.overflow = ''
+})
 
 const { add, find } = useCart()
 const cartItem = computed(() => product.value ? find(product.value.id) : null)
@@ -127,26 +141,12 @@ function addToCart () {
   }, qty.value)
 }
 
-useHead(() => ({
-  title: product.value ? `${product.value.name} — Каталог` : 'Товар'
-}))
-
-onMounted(async () => {
-  const [prodRes, treeRes] = await Promise.all([
-    fetch(`/api/products/${slug}`),
-    fetch('/api/categories')
-  ])
-  if (prodRes.ok) product.value = await prodRes.json()
-  if (treeRes.ok) categoryTree.value = await treeRes.json()
-  pending.value = false
-})
-
 const photos = computed(() => product.value?.product_photos || [])
 const currentPhoto = computed(() => photos.value[currentIndex.value]?.url)
 
 const categoryPath = computed(() => {
   if (!product.value?.categories) return []
-  function findPath(nodes, targetSlug, path = []) {
+  function findPath (nodes, targetSlug, path = []) {
     for (const node of nodes) {
       if (node.slug === targetSlug) return [...path, node]
       if (node.children?.length) {
@@ -156,7 +156,38 @@ const categoryPath = computed(() => {
     }
     return null
   }
-  return findPath(categoryTree.value, product.value.categories.slug) || []
+  return findPath(categoryTree.value || [], product.value.categories.slug) || []
+})
+
+// SEO meta + JSON-LD (Product + BreadcrumbList) — SSR-рендерится в head
+const breadcrumbItems = computed(() => {
+  const items = [{ name: 'Каталог', path: '/catalog' }]
+  for (const c of categoryPath.value) {
+    items.push({ name: c.name, path: `/catalog?category=${c.slug}` })
+  }
+  items.push({ name: product.value.name, path: `/catalog/${product.value.slug}` })
+  return items
+})
+
+const productPhoto = computed(() => {
+  const main = product.value.product_photos?.find(p => p.is_main)?.url
+  return main || product.value.product_photos?.[0]?.url
+})
+
+const metaDescription = computed(() => {
+  const base = product.value.description?.trim()
+  if (base) return base.slice(0, 200)
+  return `${product.value.name} — артикул ${product.value.article || '—'}, цена ${product.value.price.toLocaleString()} ₽. Купить в студии Рипарий, Калининград, ул. Аксакова 123.`
+})
+
+usePageMeta({
+  title: product.value.name,
+  description: metaDescription.value,
+  ogImage: productPhoto.value,
+  jsonLd: [
+    productJsonLd(product.value),
+    breadcrumbJsonLd(breadcrumbItems.value)
+  ].filter(Boolean)
 })
 
 function onZoom(e) {

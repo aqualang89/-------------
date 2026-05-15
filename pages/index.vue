@@ -181,6 +181,12 @@
 import { onBeforeRouteLeave } from 'vue-router'
 useScrollReveal()
 
+usePageMeta({
+  title: 'Студия аквариумного дизайна в Калининграде',
+  description: 'Рипарий — студия аквариумного дизайна в Калининграде. Дизайн-проект, монтаж и обслуживание аквариумов с натуральной флорой. Nature, Iwagumi, голландский, биотоп, палюдариум.',
+  jsonLd: [localBusinessJsonLd()]
+})
+
 // Template refs for horizontal scroll
 const hSection = ref(null)
 const hSticky = ref(null)

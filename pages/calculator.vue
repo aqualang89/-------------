@@ -659,6 +659,11 @@
 import { onMounted } from 'vue'
 useScrollReveal()
 
+usePageMeta({
+  title: 'Калькуляторы для аквариумиста',
+  description: 'Бесплатные калькуляторы для аквариумиста: объём воды, количество грунта, мощность нагревателя, толщина стекла, фильтрация, освещение, KH.'
+})
+
 onMounted(() => {
   // ===== TABS =====
   document.querySelectorAll('.calc-tab').forEach(btn => {

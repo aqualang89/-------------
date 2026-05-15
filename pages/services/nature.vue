@@ -33,3 +33,10 @@
     </section>
   </ServicePage>
 </template>
+
+<script setup>
+usePageMeta({
+  title: 'Nature Aquarium — природный аквариум',
+  description: 'Nature Aquarium — концепция Такаши Амано. Природный аквариум с растениями, корягами и камнями. Создание и обслуживание в Калининграде, студия Рипарий.'
+})
+</script>

@@ -59,6 +59,19 @@ export default defineNuxtConfig({
       config: {
         maxDuration: 60
       }
+    },
+    // Базовые security headers — добавляются ко всем ответам, включая HTML и API.
+    // CSP не настраиваем здесь — он требует whitelist Cloudinary/Supabase/Telegram,
+    // делать отдельно когда будет время аккуратно протестировать.
+    routeRules: {
+      '/**': {
+        headers: {
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()'
+        }
+      }
     }
   }
 })

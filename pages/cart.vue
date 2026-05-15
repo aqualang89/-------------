@@ -147,7 +147,11 @@
 </template>
 
 <script setup>
-useHead({ title: 'Корзина' })
+usePageMeta({
+  title: 'Корзина',
+  description: 'Корзина заказа в студии аквариумного дизайна Рипарий.',
+  noindex: true
+})
 
 const { items, totalCount, totalPrice, updateQty, remove, clear } = useCart()
 const step = ref('cart')
