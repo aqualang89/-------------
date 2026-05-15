@@ -2,7 +2,7 @@
 // Используется в canonical и OG-тегах.
 const SITE_URL = 'https://www.xn--80apbe1aed.xn--p1ai'
 const SITE_NAME = 'Рипарий'
-const DEFAULT_OG_IMAGE = `${SITE_URL}/img/logo-main.png`
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`
 
 /**
  * Универсальный composable для SEO-метаданных страницы.
