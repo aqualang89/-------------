@@ -437,8 +437,6 @@ useHead({ title: 'О нас — История студии' })
   line-height: 1.15;
   flex: 1;
 }
-.sh-section-year {
-
 .sh-section-body {
   font-family: var(--font-sans);
   font-size: 15px;
