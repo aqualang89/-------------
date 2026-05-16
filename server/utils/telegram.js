@@ -1,5 +1,6 @@
 const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || '').trim()
-const OWNER_CHAT_ID = (process.env.TELEGRAM_OWNER_CHAT_ID || '').trim()
+// Используем те же имена что и в order.post.js / contact.post.js — основное OWNER_CHAT_ID, fallback TELEGRAM_CHAT_ID
+const OWNER_CHAT_ID = (process.env.OWNER_CHAT_ID || process.env.TELEGRAM_CHAT_ID || '').trim()
 
 // Триггерные слова в сообщении КЛИЕНТА — на них шлём пуш в реалтайме.
 // Регулярки — границы слов где осмысленно, корни-фрагменты для морфологии русского.
@@ -56,11 +57,18 @@ async function tgSend (payload, method = 'sendMessage') {
 // 2) В сообщении клиента сработал триггер (телефон/перезвонить/купить и т.п.)
 // Остальные сообщения молча идут в дайджест.
 export async function sendOwnerCard ({ sessionId, userText, aiReply, mode }) {
-  if (!BOT_TOKEN || !OWNER_CHAT_ID) return
+  if (!BOT_TOKEN || !OWNER_CHAT_ID) {
+    console.log(`[TG] skip card: ${!BOT_TOKEN ? 'BOT_TOKEN' : 'OWNER_CHAT_ID'} not set`)
+    return
+  }
 
   const isManual = mode === 'manual'
   const trigger = detectTrigger(userText)
-  if (!isManual && !trigger) return
+  if (!isManual && !trigger) {
+    console.log(`[TG] skip card: no trigger in "${(userText || '').slice(0, 60)}"`)
+    return
+  }
+  console.log(`[TG] sending card: ${isManual ? 'manual mode' : `trigger="${trigger}"`} session=${(sessionId || '').slice(0, 8)}`)
 
   const tag = isManual
     ? '👤 КЛИЕНТ ПРОСИТ ЧЕЛОВЕКА'
