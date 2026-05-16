@@ -39,9 +39,11 @@ async function buildSitemap () {
   }
 
   // Все категории (для URL /catalog?category=slug)
+  // В таблице categories нет колонки updated_at — используем текущую дату как lastmod,
+  // категории меняются редко, точная дата изменения для них не критична
   const { data: categories, error: catErr } = await supabase
     .from('categories')
-    .select('slug, updated_at')
+    .select('slug')
 
   if (catErr) {
     console.error('Sitemap categories fetch error:', catErr.message)
@@ -61,7 +63,7 @@ async function buildSitemap () {
   for (const cat of categories || []) {
     urls.push({
       loc: `${SITE_URL}/catalog?category=${cat.slug}`,
-      lastmod: cat.updated_at ? cat.updated_at.slice(0, 10) : now,
+      lastmod: now,
       changefreq: 'weekly',
       priority: '0.8'
     })
