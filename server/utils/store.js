@@ -6,6 +6,7 @@ let memoryClient;
 function getMemoryClient() {
   if (!memoryClient) {
     const store = new Map();
+    const zsets = new Map(); // key -> Map(member -> score)
     memoryClient = {
       get: async (k) => store.get(k) || null,
       set: async (k, v, opts) => { store.set(k, String(v)); },
@@ -20,6 +21,20 @@ function getMemoryClient() {
       },
       del: async (k) => store.delete(k),
       expire: async () => {},
+      zadd: async (k, score, member) => {
+        if (!zsets.has(k)) zsets.set(k, new Map());
+        zsets.get(k).set(member, Number(score));
+      },
+      zrangebyscore: async (k, min, max) => {
+        const m = zsets.get(k);
+        if (!m) return [];
+        const lo = min === '-inf' ? -Infinity : Number(min);
+        const hi = max === '+inf' ? Infinity : Number(max);
+        return [...m.entries()]
+          .filter(([, s]) => s >= lo && s <= hi)
+          .sort((a, b) => a[1] - b[1])
+          .map(([member]) => member);
+      },
     };
   }
   return memoryClient;
@@ -84,6 +99,24 @@ export async function popManualReplies(sessionId) {
   const items = await redis.lrange(pendingKey(sessionId), 0, -1);
   await redis.del(pendingKey(sessionId));
   return (items || []).map((x) => JSON.parse(x));
+}
+
+// ===== SESSIONS INDEX =====
+// Sorted set: score = ts последнего сообщения, value = sessionId.
+// Используется для дайджеста — собрать все сессии за период.
+const SESSIONS_INDEX = 'sessions:index';
+
+export async function trackSession(sessionId) {
+  if (!sessionId) return;
+  const redis = await getRedis();
+  await redis.zadd(SESSIONS_INDEX, Date.now(), sessionId);
+  // TTL 30 дней — дольше чем сами диалоги, чтобы индекс не пухел
+  await redis.expire(SESSIONS_INDEX, 60 * 60 * 24 * 30);
+}
+
+export async function getSessionsInRange(fromTs, toTs) {
+  const redis = await getRedis();
+  return await redis.zrangebyscore(SESSIONS_INDEX, fromTs, toTs);
 }
 
 // ===== IDEMPOTENCY =====

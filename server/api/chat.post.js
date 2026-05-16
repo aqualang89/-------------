@@ -4,7 +4,8 @@ import {
   getHistory,
   getMode,
   getDailyAiCost,
-  addAiCost
+  addAiCost,
+  trackSession
 } from '~/server/utils/store.js'
 import { sendOwnerCard } from '~/server/utils/telegram.js'
 import { askOpenRouter, findRelevantProducts, buildUserMessage, SYSTEM_PROMPT } from '~/server/utils/ai.js'
@@ -161,6 +162,8 @@ export default defineEventHandler(async (event) => {
   }
 
   await addHistory(sessionId, 'assistant', reply)
+  // Индексируем сессию (идемпотентно) — для ежедневного дайджеста
+  trackSession(sessionId).catch(e => log.error('trackSession failed (non-fatal):', e.message))
   await sendOwnerCard({ sessionId, userText: historyText, aiReply: responseMode === 'ai' ? reply : null, mode: responseMode })
 
   return { reply, mode: responseMode, products }

@@ -135,9 +135,31 @@ function cleanReply (raw) {
     .trim()
 }
 
+// Anthropic prompt caching через OpenRouter: оборачиваем длинный system в content-массив
+// с cache_control. Кэшируем большой SYSTEM_PROMPT (его не меняем между запросами),
+// catalog-блок НЕ кешируем (он меняется каждый раз — товары разные).
+const CACHE_MIN_CHARS = 3000
+function applyCacheControl (messages) {
+  let cached = false
+  return messages.map(msg => {
+    if (cached) return msg
+    if (msg.role !== 'system') return msg
+    if (typeof msg.content !== 'string') return msg
+    if (msg.content.length < CACHE_MIN_CHARS) return msg
+    cached = true
+    return {
+      role: 'system',
+      content: [
+        { type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } }
+      ]
+    }
+  })
+}
+
 // Базовый вызов OpenRouter. messages может содержать multimodal content (массивы с image_url для vision)
 // signal — AbortSignal, обычно `event.node.req.signal` чтобы прерывать когда клиент уходит
-export async function askOpenRouter (messages, { signal } = {}) {
+// Опции: model (по умолчанию Sonnet), temperature, maxTokens — для дешёвых задач вроде дайджеста
+export async function askOpenRouter (messages, { signal, model = MODEL, temperature = 0.5, maxTokens = 1500 } = {}) {
   const res = await fetch(OPENROUTER_URL, {
     method: 'POST',
     signal,
@@ -148,10 +170,10 @@ export async function askOpenRouter (messages, { signal } = {}) {
       'X-Title': "Riparium"
     },
     body: JSON.stringify({
-      model: MODEL,
-      messages,
-      temperature: 0.5,
-      max_tokens: 1500
+      model,
+      messages: applyCacheControl(messages),
+      temperature,
+      max_tokens: maxTokens
     })
   })
 
@@ -163,6 +185,10 @@ export async function askOpenRouter (messages, { signal } = {}) {
   const data = await res.json()
   const raw = data?.choices?.[0]?.message?.content
   if (!raw) throw new Error('Empty AI response')
+  const usage = data?.usage
+  if (usage?.cache_read_input_tokens || usage?.cache_creation_input_tokens) {
+    console.log(`[AI Cache] read=${usage.cache_read_input_tokens || 0} write=${usage.cache_creation_input_tokens || 0} input=${usage.prompt_tokens || 0} output=${usage.completion_tokens || 0}`)
+  }
   return cleanReply(raw)
 }
 
