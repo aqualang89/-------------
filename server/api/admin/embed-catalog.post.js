@@ -1,4 +1,5 @@
 import { supabase } from '~/server/utils/supabase'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 const EMBED_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent'
 const EMBED_DIM = 768
@@ -6,10 +7,7 @@ const BATCH_SIZE = 30   // 30 параллельных запросов в Gemin
 const MAX_BATCHES_PER_CALL = 4  // 30*4 = 120 товаров за один HTTP вызов (укладывается в 60с Vercel)
 
 export default defineEventHandler(async (event) => {
-  const password = getHeader(event, 'x-admin-password')
-  if (password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 403, statusMessage: 'Неверный пароль' })
-  }
+  await requireAdmin(event)
 
   const apiKey = process.env.GOOGLE_AI_API_KEY
   if (!apiKey) {

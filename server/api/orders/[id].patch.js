@@ -1,16 +1,14 @@
 import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
 import { validateBody } from '~/server/utils/validate.js'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 const schema = z.object({
   status: z.enum(['new', 'processing', 'shipped', 'completed', 'cancelled'])
 })
 
 export default defineEventHandler(async (event) => {
-  const password = getHeader(event, 'x-admin-password')
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+  await requireAdmin(event)
 
   const id = event.context.params?.id || event.path?.split('/').pop()
   if (!id) {

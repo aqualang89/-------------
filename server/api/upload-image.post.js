@@ -1,16 +1,14 @@
 import { v2 as cloudinary } from 'cloudinary'
 import { fileTypeFromBuffer } from 'file-type'
 import sharp from 'sharp'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 // AVIF/HEIC — современные iPhone/Android часто шлют под именем .jpg.
 // Принимаем, но дальше перекодируем в JPEG для совместимости.
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/heic', 'image/heif'])
 
 export default defineEventHandler(async (event) => {
-  const password = getHeader(event, 'x-admin-password')
-  if (password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 403, statusMessage: 'Неверный пароль' })
-  }
+  await requireAdmin(event)
 
   // Читаем env с trim — частая ошибка копи-пасты в Vercel UI: пробел/перенос строки.
   // Конфигурируем Cloudinary каждый раз внутри handler — на случай если модуль закешировал старые env.

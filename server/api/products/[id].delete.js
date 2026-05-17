@@ -1,12 +1,10 @@
 import { supabase } from '~/server/utils/supabase'
 import { createLogger } from '~/server/utils/logger.js'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 export default defineEventHandler(async (event) => {
   const log = createLogger(event, 'product-delete')
-  const password = getHeader(event, 'x-admin-password')
-  if (password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 403, message: 'Неверный пароль' })
-  }
+  await requireAdmin(event)
 
   const id = getRouterParam(event, 'id')
 

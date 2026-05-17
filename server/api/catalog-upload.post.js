@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs'
 import { supabase } from '~/server/utils/supabase'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 function slugify(str) {
   if (!str) return ''
@@ -393,10 +394,7 @@ async function process1C(rows) {
 }
 
 export default defineEventHandler(async (event) => {
-  const password = getHeader(event, 'x-admin-password')
-  if (password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 403, message: 'Неверный пароль' })
-  }
+  await requireAdmin(event)
 
   const formData = await readMultipartFormData(event)
   if (!formData) {

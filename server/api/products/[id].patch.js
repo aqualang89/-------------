@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { supabase } from '~/server/utils/supabase'
 import { createLogger } from '~/server/utils/logger.js'
 import { validateBody } from '~/server/utils/validate.js'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 const schema = z.object({
   name: z.string().min(1).max(300),
@@ -12,10 +13,7 @@ const schema = z.object({
 
 export default defineEventHandler(async (event) => {
   const log = createLogger(event, 'product-patch')
-  const password = getHeader(event, 'x-admin-password')
-  if (password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 403, message: 'Неверный пароль' })
-  }
+  await requireAdmin(event)
 
   const id = getRouterParam(event, 'id')
   const body = await validateBody(event, schema)

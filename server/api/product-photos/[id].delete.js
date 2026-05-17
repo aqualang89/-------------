@@ -1,10 +1,8 @@
 import { supabase } from '~/server/utils/supabase'
+import { requireAdmin } from '~/server/utils/admin-auth.js'
 
 export default defineEventHandler(async (event) => {
-  const password = getHeader(event, 'x-admin-password')
-  if (password !== process.env.ADMIN_PASSWORD) {
-    throw createError({ statusCode: 403, statusMessage: 'Неверный пароль' })
-  }
+  await requireAdmin(event)
 
   const id = parseInt(getRouterParam(event, 'id'))
   if (!id) {
