@@ -19,7 +19,10 @@ export function usePageMeta ({ title, description, ogImage, path, noindex = fals
   const route = useRoute()
   const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — Студия аквариумного дизайна`
   const canonicalUrl = `${SITE_URL}${path ?? route.path}`
-  const image = ogImage || DEFAULT_OG_IMAGE
+  // Соцсетям нужен абсолютный URL картинки. На странице удобно писать '/img/...'
+  // — здесь склеиваем с SITE_URL. Cloudinary/полные ссылки оставляем как есть.
+  let image = ogImage || DEFAULT_OG_IMAGE
+  if (image.startsWith('/')) image = `${SITE_URL}${image}`
 
   const meta = [
     { name: 'description', content: description },
