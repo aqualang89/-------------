@@ -12,6 +12,7 @@ import { askOpenRouter, findRelevantProducts, buildUserMessage, SYSTEM_PROMPT } 
 import { supabase } from '~/server/utils/supabase'
 import { createLogger } from '~/server/utils/logger.js'
 import { validateBody } from '~/server/utils/validate.js'
+import { checkRateLimit } from '~/server/utils/rate-limit.js'
 
 // Дневной лимит расхода на AI-чат в USD. Защита от DOS на деньги OpenRouter.
 // Claude Sonnet 4.6: ~$3/M input + $15/M output. 1500 max_tokens out × $15/M ≈ $0.022 за ответ + input.
@@ -78,6 +79,11 @@ async function ensureCartProducts (reply, products) {
 
 export default defineEventHandler(async (event) => {
   const log = createLogger(event, 'chat')
+
+  // Защита от DOS на деньги: 30 запросов / 10 мин с одного IP.
+  // Доп. защита поверх AI_DAILY_USD_CAP — чтобы один атакующий не съел дневной кап мгновенно.
+  await checkRateLimit(event, { bucket: 'chat', max: 30, windowSec: 600 })
+
   const { sessionId, text, image } = await validateBody(event, schema)
 
   // Cost cap — не даём атакующему сжечь баланс OpenRouter.

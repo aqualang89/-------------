@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { validateBody } from '~/server/utils/validate.js'
+import { checkRateLimit } from '~/server/utils/rate-limit.js'
 
 const schema = z.object({
   name: z.string().min(1).max(100),
@@ -9,6 +10,9 @@ const schema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  // Защита от спама форм: 5 заявок / 10 мин с одного IP
+  await checkRateLimit(event, { bucket: 'contact', max: 5, windowSec: 600 })
+
   const { name, phone, email, message } = await validateBody(event, schema)
 
   const text = `

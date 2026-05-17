@@ -4,6 +4,7 @@ import { supabase } from '~/server/utils/supabase'
 import { getIdempotency, setIdempotency } from '~/server/utils/store.js'
 import { validateBody } from '~/server/utils/validate.js'
 import { escapeHtml } from '~/server/utils/escape.js'
+import { checkRateLimit } from '~/server/utils/rate-limit.js'
 
 const itemSchema = z.object({
   productId: z.number().int().positive(),
@@ -29,6 +30,10 @@ const schema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  // Защита от автоматических заказов / DOS: 10 заказов / час с одного IP.
+  // Реальный покупатель так часто заказы не оформляет.
+  await checkRateLimit(event, { bucket: 'order', max: 10, windowSec: 3600 })
+
   const parsed = await validateBody(event, schema)
   const {
     customer_name,
