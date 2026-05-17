@@ -40,8 +40,20 @@ function getMemoryClient() {
   return memoryClient;
 }
 
+let warnedNoRedis = false;
 async function getRedis() {
   if (!process.env.REDIS_URL) {
+    // В проде memory-fallback опасен: каждый serverless instance имеет свой Map,
+    // idempotency и AI cost cap начинают молча течь. Громко орём в логи один раз,
+    // чтобы это сразу всплыло в Vercel logs если кто-то снёс env переменную.
+    if (process.env.NODE_ENV === 'production' && !warnedNoRedis) {
+      warnedNoRedis = true;
+      console.error(
+        '[store] CRITICAL: REDIS_URL not set in production. ' +
+        'Idempotency and AI cost cap WILL NOT WORK across serverless instances. ' +
+        'Set REDIS_URL (Vercel KV / Upstash) in Vercel env.'
+      );
+    }
     return getMemoryClient();
   }
 
