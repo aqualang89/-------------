@@ -2,8 +2,22 @@
   <div class="cart-wrap">
     <h1 class="cart-title">Корзина</h1>
 
+    <!-- Success — показываем ПЕРВЫМ, иначе после clear() корзина считается пустой и success-экран теряется -->
+    <div v-if="step === 'success'" class="cart-success">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+      <h2>Заявка отправлена!</h2>
+      <p>Спасибо за заказ. Мы свяжемся с вами в ближайшее время для уточнения деталей.</p>
+      <div class="cart-success-buttons">
+        <NuxtLink to="/" class="btn-gold">Хорошо, на главную</NuxtLink>
+        <NuxtLink to="/catalog" class="btn-back-link">← В каталог</NuxtLink>
+      </div>
+    </div>
+
     <!-- Empty -->
-    <div v-if="items.length === 0" class="cart-empty">
+    <div v-else-if="items.length === 0" class="cart-empty">
       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -133,16 +147,6 @@
       </div>
     </div>
 
-    <!-- Success -->
-    <div v-else-if="step === 'success'" class="cart-success">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-        <polyline points="22 4 12 14.01 9 11.01"/>
-      </svg>
-      <h2>Спасибо за заказ!</h2>
-      <p>Мы свяжемся с вами в ближайшее время для уточнения деталей.</p>
-      <NuxtLink to="/catalog" class="btn-gold">В каталог</NuxtLink>
-    </div>
   </div>
 </template>
 
@@ -562,14 +566,34 @@ async function submitOrder () {
 .cart-success {
   text-align: center;
   padding: 60px 20px;
+  max-width: 520px;
+  margin: 0 auto;
 }
 .cart-success h2 {
   font-family: var(--font-serif);
   margin: 16px 0 8px;
+  font-size: 1.8rem;
+  color: var(--gold);
 }
 .cart-success p {
   color: var(--cream-dim);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+.cart-success-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.btn-back-link {
+  color: var(--cream-dim);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+}
+.btn-back-link:hover {
+  color: var(--gold);
 }
 
 /* Shared button */

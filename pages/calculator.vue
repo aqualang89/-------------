@@ -3,7 +3,7 @@
     <div class="page-wrap">
       <div class="calc-page">
         <h1 data-reveal-up>Калькулятор аквариума</h1>
-        <p class="subtitle" data-reveal>Рассчитайте объём, подберите оборудование и рыбок</p>
+        <p class="subtitle" data-reveal>Рассчитайте объём и подберите оборудование</p>
 
         <div class="calc-tabs" data-reveal>
           <button class="calc-tab active" data-tab="volume">💧 Объём</button>
