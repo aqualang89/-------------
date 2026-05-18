@@ -17,6 +17,13 @@
       <div class="app-footer-legal">
         <NuxtLink to="/privacy">Политика конфиденциальности</NuxtLink>
         <NuxtLink to="/consent">Согласие на обработку ПД</NuxtLink>
+        <div class="app-footer-requisites">
+          <p class="app-footer-requisites-title">Реквизиты</p>
+          <p>ИП Евдокимова Н. А.</p>
+          <p>ИНН: 390509002038</p>
+          <p>г. Калининград, ул. Войкова, 9</p>
+          <p><a href="mailto:kotdavinchi39@mail.ru">kotdavinchi39@mail.ru</a></p>
+        </div>
       </div>
 
       <div class="app-footer-contacts">
@@ -117,6 +124,33 @@
 
 .app-footer-legal a:hover {
   color: var(--cream);
+}
+
+.app-footer-requisites {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(217, 180, 106, 0.12);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--cream-faint);
+}
+.app-footer-requisites-title {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+}
+.app-footer-requisites p {
+  margin: 0;
+}
+.app-footer-requisites a {
+  color: var(--cream-faint);
+  text-decoration: none;
+}
+.app-footer-requisites a:hover {
+  color: var(--gold);
 }
 
 .app-footer-contacts {
