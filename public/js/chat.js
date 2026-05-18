@@ -1,8 +1,14 @@
 // Chat-виджет v2 (2026-05-12): текст + фото + add-to-cart через [CART_ADD:артикул]
-console.log('[chat] init v2 cart+photo')
+// 2026-05-18: клиентский ресайз фото перед отправкой (1920px JPEG 0.85)
+// чтобы укладываться в Vercel-лимит body 4.5 MB.
+console.log('[chat] init v2 cart+photo+resize')
 
 const CART_STORAGE_KEY = 'sh_cart'
-const MAX_IMAGE_MB = 5
+// 20 MB — лимит на выбор файла (защита от случайных видео/гифок).
+// Реально на сервер уходит сжатая версия 500-800 KB после canvas-ресайза.
+const MAX_IMAGE_MB = 20
+const RESIZE_MAX_SIDE = 1920
+const RESIZE_JPEG_QUALITY = 0.85
 
 const chatState = {
   open: false,
@@ -102,7 +108,7 @@ async function onFilePicked (e) {
     return
   }
   try {
-    const dataUrl = await fileToDataUrl(file)
+    const dataUrl = await fileToCompressedDataUrl(file)
     chatState.pendingImage = dataUrl
     chatState.pendingImageName = file.name
     showPreview(dataUrl, file.name)
@@ -119,6 +125,48 @@ function fileToDataUrl (file) {
     reader.onerror = reject
     reader.readAsDataURL(file)
   })
+}
+
+// Ресайз через canvas: уменьшает длинную сторону до RESIZE_MAX_SIDE,
+// перекодирует в JPEG. iPhone-фото 5-8 MB становится ~500-800 KB —
+// проходит через Vercel-лимит 4.5 MB на body запроса.
+// Если что-то сломалось (нестандартный формат, OOM на canvas) —
+// fallback на исходный dataURL: сервер всё равно отрежет по 3 MB с понятной ошибкой.
+async function fileToCompressedDataUrl (file) {
+  const originalDataUrl = await fileToDataUrl(file)
+  try {
+    const img = await loadImage(originalDataUrl)
+    const { width, height } = fitSize(img.naturalWidth, img.naturalHeight, RESIZE_MAX_SIDE)
+    // Если изображение и так маленькое — не пересжимаем, отдаём как есть.
+    // Пересжатие JPEG → JPEG портит качество без причины.
+    if (width === img.naturalWidth && height === img.naturalHeight && file.size < 1_000_000) {
+      return originalDataUrl
+    }
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(img, 0, 0, width, height)
+    return canvas.toDataURL('image/jpeg', RESIZE_JPEG_QUALITY)
+  } catch (e) {
+    console.warn('[chat] resize failed, using original:', e?.message)
+    return originalDataUrl
+  }
+}
+
+function loadImage (src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => resolve(img)
+    img.onerror = reject
+    img.src = src
+  })
+}
+
+function fitSize (w, h, maxSide) {
+  if (w <= maxSide && h <= maxSide) return { width: w, height: h }
+  const ratio = w > h ? maxSide / w : maxSide / h
+  return { width: Math.round(w * ratio), height: Math.round(h * ratio) }
 }
 
 function showPreview (dataUrl, name) {

@@ -23,8 +23,11 @@ const AI_DAILY_USD_CAP = parseFloat(process.env.AI_DAILY_USD_CAP || '5')
 const EST_COST_PER_CALL = 0.025
 
 const HISTORY_LIMIT = 20
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024  // 5MB лимит Claude
-// base64 раздувает ~33% сверх raw. Лимит длины строки — чтобы и не парсить гигабайт впустую.
+// Vercel-лимит body на serverless — 4.5 MB. base64 раздувает на ~33%.
+// 3 MB raw × 1.33 ≈ 4 MB base64 + запас 500 KB на остальное body (text, headers).
+// Клиент ресайзит до 1920px JPEG (~500-800 KB), сюда упирается только если
+// клиентский ресайз отвалился — тогда отдадим понятную ошибку, а не Vercel-овую 413.
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024
 const MAX_IMAGE_DATA_URL_LEN = Math.ceil(MAX_IMAGE_BYTES * 4 / 3) + 100
 
 // Клиент шлёт image: null когда фото не приложено — приводим null/"" к undefined,
@@ -36,7 +39,10 @@ const schema = z.object({
   text: z.preprocess(nullEmptyToUndef, z.string().max(4000).optional()),
   image: z.preprocess(
     nullEmptyToUndef,
-    z.string().max(MAX_IMAGE_DATA_URL_LEN).regex(/^data:image\//).optional()
+    z.string()
+      .max(MAX_IMAGE_DATA_URL_LEN, `Фото слишком большое, максимум ${MAX_IMAGE_BYTES / 1024 / 1024} МБ`)
+      .regex(/^data:image\//, 'Неподдерживаемый формат фото')
+      .optional()
   )
 }).refine(v => (v.text && v.text.trim()) || v.image, {
   message: 'text или image обязательны'

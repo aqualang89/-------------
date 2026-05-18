@@ -111,7 +111,7 @@ onUnmounted(() => {
 // Увеличивай число при каждом значимом изменении public/js/chat.js
 useHead({
   script: [
-    { src: '/js/chat.js?v=20260512-cart-photo', tagPosition: 'bodyClose' }
+    { src: '/js/chat.js?v=20260518-resize', tagPosition: 'bodyClose' }
     /* { src: '/js/quiz.js', tagPosition: 'bodyClose' } */
   ]
 })
