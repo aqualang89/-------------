@@ -6,7 +6,8 @@ const schema = z.object({
   name: z.string().min(1).max(100),
   phone: z.string().min(1).max(30),
   email: z.string().email().max(200),
-  message: z.string().min(1).max(2000)
+  message: z.string().min(1).max(2000),
+  consent: z.literal(true, { errorMap: () => ({ message: 'Необходимо согласие на обработку персональных данных' }) })
 })
 
 export default defineEventHandler(async (event) => {

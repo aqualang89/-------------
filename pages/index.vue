@@ -292,7 +292,8 @@ async function submitForm() {
         name: form.name,
         phone: form.phone,
         email: form.email,
-        message: form.message
+        message: form.message,
+        consent: form.consent
       }
     })
     if (res.ok) {
