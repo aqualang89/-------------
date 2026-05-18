@@ -31,6 +31,7 @@
       <slot />
     </div>
     <AppFooter />
+    <CookieBanner />
   </div>
 </template>
 
