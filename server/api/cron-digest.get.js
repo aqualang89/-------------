@@ -6,7 +6,7 @@ import { sendOwnerDigest } from '~/server/utils/telegram.js'
 // Эндпоинт нужно подключить в vercel.json (см. "crons").
 // Если CRON_SECRET не задан в env — эндпоинт открыт (для теста), но в проде ОБЯЗАТЕЛЬНО задавать.
 
-const SUMMARY_MODEL = 'anthropic/claude-haiku-4-5-20251001' // дешёвый для саммари
+const SUMMARY_MODEL = 'anthropic/claude-haiku-4.5' // дешёвый для саммари (slug OpenRouter — с точкой, без даты)
 const MAX_DIALOG_CHARS_FOR_AI = 2500 // обрезаем длинные диалоги в саммари-инпуте
 
 function fmtMsk (ts) {
