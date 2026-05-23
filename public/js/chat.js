@@ -12,10 +12,13 @@ const RESIZE_JPEG_QUALITY = 0.85
 
 const chatState = {
   open: false,
+  engaged: false,             // юзер отправил хоть одно сообщение — только тогда есть смысл ждать ручной ответ
   pendingImage: null,         // dataURL прикреплённого фото
   pendingImageName: null,
   seenProducts: new Map()     // article → product (накапливаем все товары из ответов сессии)
 }
+
+let pollTimer = null
 
 const sessionId =
   sessionStorage.getItem('riparium_chat_session') ||
@@ -63,6 +66,20 @@ function createChatElements () {
 function toggleChat (open) {
   chatState.open = open
   document.getElementById('ai-chat-box').classList.toggle('open', open)
+  if (open) startPolling()
+  else stopPolling()
+}
+
+// Поллим ручные ответы менеджера только в активном открытом диалоге и при видимой вкладке.
+function startPolling () {
+  if (pollTimer || !chatState.open || !chatState.engaged || document.hidden) return
+  pollManualReplies() // разовый catch-up — подтянуть ответ, пришедший пока было закрыто
+  pollTimer = setInterval(pollManualReplies, 4000)
+}
+
+function stopPolling () {
+  clearInterval(pollTimer)
+  pollTimer = null
 }
 
 function addMessage (role, text, opts = {}) {
@@ -256,6 +273,9 @@ async function onChatSubmit (e) {
 
   if (!text && !image) return
 
+  chatState.engaged = true
+  startPolling()
+
   addMessage('user', text, { thumb: imageThumb || null })
   input.value = ''
   clearPendingImage()
@@ -315,7 +335,10 @@ async function pollManualReplies () {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  createChatElements()
-  setInterval(pollManualReplies, 4000)
+document.addEventListener('DOMContentLoaded', createChatElements)
+
+// Вкладка в фоне — глушим поллинг, вернулись — поднимаем (если диалог ещё открыт).
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopPolling()
+  else startPolling()
 })
