@@ -29,7 +29,7 @@
       <!-- Каталог -->
       <template v-if="activeTab === 'catalog'">
       <!-- Загрузка Excel -->
-      <section class="admin-section" data-reveal>
+      <section class="admin-section">
         <h2>Загрузка из 1С (Excel)</h2>
         <div class="upload-row">
           <input type="file" accept=".xlsx,.xls,.csv" @change="handleFile">
@@ -55,7 +55,7 @@
       </section>
 
       <!-- Обогащение описаний через ИИ (Grok с веб-поиском) -->
-      <section class="admin-section" data-reveal>
+      <section class="admin-section">
         <h2>Обогащение описаний (ИИ)</h2>
         <p class="enrich-hint">
           Grok ищет реальные характеристики товаров в интернете и заполняет описание.
