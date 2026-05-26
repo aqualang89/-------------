@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
+import { readFileSync } from 'fs'
 
-const supabase = createClient(
-  'https://vbopaqxxhumyauwpqgbs.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZib3BhcXh4aHVteWF1d3BxZ2JzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzEyNTIwMywiZXhwIjoyMDkyNzAxMjAzfQ.hTBp4PuLOIkJhDTLKIyqqeK1OdAkrNmCoTsH3YempuE'
-)
+// Ключи из локального .env (он в .gitignore) — НЕ хардкодить секреты в коде
+const env = {}
+for (const line of readFileSync('.env', 'utf8').split('\n')) {
+  const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/)
+  if (m) env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+}
+
+const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY)
 
 const categories = [
   { name: 'Аквариумы', slug: 'akvariumy' },
