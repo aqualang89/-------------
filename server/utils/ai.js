@@ -172,7 +172,7 @@ function applyCacheControl (messages) {
 // Базовый вызов OpenRouter. messages может содержать multimodal content (массивы с image_url для vision)
 // signal — AbortSignal, обычно `event.node.req.signal` чтобы прерывать когда клиент уходит
 // Опции: model (по умолчанию Sonnet), temperature, maxTokens — для дешёвых задач вроде дайджеста
-export async function askOpenRouter (messages, { signal, model = MODEL, temperature = 0.5, maxTokens = 1500 } = {}) {
+export async function askOpenRouter (messages, { signal, model = MODEL, temperature = 0.5, maxTokens = 1500, plugins } = {}) {
   const res = await fetch(OPENROUTER_URL, {
     method: 'POST',
     signal,
@@ -186,7 +186,8 @@ export async function askOpenRouter (messages, { signal, model = MODEL, temperat
       model,
       messages: applyCacheControl(messages),
       temperature,
-      max_tokens: maxTokens
+      max_tokens: maxTokens,
+      ...(plugins ? { plugins } : {})
     })
   })
 
@@ -218,6 +219,43 @@ export function buildUserMessage (text, imageDataUrl) {
       { type: 'image_url', image_url: { url: imageDataUrl } }
     ]
   }
+}
+
+// ── Обогащение каталога: Grok с веб-поиском ищет реальные характеристики товара ──
+const GROK_MODEL = 'x-ai/grok-4.3'
+
+const ENRICH_PROMPT = `Ты — каталогизатор аквариумного магазина. Тебе дают название и артикул товара. Найди в интернете его РЕАЛЬНЫЕ характеристики (сайты производителей и профильных магазинов: Aquasabi, Green Aqua, Chihiros и т.п.) и напиши короткое точное описание для карточки товара.
+
+Что включить, если нашёл:
+— Назначение: для каких аквариумов, растений, задач.
+— Ключевые характеристики под тип товара: мощность (Вт), габариты и длина (см), световой поток (лм) и/или спектр и цветовая температура, рассчитанный объём аквариума, производительность (л/ч) — то что релевантно.
+— Важные нюансы эксплуатации: можно ли светильник ставить под крышку аквариума или только открыто, влагозащита (IP), особенности установки. Это критично — указывай обязательно, если нашёл.
+
+ЖЁСТКИЕ ПРАВИЛА:
+— Бери данные ТОЛЬКО из найденных источников. НЕ выдумывай и не угадывай цифры из названия модели.
+— Если достоверных данных в сети нет — верни РОВНО: NO_DATA (и больше ничего).
+— НЕ вставляй ссылки, URL, названия сайтов-источников в текст. Только характеристики.
+— БЕЗ markdown: ни звёздочек, ни списков, ни заголовков, ни таблиц. Простой связный текст.
+— Пиши на русском, 2-4 предложения, по делу, без воды и рекламных эпитетов.
+— Не указывай цену и наличие.`
+
+// Возвращает { description, found }. found=false → данных в вебе не нашлось (description='').
+export async function enrichProductDescription ({ name, article }, { signal } = {}) {
+  const messages = [
+    { role: 'system', content: ENRICH_PROMPT },
+    { role: 'user', content: `Товар: ${name}\nАртикул: ${article || '—'}` }
+  ]
+  const reply = await askOpenRouter(messages, {
+    signal,
+    model: GROK_MODEL,
+    plugins: [{ id: 'web', max_results: 5 }],
+    temperature: 0.2,
+    maxTokens: 600
+  })
+  if (/^\s*NO_DATA\s*$/i.test(reply)) return { description: '', found: false }
+  // подчищаем на всякий случай: убираем ссылки если просочились, схлопываем пробелы
+  const clean = reply.replace(/https?:\/\/\S+/g, '').replace(/\s{2,}/g, ' ').trim()
+  return { description: clean, found: clean.length > 0 }
 }
 
 export async function embedText (text) {
@@ -305,7 +343,7 @@ async function keywordSearchProducts (query) {
 
   const { data, error } = await supabase
     .from('products')
-    .select('id, name, article, price, slug, is_available, product_photos(url, is_main, sort_order)')
+    .select('id, name, description, article, price, slug, is_available, product_photos(url, is_main, sort_order)')
     .or(conditions.join(','))
     .eq('is_available', true)
     .limit(10)
@@ -319,6 +357,7 @@ async function keywordSearchProducts (query) {
   return (data || []).map(p => ({
     id: p.id,
     name: p.name,
+    description: p.description,
     article: p.article,
     price: p.price,
     slug: p.slug,

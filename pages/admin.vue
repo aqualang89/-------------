@@ -54,6 +54,55 @@
         </div>
       </section>
 
+      <!-- Обогащение описаний через ИИ (Grok с веб-поиском) -->
+      <section class="admin-section" data-reveal>
+        <h2>Обогащение описаний (ИИ)</h2>
+        <p class="enrich-hint">
+          Grok ищет реальные характеристики товаров в интернете и заполняет описание.
+          Пустые описания заполняются, существующие не трогаются (кроме режима «конкретный товар»).
+          Где данных нет — поле останется пустым, заполнишь вручную.
+        </p>
+        <div class="enrich-controls">
+          <select v-model="enrichMode" class="product-input">
+            <option value="all">Все товары без описания</option>
+            <option value="new">Только новинки без описания</option>
+            <option value="category">Выбранная слева категория без описания</option>
+            <option value="one">Конкретный товар по артикулу</option>
+          </select>
+          <input
+            v-if="enrichMode === 'one'"
+            v-model="enrichArticle"
+            placeholder="Артикул"
+            class="product-input"
+          >
+          <button :disabled="enriching || (enrichMode === 'category' && !filterCategory) || (enrichMode === 'one' && !enrichArticle)" @click="enrichCatalog">
+            {{ enriching ? 'Идёт обогащение...' : 'Запустить' }}
+          </button>
+        </div>
+        <p v-if="enrichMode === 'category' && !filterCategory" class="enrich-warn">
+          Сначала выбери категорию в дереве ниже.
+        </p>
+        <div v-if="enriching" class="progress-wrap">
+          <div class="progress-bar" :style="{ width: enrichProgress + '%' }">
+            <div class="progress-shine"></div>
+          </div>
+          <p class="progress-text">{{ enrichMessage }}</p>
+        </div>
+        <div v-if="enrichResult" class="upload-result">
+          <p>Обработано: {{ enrichResult.processed }}</p>
+          <p>Заполнено описаний: {{ enrichResult.enriched }}</p>
+          <p v-if="enrichResult.empty">Без данных (Grok не нашёл): {{ enrichResult.empty }}</p>
+          <p v-if="enrichResult.errors.length" class="error">Ошибки: {{ enrichResult.errors.join('; ') }}</p>
+          <div v-if="enrichResult.samples && enrichResult.samples.length" class="enrich-samples">
+            <h4>Примеры заполнения:</h4>
+            <div v-for="(s, i) in enrichResult.samples" :key="i" class="enrich-sample">
+              <strong>{{ s.name }}</strong>
+              <p>{{ s.description }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Фильтр товаров -->
       <section class="admin-section">
         <h2>Товары</h2>
@@ -303,6 +352,14 @@ const filterCategory = ref('')
 const page = ref(1)
 const totalPages = ref(1)
 const adminCatsOpen = ref(true)
+
+// Обогащение описаний (Grok)
+const enriching = ref(false)
+const enrichProgress = ref(0)
+const enrichMessage = ref('')
+const enrichResult = ref(null)
+const enrichMode = ref('all')
+const enrichArticle = ref('')
 
 // Tabs
 const tabs = [
@@ -616,6 +673,67 @@ function slugify(str) {
     .join('')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+async function enrichCatalog () {
+  if (enrichMode.value === 'category' && !filterCategory.value) return
+  if (enrichMode.value === 'one' && !enrichArticle.value) return
+
+  enriching.value = true
+  enrichResult.value = null
+  enrichProgress.value = 0
+  enrichMessage.value = 'Запускаем Grok...'
+
+  let processed = 0
+  let enriched = 0
+  let empty = 0
+  const errors = []
+  let lastSamples = []
+
+  try {
+    // Дёргаем эндпоинт повторно пока есть что обрабатывать — он отдаёт по пачке
+    while (true) {
+      const body = { mode: enrichMode.value }
+      if (enrichMode.value === 'category') body.category = filterCategory.value
+      if (enrichMode.value === 'one') body.article = enrichArticle.value
+
+      const res = await fetch('/api/admin/enrich-catalog', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-password': password.value
+        },
+        body: JSON.stringify(body)
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        errors.push(data.statusMessage || data.message || `HTTP ${res.status}`)
+        break
+      }
+
+      processed += data.processed || 0
+      enriched += data.enriched || 0
+      empty += data.empty || 0
+      if (data.errors?.length) errors.push(...data.errors)
+      if (data.samples?.length) lastSamples = data.samples
+
+      const total = processed + (data.remaining || 0)
+      enrichProgress.value = total ? Math.round(processed / total * 100) : 100
+      enrichMessage.value = `Обработано ${processed}, осталось ${data.remaining || 0}...`
+
+      if (enrichMode.value === 'one' || !data.remaining || data.processed === 0) break
+    }
+
+    enrichProgress.value = 100
+    enrichMessage.value = 'Готово!'
+  } catch (e) {
+    errors.push('Ошибка: ' + e.message)
+  } finally {
+    enrichResult.value = { processed, enriched, empty, errors, samples: lastSamples }
+    enriching.value = false
+    await fetchProducts()
+  }
 }
 
 async function saveProduct(p) {
@@ -964,6 +1082,61 @@ watch(activeTab, (tab) => {
   padding: 12px;
   background: rgba(217, 180, 106, 0.1);
   border-radius: 8px;
+}
+.enrich-hint {
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 8px 0 16px;
+}
+.enrich-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.enrich-controls .product-input {
+  min-width: 240px;
+}
+.enrich-controls button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  background: var(--gold);
+  color: var(--ink-deep);
+  font-weight: 600;
+  cursor: pointer;
+}
+.enrich-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.enrich-warn {
+  margin-top: 10px;
+  color: #ffcf7a;
+  font-size: 0.9rem;
+}
+.enrich-samples {
+  margin-top: 12px;
+}
+.enrich-samples h4 {
+  margin: 0 0 8px;
+  color: var(--gold);
+}
+.enrich-sample {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+}
+.enrich-sample strong {
+  color: var(--cream);
+}
+.enrich-sample p {
+  margin: 4px 0 0;
+  color: var(--cream-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 .filters {
   display: flex;
