@@ -216,7 +216,7 @@
       </template>
 
       <!-- Заказы -->
-      <template v-else>
+      <template v-else-if="activeTab === 'orders'">
         <section class="admin-section">
           <h2>Заказы</h2>
 
@@ -325,6 +325,110 @@
           </div>
         </section>
       </template>
+
+      <!-- Наши работы -->
+      <template v-else-if="activeTab === 'works'">
+        <section class="admin-section">
+          <h2>Наши работы</h2>
+          <button v-if="!workForm" class="cms-btn" @click="newWork">+ Новая работа</button>
+
+          <div v-if="workForm" class="cms-form">
+            <input v-model="workForm.title" class="product-input" placeholder="Название работы">
+            <textarea v-model="workForm.description" class="product-input" rows="5" placeholder="Описание кейса: объём аквариума, что делали, особенности"></textarea>
+
+            <div class="cms-field">
+              <label>Обложка</label>
+              <div class="cms-cover">
+                <img v-if="workForm.cover_url" :src="workForm.cover_url" alt="">
+                <input type="file" accept="image/*" @change="e => uploadCover(e, workForm)">
+              </div>
+            </div>
+
+            <div class="cms-field">
+              <label>Фото проекта (можно несколько)</label>
+              <div class="cms-photos">
+                <div v-for="(url, i) in workForm.photos" :key="i" class="cms-photo">
+                  <img :src="url" alt="">
+                  <button type="button" @click="workForm.photos.splice(i, 1)">×</button>
+                </div>
+              </div>
+              <input type="file" accept="image/*" multiple @change="uploadWorkPhotos">
+            </div>
+
+            <label class="cms-check"><input type="checkbox" v-model="workForm.is_published"> Опубликовано (видно на сайте)</label>
+            <label class="cms-order">Порядок <input type="number" v-model.number="workForm.sort_order" class="product-input"></label>
+
+            <div class="cms-actions">
+              <button class="cms-btn" :disabled="cmsSaving" @click="saveWork">{{ cmsSaving ? 'Сохраняю...' : 'Сохранить' }}</button>
+              <button class="cms-btn ghost" @click="workForm = null">Отмена</button>
+            </div>
+          </div>
+
+          <div v-if="worksLoading" class="product-loading">Загрузка...</div>
+          <div v-else class="cms-list">
+            <div v-for="w in works" :key="w.id" class="cms-item">
+              <img v-if="w.cover_url" :src="w.cover_url" class="cms-thumb" alt="">
+              <div v-else class="cms-thumb empty">🐢</div>
+              <div class="cms-item-info">
+                <strong>{{ w.title }}</strong>
+                <span :class="['cms-badge', w.is_published ? 'pub' : 'draft']">{{ w.is_published ? 'опубликовано' : 'черновик' }}</span>
+              </div>
+              <div class="cms-item-actions">
+                <button @click="editWork(w)">Изменить</button>
+                <button class="danger" @click="deleteWork(w.id)">Удалить</button>
+              </div>
+            </div>
+            <p v-if="!works.length" class="product-loading">Пока нет работ. Нажми «+ Новая работа».</p>
+          </div>
+        </section>
+      </template>
+
+      <!-- Блог -->
+      <template v-else-if="activeTab === 'blog'">
+        <section class="admin-section">
+          <h2>Блог</h2>
+          <button v-if="!articleForm" class="cms-btn" @click="newArticle">+ Новая статья</button>
+
+          <div v-if="articleForm" class="cms-form">
+            <input v-model="articleForm.title" class="product-input" placeholder="Заголовок статьи">
+            <input v-model="articleForm.excerpt" class="product-input" placeholder="Краткое описание для карточки (1-2 предложения)">
+
+            <div class="cms-field">
+              <label>Обложка</label>
+              <div class="cms-cover">
+                <img v-if="articleForm.cover_url" :src="articleForm.cover_url" alt="">
+                <input type="file" accept="image/*" @change="e => uploadCover(e, articleForm)">
+              </div>
+            </div>
+
+            <textarea v-model="articleForm.content" class="product-input cms-content" rows="16" placeholder="Текст статьи. Каждый абзац с новой строки — пустая строка между абзацами."></textarea>
+
+            <label class="cms-check"><input type="checkbox" v-model="articleForm.is_published"> Опубликовано (видно на сайте)</label>
+
+            <div class="cms-actions">
+              <button class="cms-btn" :disabled="cmsSaving" @click="saveArticle">{{ cmsSaving ? 'Сохраняю...' : 'Сохранить' }}</button>
+              <button class="cms-btn ghost" @click="articleForm = null">Отмена</button>
+            </div>
+          </div>
+
+          <div v-if="articlesLoading" class="product-loading">Загрузка...</div>
+          <div v-else class="cms-list">
+            <div v-for="a in articles" :key="a.id" class="cms-item">
+              <img v-if="a.cover_url" :src="a.cover_url" class="cms-thumb" alt="">
+              <div v-else class="cms-thumb empty">🌿</div>
+              <div class="cms-item-info">
+                <strong>{{ a.title }}</strong>
+                <span :class="['cms-badge', a.is_published ? 'pub' : 'draft']">{{ a.is_published ? 'опубликовано' : 'черновик' }}</span>
+              </div>
+              <div class="cms-item-actions">
+                <button @click="editArticle(a)">Изменить</button>
+                <button class="danger" @click="deleteArticle(a.id)">Удалить</button>
+              </div>
+            </div>
+            <p v-if="!articles.length" class="product-loading">Пока нет статей. Нажми «+ Новая статья».</p>
+          </div>
+        </section>
+      </template>
     </div>
   </div>
 </template>
@@ -364,7 +468,9 @@ const enrichArticle = ref('')
 // Tabs
 const tabs = [
   { key: 'catalog', label: 'Каталог' },
-  { key: 'orders', label: 'Заказы' }
+  { key: 'orders', label: 'Заказы' },
+  { key: 'works', label: 'Работы' },
+  { key: 'blog', label: 'Блог' }
 ]
 const activeTab = ref('catalog')
 
@@ -1014,7 +1120,125 @@ async function updateOrderStatus (o) {
 
 watch(activeTab, (tab) => {
   if (tab === 'orders') fetchOrders()
+  if (tab === 'works') fetchWorks()
+  if (tab === 'blog') fetchArticles()
 })
+
+// ===== CMS: Работы и Блог =====
+const works = ref([])
+const worksLoading = ref(false)
+const workForm = ref(null)
+const articles = ref([])
+const articlesLoading = ref(false)
+const articleForm = ref(null)
+const cmsSaving = ref(false)
+
+const cmsHeaders = () => ({ 'Content-Type': 'application/json', 'x-admin-password': password.value })
+
+// Загрузка картинки в Cloudinary → url (переиспользует /api/upload-image)
+async function uploadToCloudinary (f) {
+  const sizeMB = f.size / 1024 / 1024
+  if (sizeMB > 4) { alert(`Файл слишком большой: ${sizeMB.toFixed(1)}MB (лимит ~4MB)`); return null }
+  const form = new FormData()
+  form.append('file', f)
+  try {
+    const res = await fetch('/api/upload-image', { method: 'POST', headers: { 'x-admin-password': password.value }, body: form })
+    if (!res.ok) { alert('Ошибка загрузки фото: ' + await readErrorText(res)); return null }
+    const j = await res.json()
+    return j.url || null
+  } catch (e) { alert('Сетевая ошибка: ' + e.message); return null }
+}
+async function uploadCover (e, form) {
+  const f = e.target.files?.[0]
+  e.target.value = ''
+  if (!f) return
+  const url = await uploadToCloudinary(f)
+  if (url) form.cover_url = url
+}
+
+// ── Работы ──
+async function fetchWorks () {
+  worksLoading.value = true
+  try {
+    const res = await fetch('/api/works', { headers: { 'x-admin-password': password.value } })
+    works.value = (await res.json()).works || []
+  } catch (e) { alert('Не удалось загрузить работы: ' + e.message) }
+  worksLoading.value = false
+}
+function newWork () {
+  workForm.value = { title: '', description: '', cover_url: null, photos: [], is_published: false, sort_order: 0 }
+}
+function editWork (w) {
+  workForm.value = {
+    id: w.id, title: w.title, description: w.description || '', cover_url: w.cover_url || null,
+    photos: Array.isArray(w.photos) ? [...w.photos] : [], is_published: !!w.is_published, sort_order: w.sort_order || 0
+  }
+}
+async function uploadWorkPhotos (e) {
+  const files = Array.from(e.target.files || [])
+  e.target.value = ''
+  for (const f of files) {
+    const url = await uploadToCloudinary(f)
+    if (url) workForm.value.photos.push(url)
+  }
+}
+async function saveWork () {
+  const f = workForm.value
+  if (!f.title.trim()) { alert('Введи название'); return }
+  cmsSaving.value = true
+  try {
+    const payload = { title: f.title, description: f.description, cover_url: f.cover_url, photos: f.photos, is_published: f.is_published, sort_order: f.sort_order }
+    const res = await fetch(f.id ? `/api/works/${f.id}` : '/api/works', { method: f.id ? 'PATCH' : 'POST', headers: cmsHeaders(), body: JSON.stringify(payload) })
+    if (!res.ok) { alert('Ошибка сохранения: ' + await readErrorText(res)); cmsSaving.value = false; return }
+    workForm.value = null
+    await fetchWorks()
+  } catch (e) { alert('Ошибка: ' + e.message) }
+  cmsSaving.value = false
+}
+async function deleteWork (id) {
+  if (!confirm('Удалить работу?')) return
+  const res = await fetch(`/api/works/${id}`, { method: 'DELETE', headers: { 'x-admin-password': password.value } })
+  if (res.ok) await fetchWorks()
+  else alert('Не удалось удалить: ' + await readErrorText(res))
+}
+
+// ── Блог ──
+async function fetchArticles () {
+  articlesLoading.value = true
+  try {
+    const res = await fetch('/api/articles', { headers: { 'x-admin-password': password.value } })
+    articles.value = (await res.json()).articles || []
+  } catch (e) { alert('Не удалось загрузить статьи: ' + e.message) }
+  articlesLoading.value = false
+}
+function newArticle () {
+  articleForm.value = { title: '', excerpt: '', content: '', cover_url: null, is_published: false }
+}
+function editArticle (a) {
+  articleForm.value = {
+    id: a.id, title: a.title, excerpt: a.excerpt || '', content: a.content || '',
+    cover_url: a.cover_url || null, is_published: !!a.is_published
+  }
+}
+async function saveArticle () {
+  const f = articleForm.value
+  if (!f.title.trim()) { alert('Введи заголовок'); return }
+  cmsSaving.value = true
+  try {
+    const payload = { title: f.title, excerpt: f.excerpt, content: f.content, cover_url: f.cover_url, is_published: f.is_published }
+    const res = await fetch(f.id ? `/api/articles/${f.id}` : '/api/articles', { method: f.id ? 'PATCH' : 'POST', headers: cmsHeaders(), body: JSON.stringify(payload) })
+    if (!res.ok) { alert('Ошибка сохранения: ' + await readErrorText(res)); cmsSaving.value = false; return }
+    articleForm.value = null
+    await fetchArticles()
+  } catch (e) { alert('Ошибка: ' + e.message) }
+  cmsSaving.value = false
+}
+async function deleteArticle (id) {
+  if (!confirm('Удалить статью?')) return
+  const res = await fetch(`/api/articles/${id}`, { method: 'DELETE', headers: { 'x-admin-password': password.value } })
+  if (res.ok) await fetchArticles()
+  else alert('Не удалось удалить: ' + await readErrorText(res))
+}
 </script>
 
 <style scoped>
@@ -1564,5 +1788,76 @@ watch(activeTab, (tab) => {
   color: var(--ink-deep);
   font-weight: 600;
   cursor: pointer;
+}
+
+/* ===== CMS: Работы и Блог ===== */
+.cms-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: var(--gold);
+  color: var(--ink-deep);
+  font-weight: 600;
+  cursor: pointer;
+}
+.cms-btn.ghost {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--cream);
+}
+.cms-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cms-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--ink-mid);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0 28px;
+}
+.cms-content { resize: vertical; line-height: 1.6; }
+.cms-field { display: flex; flex-direction: column; gap: 8px; }
+.cms-field > label { font-size: 0.9rem; color: var(--cream-dim); }
+.cms-cover { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.cms-cover img { width: 160px; height: 110px; object-fit: cover; border-radius: 8px; }
+.cms-photos { display: flex; flex-wrap: wrap; gap: 10px; }
+.cms-photo { position: relative; }
+.cms-photo img { width: 96px; height: 72px; object-fit: cover; border-radius: 6px; }
+.cms-photo button {
+  position: absolute; top: -6px; right: -6px;
+  width: 22px; height: 22px; border-radius: 50%;
+  border: none; background: #c0392b; color: #fff; cursor: pointer; line-height: 1;
+}
+.cms-check { display: flex; align-items: center; gap: 8px; color: var(--cream); }
+.cms-order { display: flex; align-items: center; gap: 8px; color: var(--cream-dim); }
+.cms-order input { width: 90px; }
+.cms-actions { display: flex; gap: 12px; }
+.cms-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.cms-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--ink-mid);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.cms-thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+.cms-thumb.empty { display: flex; align-items: center; justify-content: center; background: var(--ink-soft); font-size: 1.4rem; }
+.cms-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.cms-item-info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cms-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; width: fit-content; }
+.cms-badge.pub { background: rgba(120, 200, 120, 0.18); color: #8fd98f; }
+.cms-badge.draft { background: rgba(217, 180, 106, 0.18); color: var(--gold); }
+.cms-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.cms-item-actions button {
+  padding: 6px 12px; border-radius: 6px; border: 1px solid var(--rule);
+  background: var(--ink-soft); color: var(--cream); cursor: pointer; font-size: 0.85rem;
+}
+.cms-item-actions button.danger { color: #ff8a8a; border-color: rgba(255,138,138,0.3); }
+@media (max-width: 600px) {
+  .cms-item { flex-wrap: wrap; }
+  .cms-item-actions { width: 100%; }
 }
 </style>

@@ -52,6 +52,8 @@ const regularLinks = [
   { to: '/', label: 'Главная' },
   { to: '/services', label: 'Услуги' },
   { to: '/catalog', label: 'Каталог' },
+  { to: '/works', label: 'Работы' },
+  { to: '/blog', label: 'Блог' },
   { to: '/calculator', label: 'Калькулятор' },
   { to: '/about', label: 'О нас' },
 ]
