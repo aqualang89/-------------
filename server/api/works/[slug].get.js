@@ -2,7 +2,8 @@ import { supabase } from '~/server/utils/supabase'
 
 // Одна работа по slug. Черновик виден только с админ-паролем.
 export default defineEventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug')
+  // params.slug бывает undefined из-за соседних [id].patch/delete в этой папке — фолбэк на путь
+  const slug = event.context.params?.slug || event.path?.split('?')[0].split('/').pop()
   const pwd = getHeader(event, 'x-admin-password')
   const isAdmin = pwd && pwd === process.env.ADMIN_PASSWORD
 
