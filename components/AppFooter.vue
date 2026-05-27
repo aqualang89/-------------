@@ -10,6 +10,8 @@
         <NuxtLink to="/">Главная</NuxtLink>
         <NuxtLink to="/services">Услуги</NuxtLink>
         <NuxtLink to="/catalog">Каталог</NuxtLink>
+        <NuxtLink to="/works">Работы</NuxtLink>
+        <NuxtLink to="/blog">Блог</NuxtLink>
         <NuxtLink to="/calculator">Калькулятор</NuxtLink>
         <NuxtLink to="/#контакты">Контакты</NuxtLink>
       </nav>
