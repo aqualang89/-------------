@@ -108,18 +108,53 @@
 </template>
 
 <script setup>
-const searchInput = ref('')
-const category = ref('')
-const minPriceInput = ref(0)
-const maxPriceInput = ref(9999999)
-const page = ref(1)
+const route = useRoute()
+const router = useRouter()
+
+// Состояние каталога живёт в URL-query — тогда хлебные крошки, кнопка "назад"
+// и шеринг ссылок работают как ожидается. Инициализируемся из текущего query (важно для SSR).
+const category = ref(route.query.category || '')
+const page = ref(Number(route.query.page) || 1)
+const search = ref(route.query.search || '')
+const searchInput = ref(search.value)
+const minPrice = ref(Number(route.query.minPrice) || 0)
+const maxPrice = ref(Number(route.query.maxPrice) || 9999999)
+const minPriceInput = ref(minPrice.value)
+const maxPriceInput = ref(route.query.maxPrice ? Number(route.query.maxPrice) : 9999999)
+
 const sidebarOpen = ref(true)
 const isMobile = ref(false)
-
-const search = ref('')
-const minPrice = ref(0)
-const maxPrice = ref(9999999)
 const MAX_PRICE = ref(200000)
+
+// Собрать query из текущего состояния (пустые/дефолтные значения опускаем — чистый URL)
+function buildQuery () {
+  const q = {}
+  if (category.value) q.category = category.value
+  if (page.value > 1) q.page = page.value
+  if (search.value) q.search = search.value
+  if (minPrice.value > 0) q.minPrice = minPrice.value
+  if (maxPrice.value < MAX_PRICE.value) q.maxPrice = maxPrice.value
+  return q
+}
+// push — попадает в историю (категория, страница: "назад" отматывает по шагам)
+// replace — без записи в историю (фильтры/поиск, чтобы не засорять)
+function syncUrl (mode = 'push') {
+  router[mode]({ query: buildQuery() })
+}
+
+// Назад/вперёд браузера и переход с хлебной крошки меняют query — подхватываем в состояние
+watch(() => route.query, (q) => {
+  const cat = q.category || ''
+  const pg = Number(q.page) || 1
+  const srch = q.search || ''
+  const mn = Number(q.minPrice) || 0
+  const mx = Number(q.maxPrice) || 9999999
+  if (cat !== category.value) category.value = cat
+  if (pg !== page.value) page.value = pg
+  if (srch !== search.value) { search.value = srch; searchInput.value = srch }
+  if (mn !== minPrice.value) { minPrice.value = mn; minPriceInput.value = mn }
+  if (mx !== maxPrice.value) { maxPrice.value = mx; if (mx !== 9999999) maxPriceInput.value = mx }
+})
 
 const { data: categoryTree } = await useFetch('/api/categories')
 
@@ -207,7 +242,7 @@ usePageMeta({
 let searchTimer
 watch(searchInput, (val) => {
   clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => { search.value = val; page.value = 1; scrollToTop() }, 300)
+  searchTimer = setTimeout(() => { search.value = val; page.value = 1; scrollToTop(); syncUrl('replace') }, 300)
 })
 
 let priceTimer
@@ -218,6 +253,7 @@ watch([minPriceInput, maxPriceInput], ([minVal, maxVal]) => {
     maxPrice.value = Number(maxVal) || 9999999
     page.value = 1
     scrollToTop()
+    syncUrl('replace')
   }, 300)
 })
 
@@ -228,14 +264,15 @@ function onCategoryChange() {
   page.value = 1
   scrollToTop()
   if (isMobile.value) sidebarOpen.value = false
+  syncUrl('push')
 }
 
 function prevPage() {
-  if (page.value > 1) { page.value--; scrollToTop() }
+  if (page.value > 1) { page.value--; scrollToTop(); syncUrl('push') }
 }
 
 function nextPage() {
-  if (page.value < totalPages.value) { page.value++; scrollToTop() }
+  if (page.value < totalPages.value) { page.value++; scrollToTop(); syncUrl('push') }
 }
 
 function mainPhoto(p) {
