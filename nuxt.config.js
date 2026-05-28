@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  modules: ['@sentry/nuxt/module'],
   compatibilityDate: '2024-11-01',
   compatibilityVersion: 4,
   ssr: true,

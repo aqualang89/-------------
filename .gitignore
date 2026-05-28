@@ -24,3 +24,6 @@ MOBILE_CHECKLIST.md
 REMEMBER.md
 CLAUDE.md
 tasks/
+
+.vercel
+.env*
