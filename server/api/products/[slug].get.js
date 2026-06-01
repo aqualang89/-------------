@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   const { data, error } = await supabase
     .from('products')
-    .select('*, categories(name, slug), product_photos(*)')
+    .select('id, article, name, slug, category_id, price, old_price, description, is_available, is_new, created_at, updated_at, categories(name, slug), product_photos(*)')
     .eq('slug', slug)
     .eq('is_available', true)
     .single()

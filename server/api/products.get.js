@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
   let dbQuery = supabase
     .from('products')
-    .select('*, categories(name, slug, parent_id), product_photos(id, url, is_main, sort_order)', { count: 'exact' })
+    .select('id, article, name, slug, category_id, price, old_price, description, is_available, is_new, created_at, updated_at, categories(name, slug, parent_id), product_photos(id, url, is_main, sort_order)', { count: 'exact' })
   if (!showUnavailable) {
     dbQuery = dbQuery.eq('is_available', true)
   }

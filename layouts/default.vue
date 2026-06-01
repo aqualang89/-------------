@@ -24,7 +24,7 @@
       <!-- <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a> -->
     </div>
 
-    <NuxtLink v-if="$route.path !== '/'" :to="backTo" class="sh-back" @click.native="sessionStorage.removeItem('introShown')">
+    <NuxtLink v-if="$route.path !== '/'" :to="backTo" class="sh-back" @click="clearIntro">
       ← Назад
     </NuxtLink>
     <div class="layout-content">
@@ -47,6 +47,10 @@ const backTo = computed(() => {
   if (route.path.startsWith('/catalog/') && route.path !== '/catalog') return '/catalog'
   return '/'
 })
+
+function clearIntro () {
+  try { sessionStorage.removeItem('introShown') } catch (e) {}
+}
 
 const regularLinks = [
   { to: '/', label: 'Главная' },

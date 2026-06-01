@@ -453,7 +453,9 @@ onMounted(async () => {
     console.error('Failed to load ripples scripts:', err)
   }
 
+  let introTimeout = null
   function closeIntro(scrollTo) {
+    clearTimeout(introTimeout)
     overlay.classList.add('hidden')
     document.body.style.overflow = ''
     try { $(overlay).ripples('destroy') } catch (e) {}
@@ -475,6 +477,10 @@ onMounted(async () => {
     }
     introCenter.addEventListener('click', introClickHandler)
   }
+
+  // Страховка: если за 30 сек так и не кликнули по центру — закрываем сами,
+  // чтоб не запереть человека с overflow:hidden
+  introTimeout = setTimeout(() => closeIntro(), 30000)
 
   const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
   if (!isMobile && typeof $ !== 'undefined' && $.fn.ripples) {
@@ -499,6 +505,7 @@ onMounted(async () => {
   onUnmounted(() => {
     if (introClickHandler && introCenter) introCenter.removeEventListener('click', introClickHandler)
     if (rippleInterval) clearInterval(rippleInterval)
+    clearTimeout(introTimeout)
   })
 })
 </script>
