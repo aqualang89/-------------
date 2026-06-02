@@ -662,12 +662,14 @@ onMounted(async () => {
 }
 
 .sh-hero-lede {
-  max-width: 460px;
+  max-width: 540px;
   margin: 0 auto 20px;
-  font-family: var(--font-sans);
-  font-weight: 300;
-  font-size: 15px;
-  line-height: 1.6;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1.9;
   color: var(--cream-dim);
   text-align: center;
 }
