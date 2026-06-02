@@ -618,7 +618,7 @@ onMounted(async () => {
 }
 
 .sh-hero-kicker {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   font-size: clamp(11px, 1vw, 13px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
