@@ -1038,11 +1038,9 @@ onMounted(async () => {
 }
 .sh-hcard-desc {
   font-family: var(--font-serif);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--gold);
   margin: 0;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
