@@ -621,7 +621,6 @@ onMounted(async () => {
   font-family: var(--font-serif);
   font-size: clamp(11px, 1vw, 13px);
   letter-spacing: 0.22em;
-  text-transform: uppercase;
   color: var(--cream-dim);
   text-align: center;
   margin: 0 0 18px;
@@ -668,7 +667,6 @@ onMounted(async () => {
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.22em;
-  text-transform: uppercase;
   line-height: 1.9;
   color: var(--cream-dim);
   text-align: center;
