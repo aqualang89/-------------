@@ -4,12 +4,14 @@ import { createLogger } from '~/server/utils/logger.js'
 import { validateBody } from '~/server/utils/validate.js'
 import { requireAdmin } from '~/server/utils/admin-auth.js'
 import { uniqueSlug } from '~/server/utils/slug.js'
+import { BLOG_CATEGORY_SLUGS } from '~/utils/blogCategories.js'
 
 const schema = z.object({
   title: z.string().min(1).max(200),
   excerpt: z.string().max(500).optional().default(''),
   content: z.string().max(60000).optional().default(''),
   cover_url: z.string().url().nullable().optional(),
+  category: z.enum(BLOG_CATEGORY_SLUGS).nullable().optional(),
   is_published: z.boolean().optional().default(false)
 })
 
@@ -25,6 +27,7 @@ export default defineEventHandler(async (event) => {
     excerpt: body.excerpt,
     content: body.content,
     cover_url: body.cover_url ?? null,
+    category: body.category ?? null,
     is_published: body.is_published,
     published_at: body.is_published ? new Date().toISOString() : null
   }).select().single()

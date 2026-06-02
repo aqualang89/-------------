@@ -394,6 +394,14 @@
             <input v-model="articleForm.excerpt" class="product-input" placeholder="Краткое описание для карточки (1-2 предложения)">
 
             <div class="cms-field">
+              <label>Категория</label>
+              <select v-model="articleForm.category" class="product-input">
+                <option :value="null">— без категории —</option>
+                <option v-for="c in BLOG_CATEGORIES" :key="c.slug" :value="c.slug">{{ c.title }}</option>
+              </select>
+            </div>
+
+            <div class="cms-field">
               <label>Обложка</label>
               <div class="cms-cover">
                 <img v-if="articleForm.cover_url" :src="articleForm.cover_url" alt="">
@@ -434,6 +442,8 @@
 </template>
 
 <script setup>
+import { BLOG_CATEGORIES } from '~/utils/blogCategories.js'
+
 useScrollReveal()
 
 usePageMeta({
@@ -1212,12 +1222,12 @@ async function fetchArticles () {
   articlesLoading.value = false
 }
 function newArticle () {
-  articleForm.value = { title: '', excerpt: '', content: '', cover_url: null, is_published: false }
+  articleForm.value = { title: '', excerpt: '', content: '', cover_url: null, category: null, is_published: false }
 }
 function editArticle (a) {
   articleForm.value = {
     id: a.id, title: a.title, excerpt: a.excerpt || '', content: a.content || '',
-    cover_url: a.cover_url || null, is_published: !!a.is_published
+    cover_url: a.cover_url || null, category: a.category || null, is_published: !!a.is_published
   }
 }
 async function saveArticle () {
@@ -1225,7 +1235,7 @@ async function saveArticle () {
   if (!f.title.trim()) { alert('Введи заголовок'); return }
   cmsSaving.value = true
   try {
-    const payload = { title: f.title, excerpt: f.excerpt, content: f.content, cover_url: f.cover_url, is_published: f.is_published }
+    const payload = { title: f.title, excerpt: f.excerpt, content: f.content, cover_url: f.cover_url, category: f.category, is_published: f.is_published }
     const res = await fetch(f.id ? `/api/articles/${f.id}` : '/api/articles', { method: f.id ? 'PATCH' : 'POST', headers: cmsHeaders(), body: JSON.stringify(payload) })
     if (!res.ok) { alert('Ошибка сохранения: ' + await readErrorText(res)); cmsSaving.value = false; return }
     articleForm.value = null

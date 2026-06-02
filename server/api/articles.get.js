@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const isAdmin = pwd && pwd === process.env.ADMIN_PASSWORD
 
   // Карточкам список не нужен content (тяжёлый) — берём поля для превью
-  const cols = isAdmin ? '*' : 'id, slug, title, excerpt, cover_url, published_at, created_at'
+  const cols = isAdmin ? '*' : 'id, slug, title, excerpt, cover_url, category, published_at, created_at'
   let q = supabase.from('articles')
     .select(cols)
     .order('published_at', { ascending: false, nullsFirst: false })
