@@ -1627,6 +1627,7 @@ async function deleteArticle (id) {
 /* Tabs */
 .admin-tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 24px;
 }
