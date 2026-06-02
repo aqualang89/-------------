@@ -1237,8 +1237,8 @@ onMounted(async () => {
     display: contents;
   }
   .sh-hero-kicker {
-    padding: 90px 20px 0;
-    margin-bottom: 10px;
+    padding: 60px 20px 0;
+    margin-bottom: 32px;
     order: 1;
   }
   .sh-hero-title {
