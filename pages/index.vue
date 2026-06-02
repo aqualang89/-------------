@@ -619,7 +619,7 @@ onMounted(async () => {
 
 .sh-hero-kicker {
   font-family: var(--font-serif);
-  font-size: clamp(11px, 1vw, 13px);
+  font-size: clamp(13px, 1.3vw, 15px);
   letter-spacing: 0.22em;
   color: var(--cream-dim);
   text-align: center;
@@ -665,7 +665,7 @@ onMounted(async () => {
   margin: 0 auto 20px;
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.22em;
   line-height: 1.9;
   color: var(--cream-dim);
@@ -1225,12 +1225,13 @@ onMounted(async () => {
     display: none;
   }
   .sh-hero-logo {
-    position: absolute;
-    top: 16px;
+    position: fixed;
+    top: 8px;
     left: 20px;
+    z-index: 1003;
   }
   .sh-hero-logo img {
-    height: 80px;
+    height: 56px;
   }
   .sh-hero {
     display: contents;
