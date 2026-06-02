@@ -1028,7 +1028,6 @@ onMounted(async () => {
   font-weight: 500;
   color: var(--gold);
   letter-spacing: 0.18em;
-  text-transform: uppercase;
 }
 .sh-hcard-title {
   font-family: var(--font-serif);
@@ -1044,7 +1043,6 @@ onMounted(async () => {
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
   line-height: 1.7;
   color: var(--gold);
   margin: 0;
