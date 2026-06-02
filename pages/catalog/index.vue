@@ -1,7 +1,8 @@
 <template>
   <div class="catalog-wrap">
     <div class="catalog-header">
-      <h1>Каталог</h1>
+      <h1>{{ catalogHeading }}</h1>
+      <p class="catalog-intro">{{ catalogIntro }}</p>
       <input
         v-model="searchInput"
         placeholder="Поиск по названию или артикулу..."
@@ -192,6 +193,11 @@ const activeCategoryName = computed(() => {
   return cat ? cat.name : ''
 })
 
+const catalogHeading = computed(() => activeCategoryName.value || 'Каталог товаров для аквариумистики')
+const catalogIntro = computed(() => activeCategoryName.value
+  ? `${activeCategoryName.value} для аквариума — подбор и консультация в студии Рипарий, Калининград. Доставка по России.`
+  : 'Каталог товаров для аквариумистики в Калининграде: аквариумы и тумбы, освещение, фильтрация, CO2, растения, грунты, корма и инструменты. Подбор под задачу, доставка по России.')
+
 function toggleExpand(id) {
   const next = new Set(expanded.value)
   if (next.has(id)) {
@@ -234,10 +240,15 @@ watch(productsData, (val) => {
   }
 }, { immediate: true })
 
-usePageMeta({
-  title: 'Каталог товаров для аквариумистики',
-  description: 'Каталог товаров для аквариумистики в Калининграде: аквариумы и тумбы, освещение, фильтрация, CO2, растения, грунты, корма, инструменты. Доставка по России.'
-})
+// Считаем при setup — на SSR category.value = route.query.category, имя категории уже
+// резолвится (categoryTree зафетчен выше), так что каждый ?category= URL отдаёт свой title/desc.
+const metaTitle = activeCategoryName.value
+  ? `${activeCategoryName.value} — каталог аквариумистики, Калининград`
+  : 'Каталог товаров для аквариумистики'
+const metaDesc = activeCategoryName.value
+  ? `${activeCategoryName.value} для аквариума в Калининграде — купить в студии Рипарий. Подбор, консультация, доставка по России.`
+  : 'Каталог товаров для аквариумистики в Калининграде: аквариумы и тумбы, освещение, фильтрация, CO2, растения, грунты, корма, инструменты. Доставка по России.'
+usePageMeta({ title: metaTitle, description: metaDesc })
 
 let searchTimer
 watch(searchInput, (val) => {
@@ -303,7 +314,14 @@ onMounted(() => {
 .catalog-header h1 {
   font-family: var(--font-serif);
   font-size: 2.2rem;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+.catalog-intro {
+  max-width: 760px;
+  margin: 0 0 24px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--cream-dim);
 }
 .search-input {
   width: 100%;

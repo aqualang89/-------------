@@ -107,6 +107,30 @@ export function localBusinessJsonLd () {
 }
 
 /**
+ * JSON-LD для WebSite + SearchAction — главная.
+ * Даёт Google потенциальный sitelinks searchbox (поиск по сайту прямо в выдаче).
+ */
+export function websiteJsonLd () {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    name: 'Рипарий',
+    alternateName: 'Студия аквариумного дизайна Рипарий',
+    url: SITE_URL,
+    inLanguage: 'ru-RU',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/catalog?search={search_term_string}`
+      },
+      'query-input': 'required name=search_term_string'
+    }
+  }
+}
+
+/**
  * JSON-LD для Product на товарной странице.
  */
 export function productJsonLd (product) {

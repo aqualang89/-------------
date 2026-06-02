@@ -36,6 +36,7 @@
 
       <!-- Hero контент -->
       <section class="sh-hero">
+        <p class="sh-hero-kicker" data-reveal-up><strong>Рипарий</strong> — студия аквариумного дизайна в Калининграде</p>
         <h1 class="sh-hero-title" data-reveal-up>
           Подводные <em>пейзажи,</em><br />
           собранные вручную.
@@ -184,7 +185,7 @@ useScrollReveal()
 usePageMeta({
   title: 'Студия аквариумного дизайна в Калининграде',
   description: 'Рипарий — студия аквариумного дизайна в Калининграде. Дизайн-проект, монтаж и обслуживание аквариумов с натуральной флорой. Nature, Iwagumi, голландский, биотоп, палюдариум.',
-  jsonLd: [localBusinessJsonLd()]
+  jsonLd: [localBusinessJsonLd(), websiteJsonLd()]
 })
 
 // Template refs for horizontal scroll
@@ -616,6 +617,21 @@ onMounted(async () => {
   min-height: 100vh;
 }
 
+.sh-hero-kicker {
+  font-family: var(--font-mono, var(--font-sans));
+  font-size: clamp(11px, 1vw, 13px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  text-align: center;
+  margin: 0 0 18px;
+  padding-top: 40px;
+}
+.sh-hero-kicker strong {
+  color: var(--gold-soft);
+  font-weight: 600;
+}
+
 .sh-hero-title {
   font-family: var(--font-serif);
   font-weight: 400;
@@ -625,12 +641,7 @@ onMounted(async () => {
   color: var(--cream);
   text-align: center;
   margin: 0;
-  padding-top: 40px;
-}
-@media (max-width: 768px) {
-  .sh-hero-title {
-    padding-top: 110px;
-  }
+  padding-top: 0;
 }
 
 .sh-hero-title em {
@@ -1180,8 +1191,11 @@ onMounted(async () => {
   .sh-hero {
     padding: 0 48px;
   }
-  .sh-hero-title {
+  .sh-hero-kicker {
     padding-top: 80px;
+  }
+  .sh-hero-title {
+    padding-top: 0;
   }
   .sh-toc {
     position: static;
@@ -1219,9 +1233,14 @@ onMounted(async () => {
   .sh-hero {
     display: contents;
   }
+  .sh-hero-kicker {
+    padding: 90px 20px 0;
+    margin-bottom: 10px;
+    order: 1;
+  }
   .sh-hero-title {
     font-size: 36px;
-    padding: 90px 20px 0;
+    padding: 0 20px;
     line-height: 1.15;
     order: 1;
   }
