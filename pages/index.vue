@@ -1023,11 +1023,12 @@ onMounted(async () => {
   padding: 24px;
 }
 .sh-hcard-num {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   font-size: 11px;
   font-weight: 500;
   color: var(--gold);
-  letter-spacing: 0.3em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 .sh-hcard-title {
   font-family: var(--font-serif);
@@ -1039,11 +1040,13 @@ onMounted(async () => {
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 .sh-hcard-desc {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   font-size: 14px;
-  font-weight: 300;
-  line-height: 1.5;
-  color: rgba(241, 230, 200, 0.85);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: var(--gold);
   margin: 0;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
