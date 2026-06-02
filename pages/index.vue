@@ -666,8 +666,8 @@ onMounted(async () => {
   font-family: var(--font-serif);
   font-weight: 500;
   font-size: 16px;
-  letter-spacing: 0.22em;
-  line-height: 1.9;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
   color: var(--cream-dim);
   text-align: center;
 }
@@ -1214,6 +1214,9 @@ onMounted(async () => {
 }
 
 @media (max-width: 768px) {
+  .sh-hcard-desc {
+    line-height: 1.35;
+  }
   .sh-stage {
     display: flex;
     flex-direction: column;
