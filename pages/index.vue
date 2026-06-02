@@ -629,12 +629,13 @@ onMounted(async () => {
 }
 .sh-hero-kicker strong {
   color: var(--gold-soft);
-  font-weight: 600;
+  font-weight: inherit;
 }
 
 .sh-hero-title {
   font-family: var(--font-serif);
   font-weight: 400;
+  font-style: italic;
   font-size: clamp(40px, 4.2vw, 76px);
   line-height: 1.08;
   letter-spacing: -0.01em;
