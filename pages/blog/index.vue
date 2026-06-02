@@ -100,7 +100,7 @@ usePageMeta({
   padding: 20px 22px 20px 0;
 }
 .post-date {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12px;
   color: var(--cream-faint);
   text-transform: uppercase;

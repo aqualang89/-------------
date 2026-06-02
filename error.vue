@@ -38,7 +38,7 @@ function clearIntro() {
   max-width: 480px;
 }
 .sh-error-num {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 72px;
   font-weight: 500;
   color: var(--gold);

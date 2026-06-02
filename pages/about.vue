@@ -374,7 +374,7 @@ usePageMeta({
   max-width: 720px;
 }
 .sh-about-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.35em;
   text-transform: uppercase;
@@ -427,7 +427,7 @@ usePageMeta({
   flex-wrap: wrap;
 }
 .sh-section-num {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.05em;

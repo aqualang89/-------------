@@ -227,7 +227,7 @@
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 10px;
   text-decoration: none;
   color: rgba(255, 255, 255, 0.4);

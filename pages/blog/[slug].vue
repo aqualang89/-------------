@@ -80,7 +80,7 @@ usePageMeta({
 }
 .article-date {
   display: block;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12px;
   color: var(--cream-faint);
   text-transform: uppercase;

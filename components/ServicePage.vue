@@ -108,7 +108,7 @@ defineProps({
   max-width: 720px;
 }
 .sh-service-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.35em;
   text-transform: uppercase;
@@ -162,7 +162,7 @@ defineProps({
   flex-wrap: wrap;
 }
 :deep(.sh-section-num) {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -176,7 +176,7 @@ defineProps({
   flex: 1;
 }
 :deep(.sh-section-year) {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 12px;
   color: var(--cream-faint);
   letter-spacing: 0.05em;

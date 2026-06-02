@@ -427,7 +427,7 @@ onMounted(() => {
   gap: 8px;
 }
 .price-filter-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   color: var(--cream-dim);
   letter-spacing: 0.2em;

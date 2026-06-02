@@ -21,7 +21,7 @@
   /* Шрифты */
   --font-serif: 'Cormorant Garamond', Georgia, serif;
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-mono: var(--font-sans); /* mono выпилен — алиас на sans, чтобы не сломать редкие ссылки */
 }
 
 /* ТЕЛО СТРАНИЦЫ */

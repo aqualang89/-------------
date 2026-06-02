@@ -618,7 +618,7 @@ onMounted(async () => {
 }
 
 .sh-hero-kicker {
-  font-family: var(--font-mono, var(--font-sans));
+  font-family: var(--font-sans);
   font-size: clamp(11px, 1vw, 13px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -701,7 +701,7 @@ onMounted(async () => {
 }
 
 .sh-toc-title {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 10px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -732,7 +732,7 @@ onMounted(async () => {
 .sh-toc-list li:hover { color: var(--cream); }
 
 .sh-toc-num {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   color: var(--gold);
   font-weight: 500;
@@ -774,7 +774,7 @@ onMounted(async () => {
 }
 
 .sh-contact-label {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1020,7 +1020,7 @@ onMounted(async () => {
   padding: 24px;
 }
 .sh-hcard-num {
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   font-weight: 500;
   color: var(--gold);

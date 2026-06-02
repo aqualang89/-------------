@@ -396,7 +396,7 @@ useHead({
   top: 90px;
   left: 48px;
   z-index: 100;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
