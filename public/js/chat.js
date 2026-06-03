@@ -28,11 +28,15 @@ sessionStorage.setItem('riparium_chat_session', sessionId)
 function createChatElements () {
   const btn = document.createElement('button')
   btn.id = 'ai-chat-toggle'
+  btn.setAttribute('aria-label', 'Задать вопрос консультанту')
   btn.innerHTML = `
-    <svg class="ai-chat-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+    <span class="ai-chat-toggle-hint">Задать вопрос</span>
+    <svg class="ai-chat-fish" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M6 32 C6 22 18 16 34 18 C44 19.5 50 24 52 28 L52 36 C50 40 44 44.5 34 46 C18 48 6 42 6 32 Z"/>
+      <path d="M51 28 C55 26 59 22 62 19 C61 26 61 38 62 45 C59 42 55 38 51 36 Z"/>
+      <path d="M25 18.5 C27 12.5 33 11.5 38 13.5 C34 15.5 29 16.8 27.5 18.6 Z"/>
+      <circle class="ai-chat-fish-eye" cx="16" cy="29" r="2.4"/>
     </svg>
-    <span>Задать вопрос</span>
   `
   document.body.appendChild(btn)
 

@@ -401,25 +401,25 @@ input[type="range"] {
   right: 24px;
   bottom: 24px;
   z-index: 1200;
+  width: 58px;
+  height: 58px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #d9b46a;
-  color: #1e2933;
-  border: none;
-  border-radius: 999px;
-  padding: 11px 20px;
-  font-size: 14px;
-  font-weight: 600;
+  justify-content: center;
+  background: linear-gradient(150deg, #1c3a3a, #102029);
+  color: #d9b46a;
+  border: 1.5px solid rgba(217, 180, 106, 0.5);
+  border-radius: 50%;
+  padding: 0;
   cursor: pointer;
-  box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
   /* мягкое всплытие снизу через паузу после загрузки */
   opacity: 0;
   transform: translateY(16px);
   animation: ai-chat-toggle-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.3s ease;
+              border-color 0.35s ease;
 }
 
 @keyframes ai-chat-toggle-in {
@@ -427,15 +427,65 @@ input[type="range"] {
 }
 
 #ai-chat-toggle:hover {
-  background: #e8cf95;
-  transform: translateY(-3px);
-  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.55);
+  border-color: rgba(217, 180, 106, 0.85);
 }
 
-.ai-chat-toggle-icon {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
+/* Рыбка-маскот: плавно покачивается как в воде */
+.ai-chat-fish {
+  width: 32px;
+  height: 32px;
+  overflow: visible;
+  transform-origin: center;
+  animation: ai-fish-swim 3.6s ease-in-out infinite;
+}
+.ai-chat-fish path {
+  fill: currentColor;
+}
+/* Глаз моргает раз в ~5с */
+.ai-chat-fish-eye {
+  fill: #0e1c25;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ai-fish-blink 5s ease-in-out infinite;
+}
+
+@keyframes ai-fish-swim {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(-5deg); }
+}
+@keyframes ai-fish-blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  94%, 97%      { transform: scaleY(0.12); }
+}
+
+/* Подпись — выезжает слева при наведении (десктоп) */
+.ai-chat-toggle-hint {
+  position: absolute;
+  right: calc(100% + 12px);
+  top: 50%;
+  white-space: nowrap;
+  background: #1e2933;
+  color: #f1e6c8;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(217, 180, 106, 0.25);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(6px);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+#ai-chat-toggle:hover .ai-chat-toggle-hint {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+@media (hover: none) {
+  .ai-chat-toggle-hint { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -443,9 +493,9 @@ input[type="range"] {
     animation-duration: 0.01ms;
     animation-delay: 0ms;
   }
-  #ai-chat-toggle:hover {
-    transform: none;
-  }
+  #ai-chat-toggle:hover { transform: none; }
+  .ai-chat-fish,
+  .ai-chat-fish-eye { animation: none; }
 }
 
 #ai-chat-box {
