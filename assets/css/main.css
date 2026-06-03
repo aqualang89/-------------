@@ -401,20 +401,51 @@ input[type="range"] {
   right: 24px;
   bottom: 24px;
   z-index: 1200;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: #d9b46a;
   color: #1e2933;
   border: none;
   border-radius: 999px;
-  padding: 10px 18px;
+  padding: 11px 20px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 12px 25px rgba(0,0,0,0.4);
-  transition: background 0.3s ease, color 0.3s ease;
+  /* мягкое всплытие снизу через паузу после загрузки */
+  opacity: 0;
+  transform: translateY(16px);
+  animation: ai-chat-toggle-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.3s ease;
+}
+
+@keyframes ai-chat-toggle-in {
+  to { opacity: 1; transform: translateY(0); }
 }
 
 #ai-chat-toggle:hover {
   background: #e8cf95;
+  transform: translateY(-3px);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.5);
+}
+
+.ai-chat-toggle-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #ai-chat-toggle {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+  #ai-chat-toggle:hover {
+    transform: none;
+  }
 }
 
 #ai-chat-box {
