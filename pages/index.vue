@@ -2,10 +2,19 @@
   <div>
     <!-- ИНТРО -->
     <div id="intro-overlay">
-      <!-- CSS-ripples для мобилы (вместо WebGL) -->
-      <div class="intro-ripples" aria-hidden="true">
-        <div v-for="n in 6" :key="n" class="intro-ripple" :style="rippleDelay(n)"></div>
+      <!-- Мобильный прелоадер: лого проявляется из-под уезжающей шторки с волной -->
+      <div class="intro-preloader" aria-hidden="true">
+        <img class="intro-pl-logo" src="/img/logo-main.png" alt="" />
+        <div class="intro-pl-cover">
+          <div class="intro-pl-wave">
+            <svg viewBox="0 0 1200 60" preserveAspectRatio="none">
+              <path class="soft" d="M0 30 Q150 8 300 30 T600 30 T900 30 T1200 30" />
+              <path d="M0 32 Q150 54 300 32 T600 32 T900 32 T1200 32" />
+            </svg>
+          </div>
+        </div>
       </div>
+      <!-- Десктоп: кликабельный центр для WebGL-воды -->
       <div class="intro-center" title="Кликните, чтобы войти"></div>
     </div>
 
@@ -318,26 +327,6 @@ function scrollToContacts() {
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-function rippleDelay(n) {
-  const positions = [
-    { left: '20%', top: '30%' },
-    { left: '60%', top: '20%' },
-    { left: '40%', top: '50%' },
-    { left: '75%', top: '40%' },
-    { left: '30%', top: '65%' },
-    { left: '55%', top: '75%' }
-  ]
-  const pos = positions[(n - 1) % positions.length]
-  const delay = (n - 1) * 0.7
-  const size = 50 + (n % 3) * 25
-  return {
-    left: pos.left,
-    top: pos.top,
-    width: size + 'px',
-    height: size + 'px',
-    animationDelay: delay + 's'
-  }
-}
 
 function bubbleStyle(n) {
   const left = 35 + (n - 1) * 6 + Math.random() * 4
@@ -368,6 +357,8 @@ onMounted(async () => {
 
   const overlay = document.getElementById('intro-overlay')
   if (!overlay) return
+
+  const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
 
   // === ЛОГИКА ИНТРО ===
   // Показываем интро только если:
@@ -419,8 +410,10 @@ onMounted(async () => {
     return
   }
 
-  // 4. Если уже видели в этой сессии и не reload — не показываем
-  if (!isReload) {
+  // 4. Если уже видели в этой сессии — не показываем.
+  //    Мобила: строго, даже на reload (прелоадер раз за сессию).
+  //    Десктоп: на reload показываем заново (вода — часть впечатления).
+  if (isMobile || !isReload) {
     let hasSeen = false
     try { hasSeen = !!sessionStorage.getItem('introSeen') } catch (e) {}
     if (hasSeen) {
@@ -447,14 +440,10 @@ onMounted(async () => {
   } catch (e) {}
   document.body.style.overflow = 'hidden'
 
-  try {
-    await loadScript('/js/jquery.min.js')
-    await loadScript('/js/jquery.ripples.min.js')
-  } catch (err) {
-    console.error('Failed to load ripples scripts:', err)
-  }
-
   let introTimeout = null
+  let introClickHandler = null
+  const introCenter = document.querySelector('.intro-center')
+
   function closeIntro(scrollTo) {
     clearTimeout(introTimeout)
     overlay.classList.add('hidden')
@@ -469,36 +458,45 @@ onMounted(async () => {
     }, 700)
   }
 
-  let introClickHandler = null
-  const introCenter = document.querySelector('.intro-center')
-  if (introCenter) {
-    introClickHandler = (e) => {
-      e.stopPropagation()
-      closeIntro()
-    }
-    introCenter.addEventListener('click', introClickHandler)
-  }
-
-  // Страховка: если за 30 сек так и не кликнули по центру — закрываем сами,
-  // чтоб не запереть человека с overflow:hidden
-  introTimeout = setTimeout(() => closeIntro(), 30000)
-
-  const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window
-  if (!isMobile && typeof $ !== 'undefined' && $.fn.ripples) {
+  if (isMobile) {
+    // ПРЕЛОАДЕР: CSS-анимация уже запущена классом intro-active.
+    // Шторка уезжает ~2.4с, затем закрываем overlay (фейд). Без клика, без WebGL.
+    introTimeout = setTimeout(() => closeIntro(), 2500)
+  } else {
+    // ДЕСКТОП: WebGL-вода + клик «войти» + страховка 30с
     try {
-      const origRAF = window.requestAnimationFrame
-      $(overlay).ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04, interactive: true })
-      window.requestAnimationFrame = () => {}
-      setTimeout(() => { window.requestAnimationFrame = origRAF }, 100)
-      const ripples = $(overlay).data('ripples')
-      if (ripples) {
-        const origStep = ripples.step.bind(ripples)
-        rippleInterval = setInterval(() => {
-          if (ripples.visible && ripples.running) origStep()
-        }, 1000 / 60)
-      }
+      await loadScript('/js/jquery.min.js')
+      await loadScript('/js/jquery.ripples.min.js')
     } catch (err) {
-      console.error('Ripples init failed:', err)
+      console.error('Failed to load ripples scripts:', err)
+    }
+
+    if (introCenter) {
+      introClickHandler = (e) => {
+        e.stopPropagation()
+        closeIntro()
+      }
+      introCenter.addEventListener('click', introClickHandler)
+    }
+
+    introTimeout = setTimeout(() => closeIntro(), 30000)
+
+    if (typeof $ !== 'undefined' && $.fn.ripples) {
+      try {
+        const origRAF = window.requestAnimationFrame
+        $(overlay).ripples({ resolution: 512, dropRadius: 20, perturbance: 0.04, interactive: true })
+        window.requestAnimationFrame = () => {}
+        setTimeout(() => { window.requestAnimationFrame = origRAF }, 100)
+        const ripples = $(overlay).data('ripples')
+        if (ripples) {
+          const origStep = ripples.step.bind(ripples)
+          rippleInterval = setInterval(() => {
+            if (ripples.visible && ripples.running) origStep()
+          }, 1000 / 60)
+        }
+      } catch (err) {
+        console.error('Ripples init failed:', err)
+      }
     }
   }
 
@@ -1128,33 +1126,103 @@ onMounted(async () => {
   }
 }
 
-/* CSS-ripples на интро (мобила) */
-.intro-ripples {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
+/* Мобильный прелоадер интро (десктоп — WebGL-вода, не трогаем) */
+.intro-preloader {
+  display: none;
 }
-.intro-ripple {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(241, 230, 200, 0.12);
-  animation: intro-ripple-expand 2.8s ease-out infinite;
-  transform: translate(-50%, -50%) scale(0);
-}
-@keyframes intro-ripple-expand {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.5;
+@media (max-width: 768px) {
+  .intro-preloader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink-deep);
+    z-index: 1;
   }
-  100% {
-    transform: translate(-50%, -50%) scale(4);
+  .intro-pl-logo {
+    width: min(64vw, 270px);
+    height: auto;
+    margin-bottom: 7svh;
+    position: relative;
+    z-index: 1;
     opacity: 0;
+    filter: drop-shadow(0 0 18px rgba(217, 180, 106, 0.15));
+  }
+  /* шторка цвета фона уезжает вверх через transform (GPU = гладко) */
+  .intro-pl-cover {
+    position: absolute;
+    inset: 0;
+    background: var(--ink-deep);
+    z-index: 2;
+    transform: translateY(0);
+    will-change: transform;
+  }
+  /* волна на нижней кромке шторки */
+  .intro-pl-wave {
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    width: 140vw;
+    height: 60px;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 0 10px rgba(217, 180, 106, 0.5));
+  }
+  .intro-pl-wave svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .intro-pl-wave path {
+    stroke: var(--gold);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+  }
+  .intro-pl-wave path.soft {
+    opacity: 0.4;
+    stroke-width: 2;
+  }
+  /* запуск анимаций при intro-active */
+  #intro-overlay.intro-active .intro-pl-logo {
+    opacity: 1;
+  }
+  #intro-overlay.intro-active .intro-pl-cover {
+    animation: intro-pl-lift 2.2s linear 0.2s forwards;
+  }
+  #intro-overlay.intro-active .intro-pl-wave {
+    animation: intro-pl-wavefade 2.2s linear 0.2s forwards;
+  }
+  /* клик-зона нужна только десктопу */
+  .intro-center {
+    display: none;
   }
 }
-@media (min-width: 769px) {
-  .intro-ripples {
+@keyframes intro-pl-lift {
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes intro-pl-wavefade {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+/* Уважаем отключённые анимации: без движения, лого сразу видно */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  #intro-overlay.intro-active .intro-pl-cover {
+    animation: none;
+    transform: translateY(-100%);
+  }
+  #intro-overlay.intro-active .intro-pl-wave {
+    animation: none;
     display: none;
+  }
+  .intro-pl-logo {
+    opacity: 1;
   }
 }
 
