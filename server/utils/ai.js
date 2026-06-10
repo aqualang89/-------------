@@ -80,8 +80,11 @@ export async function askOpenRouter (messages, { signal, model = MODEL, temperat
   const raw = data?.choices?.[0]?.message?.content
   if (!raw) throw new Error('Empty AI response')
   const usage = data?.usage
-  if (usage?.cache_read_input_tokens || usage?.cache_creation_input_tokens) {
-    console.log(`[AI Cache] read=${usage.cache_read_input_tokens || 0} write=${usage.cache_creation_input_tokens || 0} input=${usage.prompt_tokens || 0} output=${usage.completion_tokens || 0}`)
+  // OpenRouter отдаёт кэш в prompt_tokens_details (cached_tokens / cache_write_tokens),
+  // а НЕ в нативных Anthropic-полях cache_read_input_tokens — раньше лог из-за этого молчал.
+  const cd = usage?.prompt_tokens_details || {}
+  if (cd.cached_tokens || cd.cache_write_tokens) {
+    console.log(`[AI Cache] read=${cd.cached_tokens || 0} write=${cd.cache_write_tokens || 0} input=${usage.prompt_tokens || 0} output=${usage.completion_tokens || 0}`)
   }
   return cleanReply(raw)
 }
