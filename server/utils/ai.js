@@ -25,7 +25,9 @@ function cleanReply (raw) {
 // с cache_control. Кэшируем большой SYSTEM_PROMPT (его не меняем между запросами),
 // catalog-блок НЕ кешируем (он меняется каждый раз — товары разные).
 const CACHE_MIN_CHARS = 3000
-function applyCacheControl (messages) {
+// ttl '1h' (только для Anthropic) держит кэш системника час вместо 5 мин — посетитель пишет
+// сериями с паузами, 5-мин кэш протухал между сообщениями и системник переписывался по полной.
+function applyCacheControl (messages, ttl) {
   let cached = false
   return messages.map(msg => {
     if (cached) return msg
@@ -36,7 +38,7 @@ function applyCacheControl (messages) {
     return {
       role: 'system',
       content: [
-        { type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } }
+        { type: 'text', text: msg.content, cache_control: ttl ? { type: 'ephemeral', ttl } : { type: 'ephemeral' } }
       ]
     }
   })
@@ -46,6 +48,9 @@ function applyCacheControl (messages) {
 // signal — AbortSignal, обычно `event.node.req.signal` чтобы прерывать когда клиент уходит
 // Опции: model (по умолчанию Sonnet), temperature, maxTokens — для дешёвых задач вроде дайджеста
 export async function askOpenRouter (messages, { signal, model = MODEL, temperature = 0.5, maxTokens = 1500, plugins } = {}) {
+  // Anthropic-модели: закрепляем провайдера (иначе OpenRouter роутит между Anthropic/Bedrock/Vertex,
+  // у каждого свой кэш — прыжки рушат его) + beta-заголовок для часового TTL кэша. Grok этого не трогаем.
+  const isAnthropic = /anthropic|claude/i.test(model)
   const res = await fetch(OPENROUTER_URL, {
     method: 'POST',
     signal,
@@ -53,13 +58,15 @@ export async function askOpenRouter (messages, { signal, model = MODEL, temperat
       'Authorization': `Bearer ${(process.env.OPENROUTER_API_KEY || '').trim()}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': /^[\x00-\x7F]+$/.test(process.env.SITE_URL || '') ? process.env.SITE_URL : 'https://aquariumpage.vercel.app',
-      'X-Title': "Riparium"
+      'X-Title': "Riparium",
+      ...(isAnthropic ? { 'anthropic-beta': 'extended-cache-ttl-2025-04-11' } : {})
     },
     body: JSON.stringify({
       model,
-      messages: applyCacheControl(messages),
+      messages: applyCacheControl(messages, isAnthropic ? '1h' : null),
       temperature,
       max_tokens: maxTokens,
+      ...(isAnthropic ? { provider: { order: ['anthropic'], allow_fallbacks: true } } : {}),
       ...(plugins ? { plugins } : {})
     })
   })
