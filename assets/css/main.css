@@ -25,15 +25,12 @@
 }
 
 /* ТЕЛО СТРАНИЦЫ */
-/* overflow-x: clip (не hidden!) — не создаёт scroll-context, не ломает position: sticky
-   у горизонтальной галереи на главной. См. STATE 2026-05-12 "html overflow-x clip". */
-html {
-  overflow-x: clip;
-}
-#__nuxt {
-  overflow-x: clip;
-}
+/* overflow-x: clip против горизонтального скролла — держим на BODY, НЕ на html/#__nuxt.
+   На html/#__nuxt он ломал Lenis (плавный скролл): Lenis скроллит documentElement, а
+   overflow на нём → колесо переставало работать + ошибка null.contains. clip (не hidden!)
+   не создаёт scroll-context и не ломает position: sticky галереи. */
 body {
+  overflow-x: clip;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
