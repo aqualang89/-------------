@@ -518,6 +518,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0; /* фото не сжимается в flex-колонке, даже если название длинное (иначе наезд) */
 }
 .card-img-wrap img {
   width: 100%;
