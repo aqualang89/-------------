@@ -93,13 +93,9 @@ watch(menuOpen, (open) => {
   else unlockScroll()
 })
 
-/* Scroll-based compact nav (desktop only) */
+/* Затемнение шапки при скролле — на всех ширинах (compact теперь только меняет фон) */
 let scrollTick = false
 function onScroll () {
-  if (window.innerWidth < 768) {
-    compact.value = false
-    return
-  }
   if (!scrollTick) {
     requestAnimationFrame(() => {
       compact.value = window.scrollY > 80
@@ -114,11 +110,7 @@ let resizeTimer = null
 function onResize () {
   clearTimeout(resizeTimer)
   resizeTimer = setTimeout(() => {
-    if (window.innerWidth < 768) {
-      compact.value = false
-    } else {
-      compact.value = window.scrollY > 80
-    }
+    compact.value = window.scrollY > 80
   }, 100)
 }
 
