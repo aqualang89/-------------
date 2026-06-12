@@ -2,16 +2,21 @@
   <div class="layout-root">
     <nav class="sh-nav" :class="{ 'sh-nav--compact': compact }">
       <div class="sh-nav-inner">
+        <NuxtLink to="/" class="sh-nav-logo" aria-label="Рипарий — на главную" @click="clearIntro">
+          <img src="/img/logo-main.png" alt="Рипарий — студия аквадизайна" />
+        </NuxtLink>
+
         <div class="sh-nav-links">
           <NuxtLink v-for="link in regularLinks" :key="link.to" :to="link.to" class="sh-nav-link">{{ link.label }}</NuxtLink>
           <!-- <a href="#" class="sh-nav-link sh-nav-quiz" @click.prevent="openQuiz">Викторина</a> -->
         </div>
 
-        <CartIcon class="sh-nav-cart-icon" />
-
-        <button class="sh-nav-burger" :class="{ open: menuOpen }" aria-label="Меню" @click="menuOpen = !menuOpen">
-          <span></span><span></span><span></span>
-        </button>
+        <div class="sh-nav-actions">
+          <CartIcon class="sh-nav-cart-icon" />
+          <button class="sh-nav-burger" :class="{ open: menuOpen }" aria-label="Меню" @click="menuOpen = !menuOpen">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
       </div>
     </nav>
 
@@ -147,27 +152,45 @@ useHead({
 }
 .sh-nav-inner {
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
   gap: 28px;
+  /* Сам бар прозрачен для мыши — кликабельны только его дети (лого/меню/действия).
+     Иначе пустое пространство бара перехватывает курсор у того, что под хедером
+     (например кнопка «Назад» впритык снизу — ловила hover только нижней кромкой). */
+  pointer-events: none;
+}
+.sh-nav-logo,
+.sh-nav-links,
+.sh-nav-actions {
   pointer-events: auto;
 }
 
+/* Лого слева — небольшое, кликабельно на главную, на всех страницах */
+.sh-nav-logo {
+  flex-shrink: 0;
+  line-height: 0;
+  display: block;
+}
+.sh-nav-logo img {
+  height: 44px;
+  width: auto;
+  display: block;
+}
+
+/* Правая группа: корзина + бургер */
+.sh-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
 .sh-nav-cart-icon {
-  padding-top: 6px;
   flex-shrink: 0;
   transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
               filter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* compact (скролл > 80px на десктопе): корзина прячется вместе со ссылками,
-   остаётся только бургер */
-.sh-nav--compact .sh-nav-cart-icon {
-  opacity: 0;
-  transform: translateY(-8px) scale(0.97);
-  filter: blur(4px);
-  pointer-events: none;
 }
 
 /* На мобиле иконку корзины скрываем — там бургер, корзина внутри меню с бейджем */
@@ -203,7 +226,6 @@ useHead({
   display: flex;
   gap: 28px;
   align-items: center;
-  padding-top: 10px;
   font-family: var(--font-serif);
   font-size: 13px;
   font-weight: 500;
@@ -239,18 +261,9 @@ useHead({
   margin-right: 8px;
 }
 
-/* compact: hide links */
-.sh-nav--compact .sh-nav-links {
-  opacity: 0;
-  transform: translateY(-8px) scale(0.97);
-  filter: blur(4px);
-  pointer-events: none;
-  position: absolute;
-}
-
 /* ─── Burger ─── */
 .sh-nav-burger {
-  display: flex;
+  display: none;            /* виден только когда меню сворачивается (<1024) */
   flex-direction: column;
   justify-content: space-between;
   width: 26px;
@@ -259,16 +272,6 @@ useHead({
   border: none;
   cursor: pointer;
   padding: 0;
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.8) rotate(-10deg);
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
-              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s;
-}
-.sh-nav--compact .sh-nav-burger {
-  opacity: 1;
-  pointer-events: auto;
-  transform: scale(1) rotate(0deg);
 }
 .sh-nav-burger span {
   display: block;
@@ -303,44 +306,8 @@ useHead({
   pointer-events: all;
 }
 
-/* Desktop compact menu */
-@media (min-width: 769px) {
-  .sh-nav--compact ~ .sh-mobile-menu {
-    top: 58px;
-    right: 36px;
-    width: 220px;
-    border-radius: 10px;
-    border: 1px solid rgba(241, 230, 200, 0.08);
-    transform: translateY(-12px) scale(0.96);
-    filter: blur(2px);
-    transform-origin: top right;
-  }
-  .sh-nav--compact ~ .sh-mobile-menu.open {
-    transform: translateY(0) scale(1);
-    filter: blur(0);
-  }
-  .sh-mobile-link {
-    color: rgba(241, 230, 200, 0.8);
-    text-decoration: none;
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 400;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(241, 230, 200, 0.06);
-    display: block;
-    transition: color 0.2s ease, padding-left 0.2s ease;
-  }
-  .sh-mobile-link:hover {
-    color: #f1e6c8;
-    padding-left: 6px;
-  }
-  .sh-mobile-link:last-child {
-    border-bottom: none;
-  }
-}
-
-/* Mobile menu */
-@media (max-width: 768px) {
+/* ─── Меню сворачивается в бургер на планшете и уже (<1024) ─── */
+@media (max-width: 1023px) {
   .sh-nav {
     padding: 12px 20px;
     height: 72px;
@@ -349,17 +316,14 @@ useHead({
     padding: 12px 20px;
     height: 72px;
   }
-  .sh-nav-inner {
-    justify-content: flex-end;
-    align-items: center;
+  .sh-nav-logo img {
+    height: 40px;
   }
   .sh-nav-links {
     display: none;
   }
   .sh-nav-burger {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1) rotate(0deg);
+    display: flex;
   }
   .sh-mobile-menu {
     top: 72px;
@@ -384,6 +348,16 @@ useHead({
   }
   .sh-mobile-link:hover {
     color: #f1e6c8;
+  }
+  .sh-mobile-link:last-child {
+    border-bottom: none;
+  }
+}
+
+/* На широких экранах (>=1024) меню в строку, выпадашка не нужна */
+@media (min-width: 1024px) {
+  .sh-mobile-menu {
+    display: none !important;
   }
 }
 

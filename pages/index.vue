@@ -20,9 +20,6 @@
 
     <!-- HERO -->
     <div class="sh-stage">
-      <NuxtLink to="/" class="sh-hero-logo" aria-label="Главная">
-        <img src="/img/logo-main.png" alt="Рипарий — студия аквадизайна" loading="eager" />
-      </NuxtLink>
       <div class="sh-interior"></div>
       <div class="sh-lamp-glow" aria-hidden="true"></div>
 
@@ -180,7 +177,7 @@
             <span>Я согласен на <NuxtLink to="/consent">обработку персональных данных</NuxtLink> и принимаю <NuxtLink to="/privacy">политику конфиденциальности</NuxtLink></span>
           </label>
 
-          <button type="submit" class="sh-cta sh-cta-submit">Отправить</button>
+          <button type="submit" class="sh-cta sh-cta-submit" :disabled="!isFormValid">Отправить</button>
         </form>
       </div>
     </section>
@@ -290,19 +287,27 @@ const form = reactive({
   consent: false
 })
 
+// Кнопка «Отправить» активна только когда всё заполнено по-человечески:
+// имя не из пробелов, в телефоне 10-15 цифр, email похож на email, согласие стоит.
+const phoneDigits = computed(() => form.phone.replace(/\D/g, ''))
+const isFormValid = computed(() =>
+  form.name.trim().length >= 2 &&
+  phoneDigits.value.length >= 10 && phoneDigits.value.length <= 15 &&
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) &&
+  form.message.trim().length > 0 &&
+  form.consent === true
+)
+
 async function submitForm() {
-  if (!form.consent) {
-    alert('Необходимо согласие на обработку персональных данных')
-    return
-  }
+  if (!isFormValid.value) return
   try {
     const res = await $fetch('/api/contact', {
       method: 'POST',
       body: {
-        name: form.name,
-        phone: form.phone,
-        email: form.email,
-        message: form.message,
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        message: form.message.trim(),
         consent: form.consent
       }
     })
@@ -517,20 +522,6 @@ onMounted(async () => {
   overflow: hidden;
   background: #1e2933;
 }
-.sh-hero-logo {
-  position: absolute;
-  top: 22px;
-  left: 48px;
-  z-index: 10;
-  line-height: 0;
-  display: block;
-}
-.sh-hero-logo img {
-  height: 156px;
-  width: auto;
-  display: block;
-}
-
 .sh-interior {
   position: absolute;
   top: 12vh;
@@ -688,6 +679,15 @@ onMounted(async () => {
 .sh-cta:hover {
   background: var(--cream);
   color: var(--ink-deep);
+}
+
+/* Неактивная кнопка (форма не заполнена) — серая, не реагирует */
+.sh-cta:disabled,
+.sh-cta:disabled:hover {
+  background: transparent;
+  border-color: var(--cream-faint);
+  color: var(--cream-faint);
+  cursor: not-allowed;
 }
 
 /* Оглавление */
@@ -858,7 +858,7 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 10px 14px;
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 16px; /* >=16px — иначе iOS Safari зумит страницу при фокусе на поле */
   color: var(--cream);
   outline: none;
   transition: border-color 0.3s ease;
@@ -1293,15 +1293,6 @@ onMounted(async () => {
   .sh-stage::before,
   .sh-stage::after {
     display: none;
-  }
-  .sh-hero-logo {
-    position: fixed;
-    top: 8px;
-    left: 20px;
-    z-index: 1003;
-  }
-  .sh-hero-logo img {
-    height: 56px;
   }
   .sh-hero {
     display: contents;
