@@ -426,6 +426,10 @@ useHead({
   .sh-nav-logo {
     margin-right: auto;
   }
+  /* на внутренних страницах (есть «Назад») лого красиво по центру; на главной — слева как было */
+  .sh-back ~ .sh-nav-logo {
+    margin: 0 auto;
+  }
 }
 
 /* ─── Layout ─── */
