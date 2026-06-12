@@ -203,7 +203,7 @@ const hTrack = ref(null)
 let hScrollRaf = null
 let hScrollHandler = null
 let hResizeHandler = null
-let hResizeObserver = null
+let hResizeDebounce = null
 let hImgLoadHandlers = []
 
 function initHorizontalScroll() {
@@ -211,38 +211,38 @@ function initHorizontalScroll() {
   const track = hTrack.value
   if (!section || !track) return
   track.style.transform = ''
-  let maxTranslate = track.scrollWidth - window.innerWidth
+  let distance = 0
   function updateLayout() {
-    maxTranslate = track.scrollWidth - window.innerWidth
-    section.style.height = `${maxTranslate + window.innerHeight}px`
+    // +64 — небольшой запас, чтобы последняя карточка не упиралась в край (как на aqualang)
+    distance = Math.max(0, track.scrollWidth - window.innerWidth + 64)
+    section.style.height = `${window.innerHeight + distance}px`
     applyScroll()
   }
   function applyScroll() {
-    if (!document.body.contains(section)) return
-    const rect = section.getBoundingClientRect()
-    const scrolled = Math.max(0, -rect.top)
-    if (maxTranslate <= 0) return
-    const progress = Math.min(1, scrolled / maxTranslate)
-    // translate3d — форсит GPU-композитинг, плавнее на мобиле
-    track.style.transform = `translate3d(${-progress * maxTranslate}px, 0, 0)`
+    if (!document.body.contains(section) || distance <= 0) return
+    const r = section.getBoundingClientRect()
+    // Двигаем трек только пока секция реально на экране — иначе прыжки при пересчёте
+    const scrolled = Math.min(Math.max(-r.top, 0), distance)
+    const progress = scrolled / distance
+    track.style.transform = `translate3d(${-progress * distance}px, 0, 0)`
   }
   function onScroll() {
     if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
     hScrollRaf = requestAnimationFrame(applyScroll)
   }
   hScrollHandler = onScroll
-  hResizeHandler = updateLayout
-  window.addEventListener('scroll', hScrollHandler, { passive: true })
-  window.addEventListener('resize', hResizeHandler)
-
-  // ResizeObserver — пересчитываем секцию когда track реально меняет ширину
-  // (картинки догрузились, шрифты применились, и т.д.)
-  if (typeof ResizeObserver !== 'undefined') {
-    hResizeObserver = new ResizeObserver(() => updateLayout())
-    hResizeObserver.observe(track)
+  // Resize — только с задержкой (без дёрганого ResizeObserver, который прыгал на лету)
+  hResizeHandler = () => {
+    clearTimeout(hResizeDebounce)
+    hResizeDebounce = setTimeout(updateLayout, 120)
   }
 
-  // Также слушаем load каждой картинки — на случай если ResizeObserver не сработает
+  // Lenis есть → двигаем трек в синхроне с плавным скроллом. Иначе нативный fallback.
+  if (window.__lenis) window.__lenis.on('scroll', onScroll)
+  else window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', hResizeHandler)
+
+  // Картинки догружаются — пересчитываем ширину трека после каждой
   const imgs = track.querySelectorAll('img')
   imgs.forEach(img => {
     if (img.complete) return
@@ -256,12 +256,12 @@ function initHorizontalScroll() {
 
 function cleanupHorizontalScroll() {
   if (hScrollRaf) cancelAnimationFrame(hScrollRaf)
-  if (hScrollHandler) window.removeEventListener('scroll', hScrollHandler, { passive: true })
-  if (hResizeHandler) window.removeEventListener('resize', hResizeHandler)
-  if (hResizeObserver) {
-    hResizeObserver.disconnect()
-    hResizeObserver = null
+  if (hScrollHandler) {
+    if (window.__lenis) window.__lenis.off('scroll', hScrollHandler)
+    else window.removeEventListener('scroll', hScrollHandler, { passive: true })
   }
+  if (hResizeHandler) window.removeEventListener('resize', hResizeHandler)
+  clearTimeout(hResizeDebounce)
   hImgLoadHandlers.forEach(({ img, handler }) => img.removeEventListener('load', handler))
   hImgLoadHandlers = []
   hScrollRaf = null
@@ -329,7 +329,9 @@ async function submitForm() {
 
 function scrollToContacts() {
   const el = document.getElementById('контакты')
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  if (!el) return
+  if (window.__lenis) window.__lenis.scrollTo(el, { offset: 0 })
+  else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 
@@ -957,7 +959,7 @@ onMounted(async () => {
 .sh-horizontal-sticky {
   position: sticky;
   top: 0;
-  height: 100dvh;
+  height: 100vh; /* vh, не dvh — иначе на мобиле прыгает от адресной строки */
   display: flex;
   align-items: center;
 }
@@ -975,7 +977,7 @@ onMounted(async () => {
   flex-shrink: 0;
   width: 85vw;
   max-width: 420px;
-  height: 88dvh;
+  height: 88vh;
   min-height: 540px;
   position: relative;
   display: flex;
