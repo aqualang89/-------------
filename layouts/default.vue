@@ -2,6 +2,8 @@
   <div class="layout-root">
     <nav class="sh-nav" :class="{ 'sh-nav--compact': compact }">
       <div class="sh-nav-inner">
+        <NuxtLink v-if="$route.path !== '/'" :to="backTo" class="sh-back" @click="clearIntro">← Назад</NuxtLink>
+
         <NuxtLink to="/" class="sh-nav-logo" aria-label="Рипарий — на главную" @click="clearIntro">
           <img src="/img/logo-main.png" alt="Рипарий — студия аквадизайна" />
         </NuxtLink>
@@ -29,9 +31,6 @@
       <!-- <a href="#" class="sh-mobile-link sh-mobile-quiz" @click.prevent="openQuiz">Викторина</a> -->
     </div>
 
-    <NuxtLink v-if="$route.path !== '/'" :to="backTo" class="sh-back" @click="clearIntro">
-      ← Назад
-    </NuxtLink>
     <div class="layout-content">
       <slot />
     </div>
@@ -72,6 +71,13 @@ watch(() => route.path, () => {
   menuOpen.value = false
 })
 
+/* Пока открыто мобильное меню — гасим скролл страницы под ним */
+watch(menuOpen, (open) => {
+  if (import.meta.client) {
+    document.body.style.overflow = open ? 'hidden' : ''
+  }
+})
+
 /* Scroll-based compact nav (desktop only) */
 let scrollTick = false
 function onScroll () {
@@ -109,6 +115,7 @@ onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onResize)
   clearTimeout(resizeTimer)
+  if (import.meta.client) document.body.style.overflow = ''
 })
 
 /* function openQuiz() {
@@ -162,7 +169,8 @@ useHead({
 }
 .sh-nav-logo,
 .sh-nav-links,
-.sh-nav-actions {
+.sh-nav-actions,
+.sh-back {
   pointer-events: auto;
 }
 
@@ -384,14 +392,19 @@ useHead({
 
 @media (max-width: 768px) {
   .sh-back {
-    position: static;
-    margin: 8px 12px 0;
+    position: static;       /* в потоке flex-бара хедера, слева от лого */
+    order: -1;
+    margin: 0;
+    padding: 8px 10px;
+    min-height: 44px;
     display: inline-flex;
     align-items: center;
-    padding: 12px 16px;
-    min-height: 44px;
     font-size: 12px;
     -webkit-tap-highlight-color: rgba(217, 180, 106, 0.15);
+  }
+  /* лого + «Назад» прижаты влево, бургер уходит вправо */
+  .sh-nav-logo {
+    margin-right: auto;
   }
 }
 
