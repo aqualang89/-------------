@@ -1283,6 +1283,94 @@ onMounted(async () => {
   }
 }
 
+/* Планшет 769-1100: hero к вертикальной раскладке как на мобиле, но крупнее.
+   Раньше серединку обслуживал только max-width:1100 (десктоп-флюид) — аквариум
+   оставался absolute-фоном, банка уходила за сгиб, контент висел в пустоте.
+   См. STATE 2026-06-12. Мобилу/десктоп/карточки/хедер не трогаем. */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .sh-stage {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+  }
+  .sh-stage::before,
+  .sh-stage::after {
+    display: none;
+  }
+  .sh-hero {
+    display: contents;
+  }
+  .sh-hero-kicker {
+    order: 1;
+    padding: 72px 48px 0;
+    margin-bottom: 28px;
+  }
+  .sh-hero-title {
+    order: 1;
+    font-size: clamp(44px, 6vw, 60px);
+    padding: 0 48px;
+    line-height: 1.12;
+  }
+  .sh-hero-bottom {
+    order: 2;
+    position: static;
+    transform: none;
+    left: auto;
+    margin: 28px auto 0;
+    max-width: 600px;
+    padding: 0 48px;
+  }
+  .sh-hero-lede {
+    max-width: 100%;
+  }
+  .sh-interior {
+    order: 3;
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    height: 52vh;
+    min-height: 380px;
+    margin: 36px 0 0;
+  }
+  .sh-interior::before,
+  .sh-interior::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 70px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .sh-interior::before {
+    top: 0;
+    background: linear-gradient(to bottom, #1e2933 0%, transparent 100%);
+  }
+  .sh-interior::after {
+    bottom: 0;
+    background: linear-gradient(to top, #1e2933 0%, transparent 100%);
+  }
+  .sh-toc {
+    order: 4;
+    position: static;
+    width: 100%;
+    max-width: 560px;
+    margin: 40px auto 0;
+    right: auto;
+    padding: 0 48px;
+  }
+  .sh-toc-title,
+  .sh-toc-list li {
+    text-align: left;
+  }
+  .sh-bubbles,
+  .sh-lamp-glow {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .sh-hcard-desc {
     line-height: 1.35;
