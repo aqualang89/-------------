@@ -505,6 +505,8 @@ onMounted(() => {
   text-decoration: none;
   color: var(--cream);
   transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 .product-card:hover {
   transform: translateY(-4px);
@@ -534,6 +536,7 @@ onMounted(() => {
   padding: 0 16px 16px;
   font-size: 1.2rem;
   color: var(--gold);
+  margin-top: auto; /* прижимаем цену к низу — у всех карточек на одной линии независимо от длины названия */
 }
 .card-old-price {
   text-decoration: line-through;
