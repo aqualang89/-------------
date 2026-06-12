@@ -87,8 +87,8 @@
               </div>
               <h3 class="card-title">{{ p.name }}</h3>
               <p class="card-price">
-                {{ p.price.toLocaleString() }} ₽
-                <span v-if="p.old_price" class="card-old-price">{{ p.old_price.toLocaleString() }} ₽</span>
+                {{ formatPrice(p.price) }} ₽
+                <span v-if="p.old_price" class="card-old-price">{{ formatPrice(p.old_price) }} ₽</span>
               </p>
             </NuxtLink>
           </div>
@@ -289,6 +289,13 @@ function nextPage() {
 function mainPhoto(p) {
   const photo = p.product_photos?.find(ph => ph.is_main) || p.product_photos?.[0]
   return photo?.url
+}
+
+// Разделяем тысячи пробелом детерминированно (одинаково на сервере и клиенте).
+// toLocaleString() форматирует по локали окружения → на VPS и в браузере разный
+// результат → hydration mismatch. Своя функция этого избегает.
+function formatPrice(n) {
+  return String(n ?? '').replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
 }
 
 onMounted(() => {
