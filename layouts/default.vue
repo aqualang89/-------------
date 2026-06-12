@@ -1,6 +1,6 @@
 <template>
   <div class="layout-root">
-    <nav class="sh-nav" :class="{ 'sh-nav--compact': compact }">
+    <nav class="sh-nav" :class="{ 'sh-nav--compact': compact, 'sh-nav--menu-open': menuOpen }">
       <div class="sh-nav-inner">
         <NuxtLink v-if="$route.path !== '/'" :to="backTo" class="sh-back" @click="clearIntro">← Назад</NuxtLink>
 
@@ -71,11 +71,26 @@ watch(() => route.path, () => {
   menuOpen.value = false
 })
 
-/* Пока открыто мобильное меню — гасим скролл страницы под ним */
+/* Пока открыто мобильное меню — фиксируем страницу под ним.
+   overflow:hidden на body iOS Safari игнорит для touch — поэтому position:fixed
+   с сохранением и возвратом позиции скролла (надёжно во всех браузерах). */
+let lockedScrollY = 0
+function lockScroll () {
+  lockedScrollY = window.scrollY
+  document.body.style.position = 'fixed'
+  document.body.style.top = `-${lockedScrollY}px`
+  document.body.style.width = '100%'
+}
+function unlockScroll () {
+  document.body.style.position = ''
+  document.body.style.top = ''
+  document.body.style.width = ''
+  window.scrollTo(0, lockedScrollY)
+}
 watch(menuOpen, (open) => {
-  if (import.meta.client) {
-    document.body.style.overflow = open ? 'hidden' : ''
-  }
+  if (!import.meta.client) return
+  if (open) lockScroll()
+  else unlockScroll()
 })
 
 /* Scroll-based compact nav (desktop only) */
@@ -115,7 +130,7 @@ onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onResize)
   clearTimeout(resizeTimer)
-  if (import.meta.client) document.body.style.overflow = ''
+  if (import.meta.client && menuOpen.value) unlockScroll()
 })
 
 /* function openQuiz() {
@@ -156,6 +171,11 @@ useHead({
   background: rgba(14, 26, 36, 0.92);
   backdrop-filter: blur(10px);
   padding: 14px 48px;
+}
+/* Открыто мобильное меню — шапка непрозрачная, чтобы hero не просвечивал сквозь неё */
+.sh-nav--menu-open {
+  background: rgba(14, 26, 36, 0.98);
+  backdrop-filter: blur(12px);
 }
 .sh-nav-inner {
   display: flex;
