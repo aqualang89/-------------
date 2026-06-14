@@ -287,11 +287,23 @@ async function process1C(rows) {
     throw createError({ statusCode: 400, message: 'Не найдены заголовки 1С (Артикул / Входит в группу)' })
   }
 
+  // Колонки ищем по шапке - 1С иногда сдвигает их (название уезжало с C на D)
+  const header = rows[headerIdx].map(c => String(c || '').toLowerCase().trim())
+  const findCol = (def, ...keys) => {
+    const i = header.findIndex(h => keys.some(k => h.includes(k)))
+    return i === -1 ? def : i
+  }
+  const cArticle = findCol(0, 'артикул')
+  const cName = findCol(3, 'номенклатура', 'наименование')
+  const cParent = findCol(6, 'входит в группу')
+  const cPrice = findCol(7, 'розничная цена', 'цена')
+  const cQty = findCol(8, 'остаток', 'количество')
+
   const dataRows = rows.slice(headerIdx + 1)
 
   const parentSet = new Set()
   for (const row of dataRows) {
-    const parent = row[6]
+    const parent = row[cParent]
     if (parent) parentSet.add(String(parent).trim())
   }
 
@@ -319,11 +331,11 @@ async function process1C(rows) {
 
   for (let i = 0; i < dataRows.length; i++) {
     const row = dataRows[i]
-    const article = row[0] ? String(row[0]).trim() : null
-    const name = row[2] ? String(row[2]).trim() : null
-    const parent = row[6] ? String(row[6]).trim() : null
-    const price = parseFloat(String(row[7] || '0').replace(/\s/g, '').replace(',', '.')) || 0
-    const qty = parseFloat(String(row[8] || '0').replace(/\s/g, '').replace(',', '.')) || 0
+    const article = row[cArticle] ? String(row[cArticle]).trim() : null
+    const name = row[cName] ? String(row[cName]).trim() : null
+    const parent = row[cParent] ? String(row[cParent]).trim() : null
+    const price = parseFloat(String(row[cPrice] || '0').replace(/\s/g, '').replace(',', '.')) || 0
+    const qty = parseFloat(String(row[cQty] || '0').replace(/\s/g, '').replace(',', '.')) || 0
 
     if (!name) continue
 
