@@ -48,6 +48,7 @@
           <p>Создано: {{ uploadResult.created }}</p>
           <p>Обновлено: {{ uploadResult.updated }}</p>
           <p v-if="uploadResult.skipped">Пропущено (группы/мусор): {{ uploadResult.skipped }}</p>
+          <p v-if="uploadResult.gased">Скрыто (нет в выгрузке): {{ uploadResult.gased }}</p>
           <p v-if="uploadResult.errors.length" class="error">
             Ошибки: {{ uploadResult.errors.join('; ') }}
           </p>
@@ -778,9 +779,25 @@ async function upload1C(rows) {
     if (data.errors && data.errors.length) errors.push(...data.errors)
   }
 
+  // Гасим отсутствующие: 1С = эталон, чего нет в выгрузке - убираем из наличия
+  uploadMessage.value = 'Убираем отсутствующие...'
+  let gased = 0
+  try {
+    const fin = await fetch('/api/catalog-finalize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-password': password.value },
+      body: JSON.stringify({ names: items.map(it => it.name) })
+    })
+    const fd = await fin.json()
+    if (fin.ok) gased = fd.gased || 0
+    else errors.push('Гашение: ' + (fd.message || fd.statusMessage || 'ошибка'))
+  } catch (e) {
+    errors.push('Гашение: ' + e.message)
+  }
+
   uploadProgress.value = 100
   uploadMessage.value = 'Готово!'
-  uploadResult.value = { processed: items.length, updated, created, errors, skipped: dataRows.length - items.length }
+  uploadResult.value = { processed: items.length, updated, created, errors, skipped: dataRows.length - items.length, gased }
 
   file.value = null
   await fetchProducts()
