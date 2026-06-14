@@ -24,10 +24,24 @@ export default defineEventHandler(async (event) => {
     return { updated: 0, created: 0, errors: [] }
   }
 
-  const { data: allProducts } = await supabase.from('products').select('id, name, article')
+  const { data: allProducts } = await supabase.from('products').select('id, name, article, slug')
   const productByName = {}
+  const artSet = new Set()
+  const slugSet = new Set()
   for (const p of allProducts || []) {
     productByName[p.name] = p
+    if (p.article) artSet.add(p.article)
+    if (p.slug) slugSet.add(p.slug)
+  }
+
+  // 1С переназначает артикулы - у нового товара article/slug может совпасть с существующим (UNIQUE).
+  // Подбираем свободное значение, иначе insert молча падал и товар терялся.
+  const uniq = (desired, set, base) => {
+    let v = desired
+    let i = 2
+    while (!v || set.has(v)) { v = `${base}-${i}`; i++ }
+    set.add(v)
+    return v
   }
 
   const novinkiSlug = 'novinki'
@@ -54,9 +68,9 @@ export default defineEventHandler(async (event) => {
       })
     } else {
       inserts.push({
-        article: item.article || `NEW-${Date.now()}`,
+        article: uniq(item.article, artSet, item.article || `NEW-${Date.now()}`),
         name: item.name,
-        slug: item.slug || `p-${Date.now()}`,
+        slug: uniq(item.slug, slugSet, item.slug || `p-${Date.now()}`),
         category_id: novinkiId,
         price: item.price,
         is_available: item.qty > 0,
@@ -73,16 +87,17 @@ export default defineEventHandler(async (event) => {
       batch.map(u => supabase.from('products').update({ price: u.price, is_available: u.is_available }).eq('id', u.id))
     )
     for (const r of results) {
-      if (!r.error) updated++
+      if (r.error) errors.push(`Ошибка обновления: ${r.error.message}`)
+      else updated++
     }
   }
 
+  // По одному, чтобы одна коллизия не валила всю пачку и чтобы видеть конкретную ошибку.
   let created = 0
-  const IBATCH = 30
-  for (let i = 0; i < inserts.length; i += IBATCH) {
-    const batch = inserts.slice(i, i + IBATCH)
-    const { error } = await supabase.from('products').insert(batch)
-    if (!error) created += batch.length
+  for (const row of inserts) {
+    const { error } = await supabase.from('products').insert(row)
+    if (error) errors.push(`Не добавлен "${row.name}": ${error.message}`)
+    else created++
   }
 
   return { updated, created, errors: errors.length ? errors : [] }
