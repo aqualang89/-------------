@@ -287,10 +287,11 @@ async function process1C(rows) {
     throw createError({ statusCode: 400, message: 'Не найдены заголовки 1С (Артикул / Входит в группу)' })
   }
 
-  // Колонки ищем по шапке - 1С иногда сдвигает их (название уезжало с C на D)
-  const header = rows[headerIdx].map(c => String(c || '').toLowerCase().trim())
+  // Колонки ищем по шапке - 1С иногда сдвигает их (название уезжало с C на D).
+  // findIndex проходит по дыркам разреженного массива - отсюда String(h||'')
+  const header = (rows[headerIdx] || []).map(c => String(c || '').toLowerCase().trim())
   const findCol = (def, ...keys) => {
-    const i = header.findIndex(h => keys.some(k => h.includes(k)))
+    const i = header.findIndex(h => keys.some(k => String(h || '').includes(k)))
     return i === -1 ? def : i
   }
   const cArticle = findCol(0, 'артикул')

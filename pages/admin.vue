@@ -666,7 +666,7 @@ async function uploadExcel() {
 
     // Определяем формат
     const is1C = rows.some(r =>
-      r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
+      (r || []).some(c => String(c || '').toLowerCase().includes('входит в группу'))
     )
 
     if (is1C) {
@@ -710,17 +710,18 @@ async function upload1C(rows) {
   uploadMessage.value = 'Парсим файл...'
 
   let headerIdx = rows.findIndex(r =>
-    r.some(c => String(c || '').toLowerCase().includes('артикул')) &&
-    r.some(c => String(c || '').toLowerCase().includes('входит в группу'))
+    (r || []).some(c => String(c || '').toLowerCase().includes('артикул')) &&
+    (r || []).some(c => String(c || '').toLowerCase().includes('входит в группу'))
   )
   if (headerIdx === -1) {
     throw new Error('Не найдены заголовки 1С')
   }
 
-  // Колонки ищем по шапке - 1С иногда сдвигает их (название уезжало с C на D)
-  const header = rows[headerIdx].map(c => String(c || '').toLowerCase().trim())
+  // Колонки ищем по шапке - 1С иногда сдвигает их (название уезжало с C на D).
+  // findIndex проходит по дыркам разреженного массива (SheetJS пропускает пустые ячейки) - отсюда String(h||'')
+  const header = (rows[headerIdx] || []).map(c => String(c || '').toLowerCase().trim())
   const findCol = (def, ...keys) => {
-    const i = header.findIndex(h => keys.some(k => h.includes(k)))
+    const i = header.findIndex(h => keys.some(k => String(h || '').includes(k)))
     return i === -1 ? def : i
   }
   const cArticle = findCol(0, 'артикул')
