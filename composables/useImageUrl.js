@@ -13,7 +13,7 @@
 // Вотермарка: лого 'riparium_watermark' в правом нижнем углу, 10% ширины фото, прозрачность 60%.
 // fl_relative делает w_ относительным к базовой картинке (масштабируется под любой размер).
 // Накладывается на лету при выдаче - оригиналы в Cloudinary не трогаются, убрать/подкрутить = одна строка.
-const WATERMARK = 'l_riparium_watermark,fl_relative,w_0.10,g_south_east,x_15,y_15,o_60'
+const WATERMARK = 'l_riparium_watermark,fl_relative,w_0.30,g_south_east,x_15,y_15,o_60'
 
 export function cldImage (url, opts = {}) {
   if (!url || typeof url !== 'string') return url
